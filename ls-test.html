@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalStorage Test</title>
+<style>
+body { background:#050d1a; color:#e2e8f0; font-family:sans-serif; padding:20px; }
+button { padding:12px 20px; margin:8px; border-radius:8px; border:none; cursor:pointer; font-size:15px; }
+.save { background:#f59e0b; color:#000; }
+.load { background:#3b82f6; color:#fff; }
+.clear { background:#ef4444; color:#fff; }
+#log { background:#0d1828; border-radius:10px; padding:16px; margin-top:16px; font-size:13px; line-height:1.8; }
+</style>
+</head>
+<body>
+<h2 style="color:#f59e0b">🔧 LocalStorage Test</h2>
+<p style="color:#94a3b8;margin-bottom:16px">Test xem localStorage có hoạt động trên thiết bị này không</p>
+<button class="save" onclick="testSave()">💾 Lưu test data</button>
+<button class="load" onclick="testLoad()">📂 Load data</button>
+<button class="clear" onclick="testClear()">🗑 Xóa</button>
+<div id="log">Chưa có log...</div>
+<script>
+function log(msg, color) {
+  const el = document.getElementById('log');
+  const time = new Date().toLocaleTimeString('vi-VN');
+  el.innerHTML += '<div style="color:' + (color||'#e2e8f0') + '">[' + time + '] ' + msg + '</div>';
+}
+
+function testSave() {
+  try {
+    const data = { test: true, time: Date.now(), value: Math.random() };
+    localStorage.setItem('kpi_test', JSON.stringify(data));
+    log('✅ LƯU THÀNH CÔNG: ' + JSON.stringify(data), '#10b981');
+  } catch(e) {
+    log('❌ LỖI KHI LƯU: ' + e.toString(), '#ef4444');
+  }
+}
+
+function testLoad() {
+  try {
+    const raw = localStorage.getItem('kpi_test');
+    if (raw) {
+      log('✅ ĐỌC THÀNH CÔNG: ' + raw, '#3b82f6');
+    } else {
+      log('⚠️ Không có data trong localStorage', '#f59e0b');
+    }
+  } catch(e) {
+    log('❌ LỖI KHI ĐỌC: ' + e.toString(), '#ef4444');
+  }
+}
+
+function testClear() {
+  localStorage.removeItem('kpi_test');
+  log('🗑 Đã xóa', '#94a3b8');
+}
+
+// Auto test on load
+window.onload = function() {
+  log('🚀 Trang đã load. Đang kiểm tra localStorage...', '#f59e0b');
+  try {
+    localStorage.setItem('_ping', '1');
+    const ok = localStorage.getItem('_ping') === '1';
+    localStorage.removeItem('_ping');
+    if (ok) {
+      log('✅ localStorage HOẠT ĐỘNG BÌNH THƯỜNG trên thiết bị này', '#10b981');
+    } else {
+      log('❌ localStorage không hoạt động', '#ef4444');
+    }
+  } catch(e) {
+    log('❌ localStorage bị chặn: ' + e.toString(), '#ef4444');
+  }
+};
+</script>
+</body>
+</html>

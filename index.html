@@ -14,20 +14,18 @@
   #root { max-width:480px; margin:0 auto; background:#050d1a; min-height:100vh; }
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
-  /* Force dark on all elements */
-  div, span, button, input, p { color: inherit; }
-  button { background: none; }
 </style>
 </head>
 <body>
 <div id="root"></div>
-
-<!-- React + Babel từ CDN -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
 <script type="text/babel">
+const { useState, useEffect, useMemo, useCallback } = React;
+
+const { useState, useEffect, useMemo, useCallback } = React;
+
 const { useState, useEffect, useMemo, useCallback } = React;
 
 
@@ -83,68 +81,90 @@ const SK = {
   thTuan:  "v4_th_tuan",
 };
 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZ_f2_JXvAKVOCjkiLk2N9Y4X72fpb6k_xhhBb8WkODZ3x9tN-F2pul3xe7gjzGS9EOg/exec";
+
 // ═══════════════════════════════════════════
-// LOCAL CACHE (offline fallback)
+// STORAGE — localStorage (bền vững qua refresh)
 // ═══════════════════════════════════════════
-async function localGet(k) {
+function localGet(k) {
   try { const r=localStorage.getItem(k); return r?JSON.parse(r):null; } catch { return null; }
 }
-async function localSet(k,v) {
-  try { localStorage.setItem(k,JSON.stringify(v)); } catch(e){console.error(e);}
+function localSet(k,v) {
+  try { localStorage.setItem(k,JSON.stringify(v)); } catch(e){ console.error(e); }
 }
 
 // ═══════════════════════════════════════════
-// GOOGLE SHEETS API LAYER
+// GOOGLE SHEETS SYNC — image tag trick (bypass CORS hoàn toàn)
+// Không đọc được response nhưng Apps Script vẫn nhận và xử lý được
 // ═══════════════════════════════════════════
-const hasRemote = () => SCRIPT_URL && SCRIPT_URL.length > 10;
-
-// Load data — dùng fetch GET (Apps Script trả JSON, không bị CORS với GET)
-async function apiGet(action, params={}) {
-  if (!hasRemote()) return null;
+function sheetsPing(action, params={}) {
   try {
-    const p = new URLSearchParams({ action, ...Object.fromEntries(
-      Object.entries(params).map(([k,v])=>[k, typeof v==="object"?JSON.stringify(v):String(v)])
-    )});
-    const res = await fetch(`${SCRIPT_URL}?${p}`, { method:"GET", redirect:"follow" });
-    const data = await res.json();
-    return data.ok ? data : null;
-  } catch(e) { console.warn("GET:", e); return null; }
+    const qs = Object.entries(params)
+      .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):String(v)))
+      .join('&');
+    const url = SCRIPT_URL + '?action=' + action + '&' + qs;
+    // Dùng Image() để trigger GET request — không bị CORS, không cần response
+    const img = new Image();
+    img.src = url;
+  } catch(e) {}
 }
 
-// Save data — dùng fetch no-cors (fire & forget, không đọc response được)
-// Đồng thời lưu localStorage để không mất data
-async function apiSave(action, body={}) {
-  if (!hasRemote()) return;
-  try {
-    const p = new URLSearchParams({ action, ...Object.fromEntries(
-      Object.entries(body).map(([k,v])=>[k, typeof v==="object"?JSON.stringify(v):String(v)])
-    )});
-    fetch(`${SCRIPT_URL}?${p}`, { method:"GET", redirect:"follow", mode:"no-cors" });
-  } catch(e) { console.warn("SAVE:", e); }
-}
+// Load từ Sheets — dùng fetch với mode no-cors thì không đọc được body
+// Nên dùng approach khác: script tag injection
+function sheetsLoad(action, params={}, callback) {
+  const cbName = '_kcb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const qs = Object.entries(params)
+    .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):String(v)))
+    .join('&');
+  const url = SCRIPT_URL + '?action=' + action + '&callback=' + cbName + '&' + qs;
+  
+  const timer = setTimeout(() => {
+    delete window[cbName];
+    if (s.parentNode) s.parentNode.removeChild(s);
+    callback(null);
+  }, 10000);
 
-async function apiCall(action, body={}) {
-  return apiGet(action, body);
+  window[cbName] = (data) => {
+    clearTimeout(timer);
+    delete window[cbName];
+    if (s.parentNode) s.parentNode.removeChild(s);
+    callback(data && data.ok ? data : null);
+  };
+
+  const s = document.createElement('script');
+  s.src = url;
+  s.onerror = () => { clearTimeout(timer); delete window[cbName]; callback(null); };
+  document.head.appendChild(s);
 }
 
 async function loadAllData(month) {
-  if (hasRemote()) {
-    const r = await apiCall("getAllData", { month });
-    if (r) {
-      await localSet(SK.khPhong, r.khPhong||{});
-      await localSet(SK.khTuan,  r.khTuan||{});
-      await localSet(SK.thTuan,  r.thTuan||{});
-      return { khPhong:r.khPhong||{}, khTuan:r.khTuan||{}, thTuan:r.thTuan||{}, online:true };
-    }
-  }
-  const [kp,kt,th] = await Promise.all([localGet(SK.khPhong),localGet(SK.khTuan),localGet(SK.thTuan)]);
-  return { khPhong:kp||{}, khTuan:kt||{}, thTuan:th||{}, online:false };
+  // Load localStorage ngay lập tức
+  const kp = localGet(SK.khPhong)||{};
+  const kt = localGet(SK.khTuan)||{};
+  const th = localGet(SK.thTuan)||{};
+
+  // Sync từ Sheets trong background — update nếu có data mới
+  return new Promise(resolve => {
+    // Trả về local data trước để app load nhanh
+    resolve({ khPhong:kp, khTuan:kt, thTuan:th, online:false });
+    
+    // Background: thử load từ Sheets
+    sheetsLoad('getAllData', { month }, (remote) => {
+      if (remote) {
+        localSet(SK.khPhong, remote.khPhong||{});
+        localSet(SK.khTuan,  remote.khTuan||{});
+        localSet(SK.thTuan,  remote.thTuan||{});
+        // Notify app to re-render với data mới
+        window.dispatchEvent(new CustomEvent('sheets-synced', { detail: remote }));
+      }
+    });
+  });
 }
 
 async function saveKhPhongData(month, data, cur) {
   const next = {...cur, [month]:{...data}};
-  await localSet(SK.khPhong, next);
-  apiSave("saveKhPhong", { month, data }); // fire & forget
+  localSet(SK.khPhong, next);
+  sheetsPing("saveKhPhong", { month, data });
   return next;
 }
 
@@ -153,8 +173,8 @@ async function saveKhTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month])next[month]={};
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data};
-  await localSet(SK.khTuan, next);
-  apiSave("saveKhTuan", { month, tuan, ma_nv, data });
+  localSet(SK.khTuan, next);
+  sheetsPing("saveKhTuan", { month, tuan, ma_nv, data });
   return next;
 }
 
@@ -163,10 +183,11 @@ async function saveThTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month])next[month]={};
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data, updatedAt:Date.now()};
-  await localSet(SK.thTuan, next);
-  apiSave("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] });
+  localSet(SK.thTuan, next);
+  sheetsPing("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] });
   return next;
 }
+
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -1079,7 +1100,20 @@ function App(){
     if(showSyncing) setSyncing(false);
   };
 
-  useEffect(()=>{ loadData(); },[]);
+  useEffect(()=>{
+    loadData();
+    // Listen for background Sheets sync
+    const handler = (e) => {
+      if(e.detail) {
+        setKhPhong(e.detail.khPhong||{});
+        setKhTuan(e.detail.khTuan||{});
+        setThTuan(e.detail.thTuan||{});
+        setOnline(true);
+      }
+    };
+    window.addEventListener('sheets-synced', handler);
+    return () => window.removeEventListener('sheets-synced', handler);
+  },[]);
 
   // Wrap setters để gọi đúng save function
   const handleSaveKhPhong = async (data) => {
@@ -1209,7 +1243,9 @@ function App(){
   </div>;
 }
 
-// Mount
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App))
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(App));
 </script>

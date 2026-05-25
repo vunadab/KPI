@@ -5,29 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>KPI Banking — Phòng KHCN</title>
+<title>KPI Banking</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { background:#050d1a !important; color:#e2e8f0 !important; }
-  body { background:#050d1a !important; font-family:'Segoe UI',system-ui,sans-serif; }
-  #root { max-width:480px; margin:0 auto; background:#050d1a; min-height:100vh; }
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { background:#050d1a; color:#e2e8f0; min-height:100vh; }
+body { font-family:'Segoe UI',system-ui,sans-serif; }
+#root { max-width:480px; margin:0 auto; min-height:100vh; background:#050d1a; }
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:#050d1a"><div style="font-size:40px">🏦</div><div style="color:#f59e0b;font-size:16px;font-weight:700">Đang tải KPI Banking...</div></div></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script type="text/babel">
+<script type="text/babel" data-presets="react">
 const { useState, useEffect, useMemo, useCallback } = React;
-
-const { useState, useEffect, useMemo, useCallback } = React;
-
-const { useState, useEffect, useMemo, useCallback } = React;
-
 
 // ═══════════════════════════════════════════
 // CONFIG
@@ -81,90 +74,76 @@ const SK = {
   thTuan:  "v4_th_tuan",
 };
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZ_f2_JXvAKVOCjkiLk2N9Y4X72fpb6k_xhhBb8WkODZ3x9tN-F2pul3xe7gjzGS9EOg/exec";
-
 // ═══════════════════════════════════════════
-// STORAGE — localStorage (bền vững qua refresh)
+// LOCAL CACHE (offline fallback)
 // ═══════════════════════════════════════════
 function localGet(k) {
   try { const r=localStorage.getItem(k); return r?JSON.parse(r):null; } catch { return null; }
 }
 function localSet(k,v) {
-  try { localStorage.setItem(k,JSON.stringify(v)); } catch(e){ console.error(e); }
+  try { localStorage.setItem(k,JSON.stringify(v)); } catch(e){console.error(e);}
 }
 
 // ═══════════════════════════════════════════
-// GOOGLE SHEETS SYNC — image tag trick (bypass CORS hoàn toàn)
-// Không đọc được response nhưng Apps Script vẫn nhận và xử lý được
+// GOOGLE SHEETS API LAYER
 // ═══════════════════════════════════════════
-function sheetsPing(action, params={}) {
-  try {
-    const qs = Object.entries(params)
-      .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):String(v)))
-      .join('&');
-    const url = SCRIPT_URL + '?action=' + action + '&' + qs;
-    // Dùng Image() để trigger GET request — không bị CORS, không cần response
-    const img = new Image();
-    img.src = url;
-  } catch(e) {}
-}
+const hasRemote = () => SCRIPT_URL && SCRIPT_URL.length > 10;
 
-// Load từ Sheets — dùng fetch với mode no-cors thì không đọc được body
-// Nên dùng approach khác: script tag injection
-function sheetsLoad(action, params={}, callback) {
-  const cbName = '_kcb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-  const qs = Object.entries(params)
-    .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):String(v)))
-    .join('&');
-  const url = SCRIPT_URL + '?action=' + action + '&callback=' + cbName + '&' + qs;
-  
-  const timer = setTimeout(() => {
-    delete window[cbName];
-    if (s.parentNode) s.parentNode.removeChild(s);
-    callback(null);
-  }, 10000);
+async function apiCall(action, body={}) {
+  if (!hasRemote()) return null;
+  return new Promise((resolve) => {
+    try {
+      // JSONP workaround — bypass CORS hoàn toàn
+      const cbName = "_cb_" + Date.now();
+      const params = new URLSearchParams({
+        action,
+        callback: cbName,
+        ...Object.fromEntries(
+          Object.entries(body).map(([k,v])=>[k, typeof v==="object"?JSON.stringify(v):String(v)])
+        )
+      });
 
-  window[cbName] = (data) => {
-    clearTimeout(timer);
-    delete window[cbName];
-    if (s.parentNode) s.parentNode.removeChild(s);
-    callback(data && data.ok ? data : null);
-  };
+      const script = document.createElement("script");
+      const timeout = setTimeout(()=>{
+        cleanup(); resolve(null);
+      }, 8000);
 
-  const s = document.createElement('script');
-  s.src = url;
-  s.onerror = () => { clearTimeout(timer); delete window[cbName]; callback(null); };
-  document.head.appendChild(s);
+      window[cbName] = (data) => {
+        cleanup();
+        resolve(data && data.ok ? data : null);
+      };
+
+      function cleanup() {
+        clearTimeout(timeout);
+        delete window[cbName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      script.src = `${SCRIPT_URL}?${params}`;
+      script.onerror = () => { cleanup(); resolve(null); };
+      document.head.appendChild(script);
+    } catch(e) { console.warn("API:", e); resolve(null); }
+  });
 }
 
 async function loadAllData(month) {
-  // Load localStorage ngay lập tức
-  const kp = localGet(SK.khPhong)||{};
-  const kt = localGet(SK.khTuan)||{};
-  const th = localGet(SK.thTuan)||{};
-
-  // Sync từ Sheets trong background — update nếu có data mới
-  return new Promise(resolve => {
-    // Trả về local data trước để app load nhanh
-    resolve({ khPhong:kp, khTuan:kt, thTuan:th, online:false });
-    
-    // Background: thử load từ Sheets
-    sheetsLoad('getAllData', { month }, (remote) => {
-      if (remote) {
-        localSet(SK.khPhong, remote.khPhong||{});
-        localSet(SK.khTuan,  remote.khTuan||{});
-        localSet(SK.thTuan,  remote.thTuan||{});
-        // Notify app to re-render với data mới
-        window.dispatchEvent(new CustomEvent('sheets-synced', { detail: remote }));
-      }
-    });
-  });
+  if (hasRemote()) {
+    const r = await apiCall("getAllData", { month });
+    if (r) {
+      await localSet(SK.khPhong, r.khPhong||{});
+      await localSet(SK.khTuan,  r.khTuan||{});
+      await localSet(SK.thTuan,  r.thTuan||{});
+      return { khPhong:r.khPhong||{}, khTuan:r.khTuan||{}, thTuan:r.thTuan||{}, online:true };
+    }
+  }
+  const [kp,kt,th] = await Promise.all([localGet(SK.khPhong),localGet(SK.khTuan),localGet(SK.thTuan)]);
+  return { khPhong:kp||{}, khTuan:kt||{}, thTuan:th||{}, online:false };
 }
 
 async function saveKhPhongData(month, data, cur) {
   const next = {...cur, [month]:{...data}};
-  localSet(SK.khPhong, next);
-  sheetsPing("saveKhPhong", { month, data });
+  await localSet(SK.khPhong, next);
+  apiCall("saveKhPhong", { month, data }); // fire & forget
   return next;
 }
 
@@ -173,8 +152,8 @@ async function saveKhTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month])next[month]={};
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data};
-  localSet(SK.khTuan, next);
-  sheetsPing("saveKhTuan", { month, tuan, ma_nv, data });
+  await localSet(SK.khTuan, next);
+  apiCall("saveKhTuan", { month, tuan, ma_nv, data });
   return next;
 }
 
@@ -183,11 +162,10 @@ async function saveThTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month])next[month]={};
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data, updatedAt:Date.now()};
-  localSet(SK.thTuan, next);
-  sheetsPing("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] });
+  await localSet(SK.thTuan, next);
+  apiCall("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] });
   return next;
 }
-
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -1100,20 +1078,7 @@ function App(){
     if(showSyncing) setSyncing(false);
   };
 
-  useEffect(()=>{
-    loadData();
-    // Listen for background Sheets sync
-    const handler = (e) => {
-      if(e.detail) {
-        setKhPhong(e.detail.khPhong||{});
-        setKhTuan(e.detail.khTuan||{});
-        setThTuan(e.detail.thTuan||{});
-        setOnline(true);
-      }
-    };
-    window.addEventListener('sheets-synced', handler);
-    return () => window.removeEventListener('sheets-synced', handler);
-  },[]);
+  useEffect(()=>{ loadData(); },[]);
 
   // Wrap setters để gọi đúng save function
   const handleSaveKhPhong = async (data) => {
@@ -1243,10 +1208,8 @@ function App(){
   </div>;
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(App))
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const container = document.getElementById('root');
+const root = ReactDOM.createRoot(container);
 root.render(React.createElement(App));
 </script>
 </body>

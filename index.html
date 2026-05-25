@@ -87,10 +87,10 @@ const SK = {
 // LOCAL CACHE (offline fallback)
 // ═══════════════════════════════════════════
 async function localGet(k) {
-  try { const r=await window.storage.get(k,false); return r?JSON.parse(r.value):null; } catch { return null; }
+  try { const r=localStorage.getItem(k); return r?JSON.parse(r):null; } catch { return null; }
 }
 async function localSet(k,v) {
-  try { await window.storage.set(k,JSON.stringify(v),false); } catch(e){console.error(e);}
+  try { localStorage.setItem(k,JSON.stringify(v)); } catch(e){console.error(e);}
 }
 
 // ═══════════════════════════════════════════
@@ -98,41 +98,33 @@ async function localSet(k,v) {
 // ═══════════════════════════════════════════
 const hasRemote = () => SCRIPT_URL && SCRIPT_URL.length > 10;
 
-async function apiCall(action, body={}) {
+// Load data — dùng fetch GET (Apps Script trả JSON, không bị CORS với GET)
+async function apiGet(action, params={}) {
   if (!hasRemote()) return null;
-  return new Promise((resolve) => {
-    try {
-      // JSONP workaround — bypass CORS hoàn toàn
-      const cbName = "_cb_" + Date.now();
-      const params = new URLSearchParams({
-        action,
-        callback: cbName,
-        ...Object.fromEntries(
-          Object.entries(body).map(([k,v])=>[k, typeof v==="object"?JSON.stringify(v):String(v)])
-        )
-      });
+  try {
+    const p = new URLSearchParams({ action, ...Object.fromEntries(
+      Object.entries(params).map(([k,v])=>[k, typeof v==="object"?JSON.stringify(v):String(v)])
+    )});
+    const res = await fetch(`${SCRIPT_URL}?${p}`, { method:"GET", redirect:"follow" });
+    const data = await res.json();
+    return data.ok ? data : null;
+  } catch(e) { console.warn("GET:", e); return null; }
+}
 
-      const script = document.createElement("script");
-      const timeout = setTimeout(()=>{
-        cleanup(); resolve(null);
-      }, 8000);
+// Save data — dùng fetch no-cors (fire & forget, không đọc response được)
+// Đồng thời lưu localStorage để không mất data
+async function apiSave(action, body={}) {
+  if (!hasRemote()) return;
+  try {
+    const p = new URLSearchParams({ action, ...Object.fromEntries(
+      Object.entries(body).map(([k,v])=>[k, typeof v==="object"?JSON.stringify(v):String(v)])
+    )});
+    fetch(`${SCRIPT_URL}?${p}`, { method:"GET", redirect:"follow", mode:"no-cors" });
+  } catch(e) { console.warn("SAVE:", e); }
+}
 
-      window[cbName] = (data) => {
-        cleanup();
-        resolve(data && data.ok ? data : null);
-      };
-
-      function cleanup() {
-        clearTimeout(timeout);
-        delete window[cbName];
-        if (script.parentNode) script.parentNode.removeChild(script);
-      }
-
-      script.src = `${SCRIPT_URL}?${params}`;
-      script.onerror = () => { cleanup(); resolve(null); };
-      document.head.appendChild(script);
-    } catch(e) { console.warn("API:", e); resolve(null); }
-  });
+async function apiCall(action, body={}) {
+  return apiGet(action, body);
 }
 
 async function loadAllData(month) {
@@ -152,7 +144,7 @@ async function loadAllData(month) {
 async function saveKhPhongData(month, data, cur) {
   const next = {...cur, [month]:{...data}};
   await localSet(SK.khPhong, next);
-  apiCall("saveKhPhong", { month, data }); // fire & forget
+  apiSave("saveKhPhong", { month, data }); // fire & forget
   return next;
 }
 
@@ -162,7 +154,7 @@ async function saveKhTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data};
   await localSet(SK.khTuan, next);
-  apiCall("saveKhTuan", { month, tuan, ma_nv, data });
+  apiSave("saveKhTuan", { month, tuan, ma_nv, data });
   return next;
 }
 
@@ -172,7 +164,7 @@ async function saveThTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data, updatedAt:Date.now()};
   await localSet(SK.thTuan, next);
-  apiCall("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] });
+  apiSave("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] });
   return next;
 }
 

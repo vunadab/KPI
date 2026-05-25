@@ -127,23 +127,32 @@ async function apiCall(action, body={}) {
 }
 
 async function loadAllData(month) {
+  // BƯỚC 1: Load localStorage ngay lập tức — không bao giờ mất khi refresh
+  const kp = localGet(SK.khPhong)||{};
+  const kt = localGet(SK.khTuan)||{};
+  const th = localGet(SK.thTuan)||{};
+
+  // BƯỚC 2: Sync Sheets trong background — KHÔNG block app load
   if (hasRemote()) {
-    const r = await apiCall("getAllData", { month });
-    if (r) {
-      await localSet(SK.khPhong, r.khPhong||{});
-      await localSet(SK.khTuan,  r.khTuan||{});
-      await localSet(SK.thTuan,  r.thTuan||{});
-      return { khPhong:r.khPhong||{}, khTuan:r.khTuan||{}, thTuan:r.thTuan||{}, online:true };
-    }
+    apiCall("getAllData", { month }).then(r => {
+      if (r && r.khPhong) {
+        // Chỉ update nếu Sheets có data thật
+        localSet(SK.khPhong, r.khPhong);
+        localSet(SK.khTuan,  r.khTuan||{});
+        localSet(SK.thTuan,  r.thTuan||{});
+        // Dispatch event để App re-render
+        window.dispatchEvent(new CustomEvent('kpi_synced', { detail: r }));
+      }
+    }).catch(()=>{});
   }
-  const [kp,kt,th] = await Promise.all([localGet(SK.khPhong),localGet(SK.khTuan),localGet(SK.thTuan)]);
-  return { khPhong:kp||{}, khTuan:kt||{}, thTuan:th||{}, online:false };
+
+  return { khPhong:kp, khTuan:kt, thTuan:th, online:false };
 }
 
 async function saveKhPhongData(month, data, cur) {
   const next = {...cur, [month]:{...data}};
-  await localSet(SK.khPhong, next);
-  apiCall("saveKhPhong", { month, data }); // fire & forget
+  localSet(SK.khPhong, next); // sync — lưu ngay, không cần await
+  apiCall("saveKhPhong", { month, data }).catch(()=>{}); // background
   return next;
 }
 
@@ -152,8 +161,8 @@ async function saveKhTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month])next[month]={};
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data};
-  await localSet(SK.khTuan, next);
-  apiCall("saveKhTuan", { month, tuan, ma_nv, data });
+  localSet(SK.khTuan, next);
+  apiCall("saveKhTuan", { month, tuan, ma_nv, data }).catch(()=>{});
   return next;
 }
 
@@ -162,8 +171,8 @@ async function saveThTuanData(month, tuan, ma_nv, data, cur) {
   if(!next[month])next[month]={};
   if(!next[month][tuan])next[month][tuan]={};
   next[month][tuan][ma_nv]={...data, updatedAt:Date.now()};
-  await localSet(SK.thTuan, next);
-  apiCall("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] });
+  localSet(SK.thTuan, next);
+  apiCall("saveThTuan", { month, tuan, ma_nv, data:next[month][tuan][ma_nv] }).catch(()=>{});
   return next;
 }
 
@@ -1078,7 +1087,18 @@ function App(){
     if(showSyncing) setSyncing(false);
   };
 
-  useEffect(()=>{ loadData(); },[]);
+  useEffect(()=>{
+    loadData();
+    const onSync = (e) => {
+      if (!e.detail) return;
+      if (e.detail.khPhong) setKhPhong(e.detail.khPhong);
+      if (e.detail.khTuan)  setKhTuan(e.detail.khTuan);
+      if (e.detail.thTuan)  setThTuan(e.detail.thTuan);
+      setOnline(true);
+    };
+    window.addEventListener('kpi_synced', onSync);
+    return () => window.removeEventListener('kpi_synced', onSync);
+  },[]);
 
   // Wrap setters để gọi đúng save function
   const handleSaveKhPhong = async (data) => {

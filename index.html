@@ -17,136 +17,136 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
 <body>
 
 <div id="root">
-  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:#050d1a;padding:20px;text-align:center;">
-    <div style="font-size:40px;">🔥</div>
-    <div style="color:#f59e0b;font-size:16px;font-weight:700;">KPI Banking NAB</div>
-    <div style="color:#64748b;font-size:12px;">Đang kết nối Firebase...</div>
+  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:#050d1a">
+    <div style="font-size:40px">🏦</div>
+    <div style="color:#f59e0b;font-size:16px;font-weight:700">KPI Banking NAB</div>
+    <div style="color:#64748b;font-size:12px">Đang tải...</div>
   </div>
 </div>
 
-<!-- 1. Firebase SDK (compat) — load trước tiên -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<!-- 2. Firebase init + helper functions (plain JS, không qua Babel) -->
+<!-- Firebase REST API helper — không cần SDK, không lỗi CDN -->
 <script>
-// Đợi Firebase SDK load xong mới init
-(function() {
-  if (typeof firebase === 'undefined') {
-    console.error('Firebase SDK not loaded');
-    return;
+
+// ═══════════════════════════════════════════════════════
+// FIREBASE REALTIME DATABASE — REST API (không cần SDK)
+// Không dùng CDN, không lỗi "firebase is not defined"
+// Dùng fetch() có sẵn trong mọi browser hiện đại
+// ═══════════════════════════════════════════════════════
+var DB_URL  = "https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app";
+var DB_ROOT = "kpi_banking";
+
+// GET data từ Firebase
+async function fbGet(path) {
+  try {
+    var r = await fetch(DB_URL + "/" + path + ".json");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var data = await r.json();
+    return data; // null nếu không có data
+  } catch(e) {
+    console.warn("fbGet error:", e.message);
+    return null;
   }
+}
 
-// ═══════════════════════════════════════════
-// FIREBASE — chạy trong <script> thường (không qua Babel)
-// Init trước khi React load để tránh timing issues
-// ═══════════════════════════════════════════
-const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyDUIkD_-0vh5AM5drPgxdvWOIVxXrSEvnc",
-  authDomain:        "kpi-banking-nab.firebaseapp.com",
-  databaseURL:       "https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "kpi-banking-nab",
-  storageBucket:     "kpi-banking-nab.firebasestorage.app",
-  messagingSenderId: "943885730972",
-  appId:             "1:943885730972:web:191f7fa4d451157d3f5959"
-};
+// SET data lên Firebase
+async function fbSet(path, data) {
+  try {
+    var r = await fetch(DB_URL + "/" + path + ".json", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return true;
+  } catch(e) {
+    console.warn("fbSet error:", e.message);
+    return false;
+  }
+}
 
-const DB_ROOT = "kpi_banking";
+// LISTEN realtime — dùng Server-Sent Events (SSE) của Firebase
+function fbListen(path, cb) {
+  try {
+    var es = new EventSource(DB_URL + "/" + path + ".json?accept=text/event-stream");
+    es.addEventListener("put", function(e) {
+      try {
+        var parsed = JSON.parse(e.data);
+        if (parsed && parsed.data !== undefined) cb(parsed.data);
+      } catch(err) {}
+    });
+    es.onerror = function() { console.warn("SSE error, retrying..."); };
+    return function() { es.close(); };
+  } catch(e) {
+    console.warn("fbListen error:", e.message);
+    return function(){};
+  }
+}
 
-// Init Firebase ngay khi script load
-const _fbApp  = firebase.initializeApp(FIREBASE_CONFIG);
-const _fbDB   = firebase.database(_fbApp);
-window._fbDB  = _fbDB; // expose để các hàm khác check
-
-function _fbRef(path) { return _fbDB.ref(path); }
-
-// Expose lên window để Babel script dùng được
+// Window functions cho React app
 window.DB_ROOT = DB_ROOT;
 
 window._fbLoadAll = async function(month) {
   try {
-    if (typeof firebase === 'undefined' || !window._fbDB) throw new Error('Firebase not ready');
-    const [s1, s2, s3] = await Promise.all([
-      _fbRef(DB_ROOT + '/khPhong/' + month).get(),
-      _fbRef(DB_ROOT + '/khTuan/'  + month).get(),
-      _fbRef(DB_ROOT + '/thTuan/'  + month).get(),
-    ]);
+    var p1 = fbGet(DB_ROOT + "/khPhong/" + month);
+    var p2 = fbGet(DB_ROOT + "/khTuan/"  + month);
+    var p3 = fbGet(DB_ROOT + "/thTuan/"  + month);
+    var results = await Promise.all([p1, p2, p3]);
     return {
-      khPhong: s1.exists() ? {[month]: s1.val()} : {},
-      khTuan:  s2.exists() ? {[month]: s2.val()} : {},
-      thTuan:  s3.exists() ? {[month]: s3.val()} : {},
-      online: true,
+      khPhong: results[0] ? {[month]: results[0]} : {},
+      khTuan:  results[1] ? {[month]: results[1]} : {},
+      thTuan:  results[2] ? {[month]: results[2]} : {},
+      online: true
     };
   } catch(e) {
-    console.warn("Firebase load error, dùng localStorage:", e.message);
-    // Fallback localStorage
-    function lGet(k){ try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch{return null;} }
-    return {
-      khPhong: lGet('v4_kh_phong')||{},
-      khTuan:  lGet('v4_kh_tuan')||{},
-      thTuan:  lGet('v4_th_tuan')||{},
-      online: false,
-    };
+    console.warn("loadAll error:", e);
+    return { khPhong:{}, khTuan:{}, thTuan:{}, online:false };
   }
 };
 
 window._fbSaveKhPhong = async function(month, data, cur) {
-  const next = Object.assign({}, cur, {[month]: Object.assign({}, data)});
-  try {
-    localStorage.setItem('v4_kh_phong', JSON.stringify(next));
-    if (window._fbDB) await _fbRef(DB_ROOT + '/khPhong/' + month).set(data);
-  } catch(e) { console.warn(e); }
+  var next = Object.assign({}, cur, {[month]: data});
+  fbSet(DB_ROOT + "/khPhong/" + month, data);
   return next;
 };
 
 window._fbSaveKhTuan = async function(month, tuan, ma_nv, data, cur) {
-  const next = JSON.parse(JSON.stringify(cur));
-  if(!next[month]) next[month] = {};
-  if(!next[month][tuan]) next[month][tuan] = {};
-  next[month][tuan][ma_nv] = Object.assign({}, data);
-  try {
-    localStorage.setItem('v4_kh_tuan', JSON.stringify(next));
-    if (window._fbDB) await _fbRef(DB_ROOT + '/khTuan/' + month + '/' + tuan + '/' + ma_nv).set(data);
-  } catch(e) { console.warn(e); }
+  var next = JSON.parse(JSON.stringify(cur));
+  if(!next[month]) next[month]={};
+  if(!next[month][tuan]) next[month][tuan]={};
+  next[month][tuan][ma_nv] = data;
+  fbSet(DB_ROOT + "/khTuan/" + month + "/" + tuan + "/" + ma_nv, data);
   return next;
 };
 
 window._fbSaveTh = async function(month, tuan, ma_nv, data, cur) {
-  const next = JSON.parse(JSON.stringify(cur));
-  if(!next[month]) next[month] = {};
-  if(!next[month][tuan]) next[month][tuan] = {};
-  const record = Object.assign({}, data, {updatedAt: Date.now()});
+  var next = JSON.parse(JSON.stringify(cur));
+  if(!next[month]) next[month]={};
+  if(!next[month][tuan]) next[month][tuan]={};
+  var record = Object.assign({}, data, {updatedAt: Date.now()});
   next[month][tuan][ma_nv] = record;
-  try {
-    localStorage.setItem('v4_th_tuan', JSON.stringify(next));
-    if (window._fbDB) await _fbRef(DB_ROOT + '/thTuan/' + month + '/' + tuan + '/' + ma_nv).set(record);
-  } catch(e) { console.warn(e); }
+  fbSet(DB_ROOT + "/thTuan/" + month + "/" + tuan + "/" + ma_nv, record);
   return next;
 };
 
 window._fbListen = function(path, cb) {
-  if (!window._fbDB) return function(){}; // no-op nếu Firebase không có
-  const ref = _fbRef(path);
-  ref.on('value', snap => cb(snap.exists() ? snap.val() : null));
-  return function() { ref.off('value'); };
+  return fbListen(path, cb);
 };
 
-console.log("Firebase initialized OK:", _fbApp.name);
-})();
+console.log("Firebase REST API ready — no SDK needed");
 
 </script>
 
-<!-- 3. React -->
+<!-- React -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
-<!-- 4. Babel compiler -->
+<!-- Babel -->
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- 5. App (JSX — compiled by Babel) -->
+<!-- App -->
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useMemo, useCallback } = React;
-const { DB_ROOT } = window;
+var DB_ROOT = window.DB_ROOT || "kpi_banking";
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -1218,10 +1218,7 @@ function App(){
 
 const container = document.getElementById('root');
 
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(React.createElement(App));
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
-
 </body>
 </html>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>KPI Banking</title>
+<title>KPI Banking — NAB</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { background:#050d1a; color:#e2e8f0; min-height:100vh; }
@@ -15,63 +15,26 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
 </style>
 </head>
 <body>
+
 <div id="root">
-  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:#050d1a">
-    <div style="font-size:40px">🏦</div>
-    <div style="color:#f59e0b;font-size:16px;font-weight:700">Đang kết nối Firebase...</div>
+  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:#050d1a;padding:20px;text-align:center;">
+    <div style="font-size:40px;">🔥</div>
+    <div style="color:#f59e0b;font-size:16px;font-weight:700;">KPI Banking NAB</div>
+    <div style="color:#64748b;font-size:12px;">Đang kết nối Firebase...</div>
   </div>
 </div>
 
-<!-- Firebase SDK -->
+<!-- 1. Firebase SDK (compat) — load trước tiên -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- React + Babel -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-<script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo, useCallback } = React;
-
-data-presets="react">
-const { useState, useEffect, useMemo, useCallback } = React;
+<!-- 2. Firebase init + helper functions (plain JS, không qua Babel) -->
+<script>
 
 // ═══════════════════════════════════════════
-// CONFIG
+// FIREBASE — chạy trong <script> thường (không qua Babel)
+// Init trước khi React load để tránh timing issues
 // ═══════════════════════════════════════════
-const NV_LIST = [
-  { ma:"10924", ten:"TRƯƠNG ANH TOÀN" },
-  { ma:"16032", ten:"DƯƠNG HỒNG PHÁP" },
-  { ma:"10847", ten:"TRẦN VIẾT DUY" },
-  { ma:"10852", ten:"ĐỖ THỊ HỒNG SƯƠNG" },
-  { ma:"13933", ten:"VÕ UYÊN BÌNH" },
-  { ma:"15642", ten:"TRẦN CÔNG LUẬT" },
-  { ma:"17339", ten:"PHẠM THỊ NGỌC HUYỀN" },
-  { ma:"17489", ten:"NGUYỄN LÂM KHA" },
-  { ma:"NV009", ten:"NGUYỄN THÀNH ĐẠT" },
-  { ma:"NV010", ten:"ĐẶNG VÕ DUYÊN TRINH" },
-  { ma:"NV011", ten:"LÊ THỊ BÍCH PHƯỢNG" },
-  { ma:"NV012", ten:"NGUYỄN HỒNG PHƯƠNG THANH" },
-];
-
-const KPI_CFG = [
-  { key:"huy_dong", label:"Huy Động", short:"HD", icon:"💰", unit:"tr đ", star:true,  color:"#f59e0b" },
-  { key:"du_no",    label:"Dư Nợ",   short:"DN", icon:"🏦", unit:"tr đ", star:true,  color:"#3b82f6" },
-  { key:"the_td",   label:"Thẻ TD",  short:"TT", icon:"💳", unit:"thẻ",  star:true,  color:"#8b5cf6" },
-  { key:"tk_hkd",   label:"TK HKD",  short:"HK", icon:"🏢", unit:"TK",   star:false, color:"#10b981" },
-  { key:"qr_code",  label:"QR Code", short:"QR", icon:"📱", unit:"QR",   star:false, color:"#06b6d4" },
-  { key:"cif",      label:"CIF",     short:"CF", icon:"👤", unit:"CIF",  star:false, color:"#ec4899" },
-];
-
-const TUAN_LIST = ["T1","T2","T3","T4"];
-const now = new Date();
-const CUR_MONTH = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
-const DEFAULT_KH_PHONG = { huy_dong:47900, du_no:31000, the_td:82, tk_hkd:80, qr_code:220, cif:415 };
-
-// ════════════════════════════════════════════════
-// FIREBASE CONFIG — thay bằng config của anh
-// ════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyDUIkD_-0vh5AM5drPgxdvWOIVxXrSEvnc",
   authDomain:        "kpi-banking-nab.firebaseapp.com",
@@ -79,93 +42,85 @@ const FIREBASE_CONFIG = {
   projectId:         "kpi-banking-nab",
   storageBucket:     "kpi-banking-nab.firebasestorage.app",
   messagingSenderId: "943885730972",
-  appId:             "1:943885730972:web:191f7fa4d451157d3f5959",
+  appId:             "1:943885730972:web:191f7fa4d451157d3f5959"
 };
 
 const DB_ROOT = "kpi_banking";
 
-// ════════════════════════════════════════════════
-// FIREBASE HELPERS
-// ════════════════════════════════════════════════
-let _db = null;
+// Init Firebase ngay khi script load
+const _fbApp  = firebase.initializeApp(FIREBASE_CONFIG);
+const _fbDB   = firebase.database(_fbApp);
 
-function getDB() {
-  if (_db) return _db;
-  firebase.initializeApp(FIREBASE_CONFIG);
-  _db = firebase.database();
-  return _db;
-}
+function _fbRef(path) { return _fbDB.ref(path); }
 
-function dbRef(path) {
-  return getDB().ref(path);
-}
+// Expose lên window để Babel script dùng được
+window.DB_ROOT = DB_ROOT;
 
-async function dbGet(path) {
+window._fbLoadAll = async function(month) {
   try {
-    const snap = await dbRef(path).get();
-    return snap.exists() ? snap.val() : null;
-  } catch(e) { console.warn("dbGet error:", e); return null; }
-}
-
-async function dbSet(path, val) {
-  try {
-    await dbRef(path).set(val);
-    return true;
-  } catch(e) { console.warn("dbSet error:", e); return false; }
-}
-
-function dbListen(path, cb) {
-  dbRef(path).on('value', snap => cb(snap.exists() ? snap.val() : null));
-  return () => dbRef(path).off('value');
-}
-
-// ════════════════════════════════════════════════
-// DATA LAYER — đọc/ghi Firebase
-// ════════════════════════════════════════════════
-async function loadAllData(month) {
-  try {
-    const [khPhong, khTuan, thTuan] = await Promise.all([
-      dbGet(`${DB_ROOT}/khPhong/${month}`),
-      dbGet(`${DB_ROOT}/khTuan/${month}`),
-      dbGet(`${DB_ROOT}/thTuan/${month}`),
+    const [s1, s2, s3] = await Promise.all([
+      _fbRef(DB_ROOT + '/khPhong/' + month).get(),
+      _fbRef(DB_ROOT + '/khTuan/'  + month).get(),
+      _fbRef(DB_ROOT + '/thTuan/'  + month).get(),
     ]);
     return {
-      khPhong: month ? { [month]: khPhong||{} } : {},
-      khTuan:  month ? { [month]: khTuan||{} }  : {},
-      thTuan:  month ? { [month]: thTuan||{} }  : {},
+      khPhong: s1.exists() ? {[month]: s1.val()} : {},
+      khTuan:  s2.exists() ? {[month]: s2.val()} : {},
+      thTuan:  s3.exists() ? {[month]: s3.val()} : {},
       online: true,
     };
   } catch(e) {
-    console.warn("Firebase load error:", e);
+    console.error("Firebase load error:", e);
     return { khPhong:{}, khTuan:{}, thTuan:{}, online:false };
   }
-}
+};
 
-async function saveKhPhongData(month, data, cur) {
-  const next = {...cur, [month]:{...data}};
-  await dbSet(`${DB_ROOT}/khPhong/${month}`, data);
+window._fbSaveKhPhong = async function(month, data, cur) {
+  const next = Object.assign({}, cur, {[month]: Object.assign({}, data)});
+  try { await _fbRef(DB_ROOT + '/khPhong/' + month).set(data); } catch(e) { console.warn(e); }
   return next;
-}
+};
 
-async function saveKhTuanData(month, tuan, ma_nv, data, cur) {
+window._fbSaveKhTuan = async function(month, tuan, ma_nv, data, cur) {
   const next = JSON.parse(JSON.stringify(cur));
-  if(!next[month])next[month]={};
-  if(!next[month][tuan])next[month][tuan]={};
-  next[month][tuan][ma_nv]={...data};
-  await dbSet(`${DB_ROOT}/khTuan/${month}/${tuan}/${ma_nv}`, data);
+  if(!next[month]) next[month] = {};
+  if(!next[month][tuan]) next[month][tuan] = {};
+  next[month][tuan][ma_nv] = Object.assign({}, data);
+  try { await _fbRef(DB_ROOT + '/khTuan/' + month + '/' + tuan + '/' + ma_nv).set(data); } catch(e) { console.warn(e); }
   return next;
-}
+};
 
-async function saveThTuanData(month, tuan, ma_nv, data, cur) {
+window._fbSaveTh = async function(month, tuan, ma_nv, data, cur) {
   const next = JSON.parse(JSON.stringify(cur));
-  if(!next[month])next[month]={};
-  if(!next[month][tuan])next[month][tuan]={};
-  const record = {...data, updatedAt: Date.now()};
+  if(!next[month]) next[month] = {};
+  if(!next[month][tuan]) next[month][tuan] = {};
+  const record = Object.assign({}, data, {updatedAt: Date.now()});
   next[month][tuan][ma_nv] = record;
-  await dbSet(`${DB_ROOT}/thTuan/${month}/${tuan}/${ma_nv}`, record);
+  try { await _fbRef(DB_ROOT + '/thTuan/' + month + '/' + tuan + '/' + ma_nv).set(record); } catch(e) { console.warn(e); }
   return next;
-}
+};
 
+window._fbListen = function(path, cb) {
+  const ref = _fbRef(path);
+  ref.on('value', snap => cb(snap.exists() ? snap.val() : null));
+  return function() { ref.off('value'); };
+};
+
+console.log("Firebase initialized OK:", _fbApp.name);
+
+</script>
+
+<!-- 3. React -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+<!-- 4. Babel compiler -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- 5. App (JSX — compiled by Babel) -->
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback } = React;
+const { DB_ROOT } = window;
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -1079,39 +1034,45 @@ function App(){
 
   const loadData = async (showSyncing=false) => {
     if(showSyncing) setSyncing(true);
-    const d = await loadAllData(month);
-    setKhPhong(d.khPhong); setKhTuan(d.khTuan); setThTuan(d.thTuan);
-    setOnline(d.online);
-    setLoading(false);
-    if(showSyncing) setSyncing(false);
+    try {
+      const d = await window._fbLoadAll(month);
+      setKhPhong(d.khPhong); setKhTuan(d.khTuan); setThTuan(d.thTuan);
+      setOnline(d.online);
+    } catch(e) {
+      console.warn("loadData error:", e);
+      setOnline(false);
+    } finally {
+      setLoading(false);
+      if(showSyncing) setSyncing(false);
+    }
   };
 
   useEffect(()=>{
     loadData();
-    // Firebase realtime listener — tự động update khi có NV nhập
-    const unsubKP = dbListen(`${DB_ROOT}/khPhong/${month}`, v => {
+    // Firebase realtime listeners
+    const unsubKP = window._fbListen(`${DB_ROOT}/khPhong/${month}`, v => {
       if(v) setKhPhong(prev => ({...prev, [month]: v}));
     });
-    const unsubKT = dbListen(`${DB_ROOT}/khTuan/${month}`, v => {
+    const unsubKT = window._fbListen(`${DB_ROOT}/khTuan/${month}`, v => {
       if(v) setKhTuan(prev => ({...prev, [month]: v}));
     });
-    const unsubTH = dbListen(`${DB_ROOT}/thTuan/${month}`, v => {
+    const unsubTH = window._fbListen(`${DB_ROOT}/thTuan/${month}`, v => {
       if(v) { setThTuan(prev => ({...prev, [month]: v})); setOnline(true); }
     });
-    return () => { unsubKP(); unsubKT(); unsubTH(); };
+    return () => { unsubKP && unsubKP(); unsubKT && unsubKT(); unsubTH && unsubTH(); };
   },[]);
 
   // Wrap setters để gọi đúng save function
   const handleSaveKhPhong = async (data) => {
-    const next = await saveKhPhongData(month, data, khPhong);
+    const next = await window._fbSaveKhPhong(month, data, khPhong);
     setKhPhong(next);
   };
   const handleSaveKhTuan = async (tuan, ma_nv, data) => {
-    const next = await saveKhTuanData(month, tuan, ma_nv, data, khTuan);
+    const next = await window._fbSaveKhTuan(month, tuan, ma_nv, data, khTuan);
     setKhTuan(next);
   };
   const handleSaveThTuan = async (tuan, ma_nv, data) => {
-    const next = await saveThTuanData(month, tuan, ma_nv, data, thTuan);
+    const next = await window._fbSaveTh(month, tuan, ma_nv, data, thTuan);
     setThTuan(next);
   };
 
@@ -1231,8 +1192,10 @@ function App(){
 
 const container = document.getElementById('root');
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const container = document.getElementById('root');
+const root = ReactDOM.createRoot(container);
 root.render(React.createElement(App));
 </script>
+
 </body>
 </html>

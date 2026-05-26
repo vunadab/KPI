@@ -30,6 +30,12 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
 
 <!-- 2. Firebase init + helper functions (plain JS, không qua Babel) -->
 <script>
+// Đợi Firebase SDK load xong mới init
+(function() {
+  if (typeof firebase === 'undefined') {
+    console.error('Firebase SDK not loaded');
+    return;
+  }
 
 // ═══════════════════════════════════════════
 // FIREBASE — chạy trong <script> thường (không qua Babel)
@@ -50,6 +56,7 @@ const DB_ROOT = "kpi_banking";
 // Init Firebase ngay khi script load
 const _fbApp  = firebase.initializeApp(FIREBASE_CONFIG);
 const _fbDB   = firebase.database(_fbApp);
+window._fbDB  = _fbDB; // expose để các hàm khác check
 
 function _fbRef(path) { return _fbDB.ref(path); }
 
@@ -58,6 +65,7 @@ window.DB_ROOT = DB_ROOT;
 
 window._fbLoadAll = async function(month) {
   try {
+    if (typeof firebase === 'undefined' || !window._fbDB) throw new Error('Firebase not ready');
     const [s1, s2, s3] = await Promise.all([
       _fbRef(DB_ROOT + '/khPhong/' + month).get(),
       _fbRef(DB_ROOT + '/khTuan/'  + month).get(),
@@ -70,14 +78,24 @@ window._fbLoadAll = async function(month) {
       online: true,
     };
   } catch(e) {
-    console.error("Firebase load error:", e);
-    return { khPhong:{}, khTuan:{}, thTuan:{}, online:false };
+    console.warn("Firebase load error, dùng localStorage:", e.message);
+    // Fallback localStorage
+    function lGet(k){ try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch{return null;} }
+    return {
+      khPhong: lGet('v4_kh_phong')||{},
+      khTuan:  lGet('v4_kh_tuan')||{},
+      thTuan:  lGet('v4_th_tuan')||{},
+      online: false,
+    };
   }
 };
 
 window._fbSaveKhPhong = async function(month, data, cur) {
   const next = Object.assign({}, cur, {[month]: Object.assign({}, data)});
-  try { await _fbRef(DB_ROOT + '/khPhong/' + month).set(data); } catch(e) { console.warn(e); }
+  try {
+    localStorage.setItem('v4_kh_phong', JSON.stringify(next));
+    if (window._fbDB) await _fbRef(DB_ROOT + '/khPhong/' + month).set(data);
+  } catch(e) { console.warn(e); }
   return next;
 };
 
@@ -86,7 +104,10 @@ window._fbSaveKhTuan = async function(month, tuan, ma_nv, data, cur) {
   if(!next[month]) next[month] = {};
   if(!next[month][tuan]) next[month][tuan] = {};
   next[month][tuan][ma_nv] = Object.assign({}, data);
-  try { await _fbRef(DB_ROOT + '/khTuan/' + month + '/' + tuan + '/' + ma_nv).set(data); } catch(e) { console.warn(e); }
+  try {
+    localStorage.setItem('v4_kh_tuan', JSON.stringify(next));
+    if (window._fbDB) await _fbRef(DB_ROOT + '/khTuan/' + month + '/' + tuan + '/' + ma_nv).set(data);
+  } catch(e) { console.warn(e); }
   return next;
 };
 
@@ -96,17 +117,22 @@ window._fbSaveTh = async function(month, tuan, ma_nv, data, cur) {
   if(!next[month][tuan]) next[month][tuan] = {};
   const record = Object.assign({}, data, {updatedAt: Date.now()});
   next[month][tuan][ma_nv] = record;
-  try { await _fbRef(DB_ROOT + '/thTuan/' + month + '/' + tuan + '/' + ma_nv).set(record); } catch(e) { console.warn(e); }
+  try {
+    localStorage.setItem('v4_th_tuan', JSON.stringify(next));
+    if (window._fbDB) await _fbRef(DB_ROOT + '/thTuan/' + month + '/' + tuan + '/' + ma_nv).set(record);
+  } catch(e) { console.warn(e); }
   return next;
 };
 
 window._fbListen = function(path, cb) {
+  if (!window._fbDB) return function(){}; // no-op nếu Firebase không có
   const ref = _fbRef(path);
   ref.on('value', snap => cb(snap.exists() ? snap.val() : null));
   return function() { ref.off('value'); };
 };
 
 console.log("Firebase initialized OK:", _fbApp.name);
+})();
 
 </script>
 

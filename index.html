@@ -8,1158 +8,848 @@
 <title>KPI Banking — NAB</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{background:#050d1a;color:#e2e8f0;min-height:100vh;}
-body{font-family:'Segoe UI',system-ui,sans-serif;}
-#root{max-width:480px;margin:0 auto;min-height:100vh;background:#050d1a;}
+:root{
+  --bg0:#050d1a;--bg1:#0a1628;--bg2:#111f35;--bg3:#1a2e48;
+  --gold:#f59e0b;--blue:#3b82f6;--green:#10b981;--red:#ef4444;
+  --purple:#8b5cf6;--cyan:#06b6d4;--pink:#ec4899;--orange:#f97316;
+  --text:#e2e8f0;--dim:#94a3b8;--mute:#475569;--border:#1e3a5f;
+}
+html,body{background:var(--bg0);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg0);padding-bottom:70px;}
+
+/* Header */
+.header{background:linear-gradient(180deg,var(--bg1),var(--bg0));padding:14px 16px 12px;
+  border-bottom:1px solid #1e3a5f55;position:sticky;top:0;z-index:100;}
+.header-row{display:flex;align-items:center;justify-content:space-between;}
+.header-title{font-size:20px;font-weight:900;letter-spacing:-.02em;}
+.header-title span{color:var(--gold);}
+.header-sub{font-size:11px;color:var(--mute);margin-top:2px;display:flex;align-items:center;gap:6px;}
+.badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.badge-green{background:#10b98122;color:var(--green);border:1px solid #10b98144;}
+.badge-yellow{background:#f59e0b22;color:var(--gold);border:1px solid #f59e0b44;}
+.badge-red{background:#ef444422;color:var(--red);border:1px solid #ef444444;}
+
+/* Bottom nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:var(--bg0);
+  border-top:1px solid #1e3a5f55;display:flex;z-index:100;}
+.nav-btn{flex:1;padding:10px 6px;background:none;border:none;cursor:pointer;
+  color:var(--mute);font-size:10px;font-weight:500;font-family:inherit;
+  border-top:2px solid transparent;transition:all .2s;line-height:1.4;}
+.nav-btn.active{color:var(--gold);border-top-color:var(--gold);font-weight:700;}
+.nav-icon{font-size:19px;display:block;margin-bottom:1px;}
+
+/* Cards */
+.card{background:var(--bg2);border-radius:14px;padding:14px;
+  border:1px solid #1e3a5f22;margin-bottom:10px;}
+.card-highlight{background:linear-gradient(135deg,#1a3050,var(--bg1));
+  border:1px solid #1e3a5f44;}
+
+/* KPI grid */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.kpi-card{background:var(--bg2);border-radius:14px;padding:13px;
+  border:1px solid #1e3a5f22;position:relative;overflow:hidden;}
+.kpi-card-bg{position:absolute;bottom:-8px;right:-4px;font-size:38px;opacity:.04;}
+.kpi-label{font-size:10px;color:var(--mute);margin-bottom:2px;}
+.kpi-value{font-size:20px;font-weight:900;line-height:1;}
+.kpi-kh{font-size:9px;color:var(--mute);margin-top:2px;}
+.kpi-ring-wrap{position:relative;width:44px;height:44px;flex-shrink:0;}
+.kpi-ring-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:9px;font-weight:700;text-align:center;}
+
+/* Progress bar */
+.bar-wrap{background:#0a1628;border-radius:4px;height:5px;overflow:hidden;margin-top:6px;}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+
+/* Section title */
+.sec-title{font-size:11px;color:var(--dim);text-transform:uppercase;
+  letter-spacing:.1em;font-weight:700;margin-bottom:10px;}
+
+/* NV list items */
+.nv-item{background:var(--bg2);border-radius:14px;padding:13px 14px;
+  margin-bottom:8px;border:1px solid #1e3a5f22;cursor:pointer;
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;}
+.nv-item:active{opacity:.7;}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;}
+.nv-name{font-weight:600;font-size:13px;color:var(--text);}
+.nv-sub{font-size:11px;color:var(--mute);margin-top:2px;}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.chip{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:700;}
+
+/* Form */
+.form-field{background:var(--bg2);border-radius:14px;padding:14px;
+  margin-bottom:10px;border:1px solid #1e3a5f22;}
+.field-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.field-label{display:flex;align-items:center;gap:8px;}
+.field-name{font-weight:600;font-size:14px;}
+.field-kh{font-size:10px;color:var(--mute);}
+input[type=number]{width:100%;background:var(--bg1);border:1px solid var(--border);
+  border-radius:10px;padding:12px 13px;color:var(--text);font-size:16px;
+  font-weight:600;outline:none;font-family:inherit;}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]:focus{border-color:#3b82f6;}
+
+/* Buttons */
+.btn-primary{width:100%;padding:15px;border-radius:14px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),#d97706);color:#040a12;
+  font-weight:800;font-size:16px;font-family:inherit;margin-top:4px;}
+.btn-primary:active{opacity:.8;}
+.btn-primary.saved{background:#10b981;color:#fff;}
+.btn-back{background:none;border:none;color:var(--dim);cursor:pointer;
+  font-size:13px;font-family:inherit;padding:0;margin-bottom:14px;}
+
+/* Ranking */
+.rank-item{background:var(--bg2);border-radius:14px;padding:13px 14px;
+  margin-bottom:8px;border:1px solid #1e3a5f22;cursor:pointer;
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;}
+.rank-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+
+/* Tuần tabs */
+.tabs{display:flex;gap:6px;margin-bottom:14px;}
+.tab-btn{flex:1;padding:9px 0;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--dim);font-weight:700;font-size:14px;
+  cursor:pointer;font-family:inherit;transition:all .2s;}
+.tab-btn.active{border-color:#3b82f6;background:#3b82f622;color:#3b82f6;}
+
+/* Loading */
+#loading{display:flex;align-items:center;justify-content:center;height:100vh;
+  flex-direction:column;gap:16px;}
+
+/* Alert */
+.alert-card{background:var(--bg2);border-radius:14px;padding:14px;
+  margin-bottom:12px;border-left:4px solid;}
+.alert-title{font-size:14px;font-weight:700;margin-bottom:8px;}
+.alert-item{display:flex;align-items:center;gap:8px;padding:7px 0;
+  border-top:1px solid #ffffff08;font-size:13px;}
+
+/* Scope filter */
+.scope-bar{display:flex;gap:5px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
+.scope-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--dim);font-size:12px;font-weight:600;
+  cursor:pointer;font-family:inherit;white-space:nowrap;}
+.scope-btn.active{border-color:var(--gold);background:#f59e0b22;color:var(--gold);}
 </style>
 </head>
 <body>
-<div id="root">
-  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:#050d1a">
-    <div style="font-size:40px">🏦</div>
-    <div style="color:#f59e0b;font-size:16px;font-weight:700">KPI Banking NAB</div>
-    <div style="color:#64748b;font-size:12px">Đang tải...</div>
-  </div>
+<div id="loading">
+  <div style="font-size:40px">🏦</div>
+  <div style="color:#f59e0b;font-size:16px;font-weight:700">KPI Banking NAB</div>
+  <div style="color:#64748b;font-size:13px">Đang tải...</div>
 </div>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script type="text/babel" data-presets="react">
-const {useState,useEffect,useMemo,useCallback}=React;
-// ═══════════════════════════════════════════
+<div id="app" style="display:none"></div>
+
+<script>
+// ══════════════════════════════════════════
 // CONFIG
-// ═══════════════════════════════════════════
-const NV_LIST = [
-  { ma:"10924", ten:"TRƯƠNG ANH TOÀN" },
-  { ma:"16032", ten:"DƯƠNG HỒNG PHÁP" },
-  { ma:"10847", ten:"TRẦN VIẾT DUY" },
-  { ma:"10852", ten:"ĐỖ THỊ HỒNG SƯƠNG" },
-  { ma:"13933", ten:"VÕ UYÊN BÌNH" },
-  { ma:"15642", ten:"TRẦN CÔNG LUẬT" },
-  { ma:"17339", ten:"PHẠM THỊ NGỌC HUYỀN" },
-  { ma:"17489", ten:"NGUYỄN LÂM KHA" },
-  { ma:"NV009", ten:"NGUYỄN THÀNH ĐẠT" },
-  { ma:"NV010", ten:"ĐẶNG VÕ DUYÊN TRINH" },
-  { ma:"NV011", ten:"LÊ THỊ BÍCH PHƯỢNG" },
-  { ma:"NV012", ten:"NGUYỄN HỒNG PHƯƠNG THANH" },
+// ══════════════════════════════════════════
+const DB = "https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app";
+const ROOT = "kpi";
+const MONTH = (()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); })();
+const TODAY_DAY = new Date().getDate();
+const CUR_TUAN = TODAY_DAY<=7?"T1":TODAY_DAY<=14?"T2":TODAY_DAY<=21?"T3":"T4";
+
+const NVS = [
+  {ma:"10924",ten:"TRƯƠNG ANH TOÀN"},
+  {ma:"16032",ten:"DƯƠNG HỒNG PHÁP"},
+  {ma:"10847",ten:"TRẦN VIẾT DUY"},
+  {ma:"10852",ten:"ĐỖ THỊ HỒNG SƯƠNG"},
+  {ma:"13933",ten:"VÕ UYÊN BÌNH"},
+  {ma:"15642",ten:"TRẦN CÔNG LUẬT"},
+  {ma:"17339",ten:"PHẠM THỊ NGỌC HUYỀN"},
+  {ma:"17489",ten:"NGUYỄN LÂM KHA"},
+  {ma:"NV009",ten:"NGUYỄN THÀNH ĐẠT"},
+  {ma:"NV010",ten:"ĐẶNG VÕ DUYÊN TRINH"},
+  {ma:"NV011",ten:"LÊ THỊ BÍCH PHƯỢNG"},
+  {ma:"NV012",ten:"NGUYỄN HỒNG PHƯƠNG THANH"},
 ];
 
-const KPI_CFG = [
-  { key:"huy_dong", label:"Huy Động", short:"HD", icon:"💰", unit:"tr đ", star:true,  color:"#f59e0b" },
-  { key:"du_no",    label:"Dư Nợ",   short:"DN", icon:"🏦", unit:"tr đ", star:true,  color:"#3b82f6" },
-  { key:"the_td",   label:"Thẻ TD",  short:"TT", icon:"💳", unit:"thẻ",  star:true,  color:"#8b5cf6" },
-  { key:"tk_hkd",   label:"TK HKD",  short:"HK", icon:"🏢", unit:"TK",   star:false, color:"#10b981" },
-  { key:"qr_code",  label:"QR Code", short:"QR", icon:"📱", unit:"QR",   star:false, color:"#06b6d4" },
-  { key:"cif",      label:"CIF",     short:"CF", icon:"👤", unit:"CIF",  star:false, color:"#ec4899" },
+const KPIS = [
+  {key:"huy_dong",label:"Huy Động",icon:"💰",unit:"tr đ",star:true, color:"#f59e0b"},
+  {key:"du_no",   label:"Dư Nợ",   icon:"🏦",unit:"tr đ",star:true, color:"#3b82f6"},
+  {key:"the_td",  label:"Thẻ TD",  icon:"💳",unit:"thẻ", star:true, color:"#8b5cf6"},
+  {key:"tk_hkd",  label:"TK HKD",  icon:"🏢",unit:"TK",  star:false,color:"#10b981"},
+  {key:"qr_code", label:"QR Code", icon:"📱",unit:"QR",  star:false,color:"#06b6d4"},
+  {key:"cif",     label:"CIF",     icon:"👤",unit:"CIF", star:false,color:"#ec4899"},
 ];
 
-const TUAN_LIST = ["T1","T2","T3","T4"];
-const now = new Date();
-const CUR_MONTH = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
-const DEFAULT_KH_PHONG = { huy_dong:47900, du_no:31000, the_td:82, tk_hkd:80, qr_code:220, cif:415 };
+const DEFAULT_KH = {huy_dong:47900,du_no:31000,the_td:82,tk_hkd:80,qr_code:220,cif:415};
 
-// FIREBASE REST API
-const DB_URL  = "https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app";
-const DB_PATH = "kpi_banking";
-
-async function fbGet(p) {
+// ══════════════════════════════════════════
+// FIREBASE REST
+// ══════════════════════════════════════════
+async function fbGet(path) {
   try {
-    const r = await fetch(DB_URL+"/"+p+".json");
+    const r = await fetch(DB+"/"+ROOT+"/"+path+".json");
     if(!r.ok) return null;
-    return await r.json();
-  } catch(e) { return null; }
+    const d = await r.json();
+    return d;
+  } catch(e) { console.warn("GET",path,e.message); return null; }
 }
 
-async function fbSet(p, d) {
+async function fbSet(path, data) {
   try {
-    await fetch(DB_URL+"/"+p+".json", {
-      method:"PUT", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(d)
+    await fetch(DB+"/"+ROOT+"/"+path+".json", {
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(data)
     });
-  } catch(e) {}
+  } catch(e) { console.warn("SET",path,e.message); }
 }
 
-async function loadAllData(month) {
-  try {
-    const [d1,d2,d3] = await Promise.all([
-      fbGet(DB_PATH+"/khPhong/"+month),
-      fbGet(DB_PATH+"/khTuan/"+month),
-      fbGet(DB_PATH+"/thTuan/"+month),
-    ]);
-    return {
-      khPhong: d1?{[month]:d1}:{}, khTuan: d2?{[month]:d2}:{},
-      thTuan: d3?{[month]:d3}:{}, online:true,
-    };
-  } catch(e) { return {khPhong:{},khTuan:{},thTuan:{},online:false}; }
-}
-
-async function saveKhPhongData(month, data, cur) {
-  const next = {...cur, [month]:{...data}};
-  fbSet(DB_PATH+"/khPhong/"+month, data);
-  return next;
-}
-
-async function saveKhTuanData(month, tuan, ma_nv, data, cur) {
-  const next = JSON.parse(JSON.stringify(cur));
-  if(!next[month])next[month]={};
-  if(!next[month][tuan])next[month][tuan]={};
-  next[month][tuan][ma_nv] = {...data};
-  fbSet(DB_PATH+"/khTuan/"+month+"/"+tuan+"/"+ma_nv, data);
-  return next;
-}
-
-async function saveThTuanData(month, tuan, ma_nv, data, cur) {
-  const next = JSON.parse(JSON.stringify(cur));
-  if(!next[month])next[month]={};
-  if(!next[month][tuan])next[month][tuan]={};
-  const record = {...data, updatedAt:Date.now()};
-  next[month][tuan][ma_nv] = record;
-  fbSet(DB_PATH+"/thTuan/"+month+"/"+tuan+"/"+ma_nv, record);
-  return next;
-}
-
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
-const n = v => (v===null||v===undefined||v===""||isNaN(+v)) ? null : +v;
-const fmt = (v,u="") => { const x=n(v); return x===null?"—":x.toLocaleString("vi-VN")+(u?" "+u:""); };
-const pct = (th,kh) => (kh&&kh>0&&th!==null) ? th/kh*100 : null;
-const p2s = p => p===null?"—":Math.round(p)+"%";
-
-const C = {
-  good:"#10b981", warn:"#f59e0b", low:"#f97316", bad:"#ef4444", mute:"#475569",
-  bg0:"#050d1a", bg1:"#0a1628", bg2:"#111f35", bg3:"#1a2e48",
-  border:"#1e3a5f", gold:"#f59e0b", text:"#e2e8f0", dim:"#94a3b8",
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let STATE = {
+  tab: "nhap",           // nhap | kh | dash | alert
+  khTab: "phong",        // phong | tuan
+  selTuan: CUR_TUAN,
+  selNV: null,
+  detailNV: null,
+  khPhong: {},           // {kpi: value}
+  khTuan: {},            // {tuan: {ma: {kpi: value}}}
+  thTuan: {},            // {tuan: {ma: {kpi: value, updatedAt}}}
+  scope: "thang",        // thang | T1..T4
+  online: false,
 };
-const pc = p => p===null?C.mute:p>=100?C.good:p>=70?C.warn:p>=40?C.low:C.bad;
-const st = p => p===null?{l:"Chưa có KH",c:C.mute}:p>=100?{l:"✅ Đạt",c:C.good}:p>=70?{l:"⚡ Khá",c:C.warn}:p>=40?{l:"⚠️ Trung bình",c:C.low}:{l:"🚨 Cần đẩy",c:C.bad};
 
-const todayStr = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
-const acChar = name => name.split(" ").pop()[0]||"?";
-const acColor = ma => { const cols=["#f59e0b","#3b82f6","#8b5cf6","#10b981","#ec4899","#06b6d4","#f97316","#a855f7"]; let h=0; for(let i=0;i<ma.length;i++)h=(h*31+ma.charCodeAt(i))%cols.length; return cols[h]; };
-const fmtTs = ts => { if(!ts)return"—"; const d=new Date(ts); return `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; };
+function getKhPhong() { return STATE.khPhong[MONTH] || DEFAULT_KH; }
+function getKhTuan(tuan, ma) { return (STATE.khTuan[MONTH]||{})[tuan]?.[ma] || {}; }
+function getThTuan(tuan, ma) { return (STATE.thTuan[MONTH]||{})[tuan]?.[ma] || {}; }
 
-// Deep clone
-const clone = v => JSON.parse(JSON.stringify(v));
-
-// ═══════════════════════════════════════════
-// UI ATOMS
-// ═══════════════════════════════════════════
-function Bar({v=0,max=0,color,h=6}){
-  const w=max>0?Math.min(100,Math.max(0,v/max*100)):0;
-  return <div style={{background:"#08111e",borderRadius:h,height:h,overflow:"hidden"}}>
-    <div style={{width:`${w}%`,height:"100%",background:color,borderRadius:h,transition:"width .5s"}}/>
-  </div>;
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function fmt(v, unit="") {
+  if(v===null||v===undefined) return "—";
+  const n = Number(v);
+  if(isNaN(n)) return "—";
+  return n.toLocaleString("vi-VN")+(unit?" "+unit:"");
+}
+function pct(th, kh) { return (kh&&kh>0&&th!==null&&th!==undefined) ? th/kh*100 : null; }
+function p2s(p) { return p===null?"—":Math.round(p)+"%"; }
+function pc(p) {
+  if(p===null) return "#475569";
+  if(p>=100) return "#10b981";
+  if(p>=70)  return "#f59e0b";
+  if(p>=40)  return "#f97316";
+  return "#ef4444";
+}
+function acColor(ma) {
+  const cols=["#f59e0b","#3b82f6","#8b5cf6","#10b981","#ec4899","#06b6d4","#f97316","#a855f7"];
+  let h=0; for(let i=0;i<ma.length;i++) h=(h*31+ma.charCodeAt(i))%cols.length;
+  return cols[h];
+}
+function ring(p, size=44, sw=6) {
+  const r=(size-sw*2)/2, c=2*Math.PI*r, val=Math.min(Math.max(p||0,0),100);
+  const color=pc(p);
+  return `<svg width="${size}" height="${size}" style="transform:rotate(-90deg)">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#08111e" stroke-width="${sw}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+      stroke-dasharray="${val/100*c} ${c}" stroke-linecap="round"/>
+  </svg>`;
+}
+function bar(v, max, color, h=5) {
+  const w = max>0?Math.min(100,Math.max(0,(v||0)/max*100)):0;
+  return `<div class="bar-wrap"><div class="bar-fill" style="width:${w}%;background:${color};height:${h}px"></div></div>`;
+}
+function avatar(name, ma, size=38) {
+  const c=acColor(ma);
+  return `<div class="avatar" style="width:${size}px;height:${size}px;background:${c}1a;border:1.5px solid ${c}55;color:${c};font-size:${size*.38}px">
+    ${name.split(" ").pop()[0]||"?"}
+  </div>`;
+}
+function chip(label, color) {
+  return `<span class="chip" style="background:${color}22;color:${color}">${label}</span>`;
+}
+function fmtTs(ts) {
+  if(!ts) return "";
+  const d=new Date(ts);
+  return `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
 
-function Ring({p=0,size=50,sw=6}){
-  const r=(size-sw*2)/2, c2=2*Math.PI*r, val=Math.min(Math.max(p||0,0),100);
-  return <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
-    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#08111e" strokeWidth={sw}/>
-    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={pc(p)} strokeWidth={sw}
-      strokeDasharray={`${val/100*c2} ${c2}`} strokeLinecap="round" style={{transition:"stroke-dasharray .6s"}}/>
-  </svg>;
+// ══════════════════════════════════════════
+// LOAD DATA
+// ══════════════════════════════════════════
+async function loadData() {
+  const [kp, kt, th] = await Promise.all([
+    fbGet("khPhong/"+MONTH),
+    fbGet("khTuan/"+MONTH),
+    fbGet("thTuan/"+MONTH),
+  ]);
+  if(kp) STATE.khPhong[MONTH] = kp;
+  if(kt) STATE.khTuan[MONTH]  = kt;
+  if(th) STATE.thTuan[MONTH]  = th;
+  STATE.online = !!(kp||kt||th);
 }
 
-function Av({name,ma,size=38}){
-  const ac=acColor(ma);
-  return <div style={{width:size,height:size,borderRadius:"50%",background:ac+"1a",border:`1.5px solid ${ac}55`,
-    display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*.38,fontWeight:800,color:ac,flexShrink:0}}>
-    {acChar(name)}
-  </div>;
+// ══════════════════════════════════════════
+// RENDER ENGINE
+// ══════════════════════════════════════════
+function render() {
+  const app = document.getElementById("app");
+  if(!app) return;
+  app.innerHTML = renderHeader() + renderContent() + renderNav();
+  bindEvents();
 }
 
-function Tag({label,color,bg,sm}){
-  return <span style={{background:bg||color+"22",color,borderRadius:6,padding:sm?"2px 7px":"4px 11px",
-    fontSize:sm?10:12,fontWeight:700,whiteSpace:"nowrap"}}>{label}</span>;
-}
-
-function Card({ch,style={}}){
-  return <div style={{background:C.bg2,borderRadius:14,padding:16,border:`1px solid ${C.border}22`,...style}}>{ch}</div>;
-}
-
-function Sec({title,sub}){
-  return <div style={{marginBottom:10}}>
-    <div style={{fontSize:11,color:C.dim,textTransform:"uppercase",letterSpacing:".1em",fontWeight:700}}>{title}</div>
-    {sub&&<div style={{fontSize:12,color:C.mute,marginTop:2}}>{sub}</div>}
-  </div>;
-}
-
-function NInput({value,onChange,placeholder,style={}}){
-  return <input type="number" inputMode="decimal" value={value??""} onChange={e=>onChange(e.target.value)}
-    placeholder={placeholder} style={{width:"100%",background:C.bg1,border:`1px solid ${C.border}`,borderRadius:10,
-      padding:"12px 13px",color:C.text,fontSize:16,outline:"none",boxSizing:"border-box",fontWeight:600,...style}}/>;
-}
-
-function SaveBtn({onSave,saving,saved,label}){
-  return <button onClick={onSave} disabled={saving||saved}
-    style={{width:"100%",padding:16,borderRadius:14,border:"none",cursor:"pointer",marginTop:8,
-      background:saved?"#10b981":`linear-gradient(135deg,${C.gold},#d97706)`,
-      color:"#040a12",fontWeight:800,fontSize:16,transition:"all .3s"}}>
-    {saved?"✅ ĐÃ LƯU!":saving?"⏳ Đang lưu...":label}
-  </button>;
-}
-
-// ═══════════════════════════════════════════
-// VIEW: KH PHÒNG (KH tháng toàn phòng)
-// ═══════════════════════════════════════════
-function KhPhongView({khPhong, onSave, month}){
-  const cur = khPhong[month]||DEFAULT_KH_PHONG;
-  const [vals,setVals] = useState({...cur});
-  const [saving,setSaving] = useState(false);
-  const [saved,setSaved] = useState(false);
-
-  const save = async()=>{
-    setSaving(true);
-    await onSave(vals);
-    setSaving(false); setSaved(true); setTimeout(()=>setSaved(false),1500);
-  };
-
-  return <div style={{padding:16}}>
-    <Sec title="🏦 KH tháng — Toàn phòng" sub={`Chỉ tiêu ban lãnh đạo giao · ${month}`}/>
-    <div style={{background:C.bg1,borderRadius:12,padding:12,marginBottom:16,border:`1px solid ${C.warn}33`}}>
-      <div style={{fontSize:12,color:C.warn,fontWeight:700,marginBottom:4}}>⚡ Nguyên tắc</div>
-      <div style={{fontSize:12,color:C.dim,lineHeight:1.6}}>
-        Đây là tổng KH tháng ban lãnh đạo giao. Khi phân bổ KH tuần cho NV, hệ thống tự kiểm soát tổng không vượt mức này.
-      </div>
-    </div>
-    {KPI_CFG.map(k=><div key={k.key} style={{background:C.bg2,borderRadius:14,padding:14,marginBottom:10,
-      border:`1px solid ${k.color}33`}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-        <span style={{fontSize:22}}>{k.icon}</span>
-        <div style={{flex:1}}>
-          <div style={{fontWeight:700,fontSize:14,color:k.star?C.gold:C.text}}>{k.star?"⭐ ":""}{k.label}</div>
-          <div style={{fontSize:11,color:C.mute}}>Đơn vị: {k.unit}</div>
+function renderHeader() {
+  const onlineBadge = STATE.online
+    ? `<span class="badge badge-green">☁️ Online</span>`
+    : `<span class="badge badge-yellow">📱 Offline</span>`;
+  const khTabs = STATE.tab==="kh" ? `
+    <div style="display:flex;gap:5px">
+      <button onclick="setKhTab('phong')" class="scope-btn ${STATE.khTab==='phong'?'active':''}" style="padding:5px 10px;font-size:11px">📋 Phòng</button>
+      <button onclick="setKhTab('tuan')" class="scope-btn ${STATE.khTab==='tuan'?'active':''}" style="padding:5px 10px;font-size:11px">👤 NV</button>
+    </div>` : "";
+  return `<div class="header">
+    <div class="header-row">
+      <div>
+        <div class="header-title">🏦 KPI <span>Banking</span></div>
+        <div class="header-sub">
+          ${new Date().toLocaleDateString("vi-VN",{weekday:"short",day:"numeric",month:"numeric"})}
+          · <b style="color:var(--gold)">${MONTH}</b>
+          · <b style="color:#3b82f6">${CUR_TUAN}</b>
+          · ${onlineBadge}
         </div>
-        {(vals[k.key]||0)>0&&<Tag label={fmt(vals[k.key],k.unit)} color={k.color}/>}
       </div>
-      <NInput value={vals[k.key]} onChange={v=>setVals(p=>({...p,[k.key]:n(v)||0}))}
-        placeholder={`KH tháng ${k.label}`}/>
-    </div>)}
-    <SaveBtn onSave={save} saving={saving} saved={saved} label="💾 LƯU KH PHÒNG"/>
-  </div>;
+      ${khTabs}
+    </div>
+  </div>`;
 }
 
-// ═══════════════════════════════════════════
-// VIEW: GIAO KH TUẦN (phân bổ cho NV)
-// ═══════════════════════════════════════════
-function KhTuanView({khPhong,khTuan,onSaveKh,month,thTuan}){
-  const [selT,setSelT] = useState("T1");
-  const [selNV,setSelNV] = useState(null);
-  const [vals,setVals] = useState({});
-  const [saved,setSaved] = useState(false);
-  const [view,setView] = useState("list"); // list | form | overview
+function renderNav() {
+  const alertCount = NVS.filter(nv=>{
+    const kh = getKhTuan(CUR_TUAN, nv.ma);
+    const th = getThTuan(CUR_TUAN, nv.ma);
+    return KPIS.some(k=>(kh[k.key]||0)>0) && !KPIS.some(k=>(th[k.key]??null)!==null);
+  }).length;
+  const tabs = [
+    {id:"nhap", icon:"✏️", label:"Nhập TH"},
+    {id:"kh",   icon:"🎯", label:"Giao KH"},
+    {id:"dash", icon:"📊", label:"Dashboard"},
+    {id:"alert",icon:"🚨", label:"Cảnh báo"},
+  ];
+  return `<div class="nav">${tabs.map(t=>`
+    <button class="nav-btn ${STATE.tab===t.id?'active':''}" onclick="setTab('${t.id}')">
+      <span class="nav-icon">${t.icon}</span>
+      ${t.id==="alert"&&alertCount>0
+        ? `<span style="position:relative">${t.label}<span style="position:absolute;top:-8px;right:-10px;background:#ef4444;color:#fff;border-radius:50%;width:14px;height:14px;font-size:9px;display:inline-flex;align-items:center;justify-content:center">${alertCount}</span></span>`
+        : t.label}
+    </button>`).join("")}</div>`;
+}
 
-  const khP = khPhong[month]||DEFAULT_KH_PHONG;
+function renderContent() {
+  if(STATE.tab==="nhap")  return renderNhap();
+  if(STATE.tab==="kh")    return STATE.khTab==="phong" ? renderKhPhong() : renderKhTuan();
+  if(STATE.tab==="dash")  return renderDash();
+  if(STATE.tab==="alert") return renderAlert();
+  return "";
+}
 
-  // Tổng KH đã giao trong tháng per KPI (tất cả tuần)
-  const sumGiaoThang = (ma,kk) => TUAN_LIST.reduce((s,t)=>s+(khTuan?.[month]?.[t]?.[ma]?.[kk]||0),0);
-  const sumGiaoPhong = kk => NV_LIST.reduce((s,nv)=>s+sumGiaoThang(nv.ma,kk),0);
-
-  const tuanData = khTuan?.[month]?.[selT]||{};
-
-  const openForm = nv => {
-    setVals(Object.fromEntries(KPI_CFG.map(k=>[k.key,tuanData[nv.ma]?.[k.key]??null])));
-    setSelNV(nv); setView("form");
-  };
-
-  const doSave = async()=>{
-    // Validate không vượt KH phòng
-    const errs=[];
-    KPI_CFG.forEach(k=>{
-      const newV=n(vals[k.key])||0, oldV=tuanData[selNV.ma]?.[k.key]||0;
-      const giaoPhongExcl=sumGiaoPhong(k.key)-sumGiaoThang(selNV.ma,k.key);
-      const nvSumExcl=sumGiaoThang(selNV.ma,k.key)-oldV;
-      if(giaoPhongExcl+nvSumExcl+newV>(khP[k.key]||0)) errs.push(k.label);
-    });
-    if(errs.length){ alert(`⚠️ Vượt KH tháng phòng:\n${errs.join(", ")}`); return; }
-    const data = Object.fromEntries(KPI_CFG.map(k=>[k.key,n(vals[k.key])||0]));
-    await onSaveKh(selT, selNV.ma, data);
-    setSaved(true); setTimeout(()=>{setSaved(false);setView("list");setSelNV(null);},1200);
-  };
-
-  // ── OVERVIEW ──
-  if(view==="overview") return <div style={{padding:16}}>
-    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
-      <button onClick={()=>setView("list")} style={{background:"none",border:"none",color:C.dim,cursor:"pointer",fontSize:14,padding:0}}>←</button>
-      <div style={{fontWeight:700,color:C.gold,fontSize:15}}>{selT} — Tổng quan KH vs TH</div>
+// ── NHẬP TH ──────────────────────────────
+function renderNhap() {
+  if(STATE.selNV) return renderNhapForm();
+  return `<div style="padding:16px">
+    <div class="sec-title">✏️ Nhập / Cập nhật TH · ${MONTH}</div>
+    <div class="tabs">${["T1","T2","T3","T4"].map(t=>`
+      <button class="tab-btn ${STATE.selTuan===t?'active':''}" onclick="setTuan('${t}')">${t}</button>
+    `).join("")}</div>
+    <div>
+    ${NVS.map(nv=>{
+      const th = getThTuan(STATE.selTuan, nv.ma);
+      const kh = getKhTuan(STATE.selTuan, nv.ma);
+      const hasKh = KPIS.some(k=>(kh[k.key]||0)>0);
+      const hasTh = KPIS.some(k=>(th[k.key]??null)!==null);
+      const ts = th.updatedAt;
+      let sub = "";
+      if(hasTh) {
+        const parts = KPIS.filter(k=>k.star).map(k=>{
+          const v=th[k.key]; const kv=kh[k.key]||0;
+          const p=kv>0?pct(v,kv):null;
+          return `${k.icon} ${fmt(v,k.unit)}${p!==null?" ("+Math.round(p)+"%)":""}`;
+        });
+        sub = `<div class="chips">${parts.map(s=>`<span style="font-size:10px;color:var(--dim)">${s}</span>`).join("")}</div>`;
+        if(ts) sub += `<div style="font-size:10px;color:var(--mute);margin-top:3px">🕐 ${fmtTs(ts)}</div>`;
+      } else {
+        sub = `<div class="nv-sub">${hasKh?"Có KH — chưa nhập TH":"Chưa có KH tuần này"}</div>`;
+      }
+      return `<button class="nv-item" onclick="selNV('${nv.ma}')">
+        ${avatar(nv.ten, nv.ma)}
+        <div style="flex:1">
+          <div class="nv-name">${nv.ten}</div>
+          ${sub}
+        </div>
+        ${hasTh ? chip("Đã nhập","#10b981") : hasKh ? chip("Cần nhập","#f59e0b") : chip("Chưa KH","#475569")}
+      </button>`;
+    }).join("")}
     </div>
-    {KPI_CFG.map(k=>{
-      const giaoPhong=sumGiaoPhong(k.key), khPV=khP[k.key]||0;
-      const p=pct(giaoPhong,khPV);
-      return <div key={k.key} style={{background:C.bg2,borderRadius:14,padding:14,marginBottom:10,border:`1px solid ${k.color}33`}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-          <span style={{fontSize:19}}>{k.icon}</span>
-          <div style={{fontWeight:700,fontSize:13,color:k.star?C.gold:C.text,flex:1}}>{k.label}</div>
-          <div style={{fontSize:12,textAlign:"right"}}>
-            <span style={{color:pc(p),fontWeight:800}}>{fmt(giaoPhong,k.unit)}</span>
-            <span style={{color:C.mute}}> / {fmt(khPV,k.unit)}</span>
+  </div>`;
+}
+
+function renderNhapForm() {
+  const nv = NVS.find(n=>n.ma===STATE.selNV);
+  if(!nv) return "";
+  const kh = getKhTuan(STATE.selTuan, nv.ma);
+  const th = getThTuan(STATE.selTuan, nv.ma);
+  const hasKh = KPIS.some(k=>(kh[k.key]||0)>0);
+  const fields = KPIS.map(k=>{
+    const khv = kh[k.key]||0;
+    const thv = th[k.key]??null;
+    const p = khv>0&&thv!==null ? pct(thv,khv) : null;
+    return `<div class="form-field" style="border-color:${k.color}33">
+      <div class="field-header">
+        <div class="field-label">
+          <span style="font-size:20px">${k.icon}</span>
+          <div>
+            <div class="field-name" style="color:${k.star?"#f59e0b":"var(--text)"}">${k.star?"⭐ ":""}${k.label}</div>
+            <div class="field-kh">KH ${STATE.selTuan}: ${khv?fmt(khv,k.unit):"Chưa giao"}</div>
           </div>
         </div>
-        <Bar v={giaoPhong} max={khPV} color={k.color}/>
-        <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:5}}>
-          {NV_LIST.map(nv=>{
-            const kh=tuanData[nv.ma]?.[k.key]||0;
-            const th=thTuan?.[month]?.[selT]?.[nv.ma]?.[k.key]??null;
-            if(!kh&&th===null) return null;
-            const pp=pct(th??0,kh);
-            return <div key={nv.ma} style={{display:"flex",alignItems:"center",gap:8,background:C.bg1,borderRadius:8,padding:"7px 10px"}}>
-              <Av name={nv.ten} ma={nv.ma} size={26}/>
-              <div style={{flex:1,overflow:"hidden"}}>
-                <div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                  {nv.ten.split(" ").slice(-2).join(" ")}
-                </div>
-                <div style={{fontSize:10,color:C.mute}}>KH: {fmt(kh,k.unit)}</div>
-              </div>
-              <div style={{textAlign:"right",flexShrink:0}}>
-                <div style={{fontWeight:700,fontSize:12,color:kh?pc(pp):C.mute}}>{kh?fmt(th??0,k.unit):"—"}</div>
-                {kh>0&&<Tag label={p2s(pp)} color={pc(pp)} sm/>}
-              </div>
-            </div>;
-          })}
-        </div>
-      </div>;
-    })}
-  </div>;
-
-  // ── FORM ──
-  if(view==="form"&&selNV) return <div style={{padding:16}}>
-    <button onClick={()=>setView("list")} style={{background:"none",border:"none",color:C.dim,cursor:"pointer",fontSize:13,padding:0,marginBottom:14}}>
-      ← Danh sách
-    </button>
-    <div style={{background:`linear-gradient(135deg,#1a3050,${C.bg0})`,borderRadius:14,padding:14,marginBottom:16,border:`1px solid ${C.border}44`}}>
-      <div style={{display:"flex",alignItems:"center",gap:12}}>
-        <Av name={selNV.ten} ma={selNV.ma} size={46}/>
+        <span style="font-size:11px;font-weight:700;color:${pc(p)}">${p2s(p)}</span>
+      </div>
+      <input type="number" id="f_${k.key}" value="${thv!==null?thv:""}" placeholder="${k.label} (${k.unit})"
+        style="border-color:${k.color}44" oninput="updateFieldBar('${k.key}',${khv},'${k.color}')">
+      <div id="bar_${k.key}" style="margin-top:6px">${p!==null&&khv>0?bar(thv,khv,k.color):""}</div>
+    </div>`;
+  }).join("");
+  return `<div style="padding:16px">
+    <button class="btn-back" onclick="backNhap()">← Chọn lại NV</button>
+    <div class="card card-highlight" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px">
+        ${avatar(nv.ten, nv.ma, 46)}
         <div>
-          <div style={{fontWeight:700,fontSize:15}}>{selNV.ten}</div>
-          <div style={{fontSize:11,color:C.dim}}>Giao KH {selT} · {month}</div>
-        </div>
-      </div>
-    </div>
-    {KPI_CFG.map(k=>{
-      const newV=n(vals[k.key])||0, oldV=tuanData[selNV.ma]?.[k.key]||0;
-      const giaoExcl=sumGiaoPhong(k.key)-sumGiaoThang(selNV.ma,k.key);
-      const nvExcl=sumGiaoThang(selNV.ma,k.key)-oldV;
-      const conPhong=(khP[k.key]||0)-giaoExcl-nvExcl-newV;
-      const warn=conPhong<0;
-      const th=thTuan?.[month]?.[selT]?.[selNV.ma]?.[k.key]??null;
-      const pp=pct(th??0,newV);
-      return <div key={k.key} style={{background:C.bg2,borderRadius:14,padding:14,marginBottom:10,
-        border:`1px solid ${warn?C.bad:k.color}33`}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-          <span style={{fontSize:20}}>{k.icon}</span>
-          <div style={{flex:1}}>
-            <div style={{fontWeight:600,fontSize:14,color:k.star?C.gold:C.text}}>{k.star?"⭐ ":""}{k.label}</div>
-            <div style={{fontSize:10,color:warn?C.bad:C.mute}}>
-              Còn lại phòng: <b style={{color:warn?C.bad:C.good}}>{fmt(conPhong,k.unit)}</b>
-              {warn&&" — Vượt!"}
-            </div>
-          </div>
-          {newV>0&&th!==null&&<Tag label={`TH: ${fmt(th,k.unit)}`} color={pc(pp)} sm/>}
-        </div>
-        <NInput value={vals[k.key]} onChange={v=>setVals(p=>({...p,[k.key]:v}))}
-          placeholder={`KH ${selT} — ${k.label} (${k.unit})`}
-          style={{borderColor:warn?"#ef444466":undefined}}/>
-        {newV>0&&<div style={{marginTop:8}}>
-          <Bar v={newV} max={khP[k.key]} color={k.color}/>
-          <div style={{fontSize:10,color:C.mute,marginTop:3,textAlign:"right"}}>
-            {p2s(pct(newV,khP[k.key]))} KH tháng phòng
-          </div>
-        </div>}
-      </div>;
-    })}
-    <SaveBtn onSave={doSave} saving={false} saved={saved} label="💾 GIAO KẾ HOẠCH"/>
-  </div>;
-
-  // ── LIST ──
-  return <div style={{padding:16}}>
-    <Sec title={`📋 Kế hoạch tuần · ${month}`} sub="Phân bổ chỉ tiêu tuần cho từng nhân viên"/>
-
-    {/* Tuần selector */}
-    <div style={{display:"flex",gap:6,marginBottom:14}}>
-      {TUAN_LIST.map(t=><button key={t} onClick={()=>setSelT(t)}
-        style={{flex:1,padding:"10px 0",borderRadius:10,border:"1px solid",
-          borderColor:selT===t?"#3b82f6":C.border,background:selT===t?"#3b82f622":C.bg2,
-          color:selT===t?"#3b82f6":C.dim,fontWeight:700,fontSize:14,cursor:"pointer"}}>{t}</button>)}
-    </div>
-
-    {/* KH còn lại phòng */}
-    <div style={{overflowX:"auto",marginBottom:14}}>
-      <div style={{display:"flex",gap:6,width:"max-content",paddingBottom:2}}>
-        {KPI_CFG.map(k=>{
-          const con=(khP[k.key]||0)-sumGiaoPhong(k.key), warn=con<0;
-          return <div key={k.key} style={{background:C.bg1,borderRadius:10,padding:"8px 12px",
-            border:`1px solid ${warn?C.bad:k.color}22`,textAlign:"center",minWidth:80}}>
-            <div style={{fontSize:10,color:k.color,marginBottom:2}}>{k.icon} {k.short}</div>
-            <div style={{fontSize:13,fontWeight:800,color:warn?C.bad:C.text}}>{fmt(con,k.unit)}</div>
-            <div style={{fontSize:9,color:C.mute}}>còn phân bổ</div>
-          </div>;
-        })}
-      </div>
-    </div>
-
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-      <div style={{fontSize:12,color:C.dim}}>Bấm vào NV để giao KH {selT}</div>
-      <button onClick={()=>setView("overview")}
-        style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:8,
-          padding:"6px 12px",color:C.gold,fontSize:12,cursor:"pointer",fontWeight:600}}>📊 Tổng quan</button>
-    </div>
-
-    <div style={{display:"flex",flexDirection:"column",gap:8}}>
-      {NV_LIST.map(nv=>{
-        const nvKh=tuanData[nv.ma]||{};
-        const hasKh=KPI_CFG.some(k=>(nvKh[k.key]||0)>0);
-        const starTH=KPI_CFG.filter(k=>k.star).map(k=>({k,th:thTuan?.[month]?.[selT]?.[nv.ma]?.[k.key]??null,kh:nvKh[k.key]||0}));
-        return <button key={nv.ma} onClick={()=>openForm(nv)}
-          style={{background:C.bg2,border:`1px solid ${hasKh?C.gold+"44":C.border}`,
-            borderRadius:14,padding:14,textAlign:"left",cursor:"pointer",width:"100%"}}>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <Av name={nv.ten} ma={nv.ma}/>
-            <div style={{flex:1}}>
-              <div style={{fontWeight:600,fontSize:13}}>{nv.ten}</div>
-              {hasKh
-                ? <div style={{display:"flex",gap:4,marginTop:5,flexWrap:"wrap"}}>
-                    {starTH.map(({k,th,kh})=>{
-                      const pp=kh>0?pct(th??0,kh):null;
-                      return <span key={k.key} style={{fontSize:10,background:C.bg1,borderRadius:5,
-                        padding:"2px 6px",color:pp!==null?pc(pp):C.dim}}>
-                        {k.icon} KH:{fmt(kh,k.unit)} TH:{kh?fmt(th??0,k.unit):"—"}
-                      </span>;
-                    })}
-                  </div>
-                : <div style={{fontSize:11,color:C.mute,marginTop:3}}>Chưa giao KH {selT}</div>}
-            </div>
-            <span style={{color:hasKh?C.gold:C.mute,fontSize:20}}>›</span>
-          </div>
-        </button>;
-      })}
-    </div>
-  </div>;
-}
-
-// ═══════════════════════════════════════════
-// VIEW: NHẬP LIỆU (nhập TH theo tuần, linh hoạt)
-// ═══════════════════════════════════════════
-function NhapView({thTuan, onSaveTh, khTuan, month}){
-  const [selNV,setSelNV] = useState(null);
-  const [selT,setSelT] = useState("T1");
-  const [search,setSearch] = useState("");
-
-  const filtered=NV_LIST.filter(nv=>nv.ten.toLowerCase().includes(search.toLowerCase())||nv.ma.includes(search));
-
-  if(selNV) return <NhapForm nv={selNV} selT={selT} month={month}
-    khTuan={khTuan} thTuan={thTuan} onSaveTh={onSaveTh} onBack={()=>setSelNV(null)}/>;
-
-  return <div style={{padding:16}}>
-    <Sec title="✏️ Nhập / Cập nhật TH" sub="Chọn tuần + NV — nhập lũy kế TH của tuần đó"/>
-
-    {/* Hướng dẫn nghiệp vụ */}
-    <div style={{background:C.bg1,borderRadius:12,padding:12,marginBottom:14,border:`1px solid #3b82f633`}}>
-      <div style={{fontSize:12,color:"#3b82f6",fontWeight:700,marginBottom:4}}>📌 Cách nhập</div>
-      <div style={{fontSize:12,color:C.dim,lineHeight:1.6}}>
-        Nhập <b style={{color:C.text}}>tổng lũy kế TH</b> của tuần — có thể cập nhật bất kỳ lúc nào. Ví dụ cuối tuần mới nhập, hoặc điều chỉnh khi có chỉ đạo mới.
-      </div>
-    </div>
-
-    {/* Chọn tuần */}
-    <div style={{display:"flex",gap:6,marginBottom:14}}>
-      {TUAN_LIST.map(t=>{
-        const hasData=NV_LIST.some(nv=>KPI_CFG.some(k=>(thTuan?.[month]?.[t]?.[nv.ma]?.[k.key]??null)!==null));
-        return <button key={t} onClick={()=>setSelT(t)}
-          style={{flex:1,padding:"10px 0",borderRadius:10,border:"1px solid",
-            borderColor:selT===t?"#3b82f6":C.border,background:selT===t?"#3b82f622":C.bg2,
-            color:selT===t?"#3b82f6":C.dim,fontWeight:700,fontSize:14,cursor:"pointer",position:"relative"}}>
-          {t}
-          {hasData&&<div style={{position:"absolute",top:4,right:4,width:6,height:6,borderRadius:"50%",background:C.good}}/>}
-        </button>;
-      })}
-    </div>
-
-    <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Tìm nhân viên..."
-      style={{width:"100%",background:C.bg2,border:`1px solid ${C.border}`,borderRadius:10,
-        padding:"10px 14px",color:C.text,fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:12}}/>
-
-    <div style={{display:"flex",flexDirection:"column",gap:8}}>
-      {filtered.map(nv=>{
-        const nvTh=thTuan?.[month]?.[selT]?.[nv.ma]||{};
-        const nvKh=khTuan?.[month]?.[selT]?.[nv.ma]||{};
-        const hasKh=KPI_CFG.some(k=>(nvKh[k.key]||0)>0);
-        const hasTh=KPI_CFG.some(k=>(nvTh[k.key]??null)!==null);
-        const ts=nvTh.updatedAt;
-        const starKpis=KPI_CFG.filter(k=>k.star);
-        const avgPct=hasKh?starKpis.filter(k=>nvKh[k.key]>0).map(k=>pct(nvTh[k.key]??0,nvKh[k.key])):[];
-        const avg=avgPct.length?avgPct.reduce((a,b)=>a+(b||0),0)/avgPct.length:null;
-        return <button key={nv.ma} onClick={()=>setSelNV(nv)}
-          style={{background:C.bg2,border:`1px solid ${hasTh?acColor(nv.ma)+"44":hasKh?"#f59e0b33":C.border}`,
-            borderRadius:14,padding:14,textAlign:"left",cursor:"pointer",width:"100%"}}>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{position:"relative"}}>
-              <Av name={nv.ten} ma={nv.ma}/>
-              {avg!==null&&<div style={{position:"absolute",bottom:-3,right:-3,background:pc(avg),
-                borderRadius:"50%",width:16,height:16,border:`2px solid ${C.bg2}`,
-                display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,fontWeight:800,color:"#fff"}}>
-                {Math.round(avg)}
-              </div>}
-            </div>
-            <div style={{flex:1}}>
-              <div style={{fontWeight:600,fontSize:13}}>{nv.ten}</div>
-              {hasTh
-                ? <div>
-                    <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
-                      {starKpis.map(k=>{
-                        const thV=nvTh[k.key]??null, khV=nvKh[k.key]||0;
-                        const pp=khV>0?pct(thV??0,khV):null;
-                        return <span key={k.key} style={{fontSize:10,background:C.bg1,borderRadius:5,
-                          padding:"2px 6px",color:pp!==null?pc(pp):C.dim}}>
-                          {k.icon} {fmt(thV,k.unit)} {pp!==null?`(${Math.round(pp)}%)`:""} 
-                        </span>;
-                      })}
-                    </div>
-                    {ts&&<div style={{fontSize:10,color:C.mute,marginTop:3}}>🕐 Cập nhật: {fmtTs(ts)}</div>}
-                  </div>
-                : <div style={{fontSize:11,color:hasKh?C.warn:C.mute,marginTop:3}}>
-                    {hasKh?"Đã có KH — chưa nhập TH":"Chưa có KH tuần này"}
-                  </div>}
-            </div>
-            <div style={{flexShrink:0}}>
-              {avg!==null
-                ? <Tag label={p2s(avg)} color={pc(avg)} sm/>
-                : <Tag label={hasTh?"Đã nhập":hasKh?"Cần nhập":"—"} color={hasTh?C.good:hasKh?C.warn:C.mute} sm/>}
-            </div>
-          </div>
-        </button>;
-      })}
-    </div>
-  </div>;
-}
-
-function NhapForm({nv,selT,month,khTuan,thTuan,onSaveTh,onBack}){
-  const kh=khTuan?.[month]?.[selT]?.[nv.ma]||{};
-  const cur=thTuan?.[month]?.[selT]?.[nv.ma]||{};
-  const hasKh=KPI_CFG.some(k=>(kh[k.key]||0)>0);
-  const [vals,setVals]=useState(()=>Object.fromEntries(KPI_CFG.map(k=>[k.key,cur[k.key]??null])));
-  const [saving,setSaving]=useState(false);
-  const [saved,setSaved]=useState(false);
-
-  const doSave=async()=>{
-    setSaving(true);
-    const data = Object.fromEntries(KPI_CFG.map(k=>[k.key,n(vals[k.key])]));
-    await onSaveTh(selT, nv.ma, data);
-    setSaving(false); setSaved(true);
-    setTimeout(()=>{setSaved(false);onBack();},1300);
-  };
-
-  return <div style={{padding:16}}>
-    <button onClick={onBack} style={{background:"none",border:"none",color:C.dim,cursor:"pointer",fontSize:13,padding:0,marginBottom:14}}>
-      ← Chọn lại
-    </button>
-
-    <div style={{background:`linear-gradient(135deg,#1a3050,${C.bg0})`,borderRadius:14,padding:14,marginBottom:16,border:`1px solid ${C.border}44`}}>
-      <div style={{display:"flex",alignItems:"center",gap:12}}>
-        <Av name={nv.ten} ma={nv.ma} size={46}/>
-        <div style={{flex:1}}>
-          <div style={{fontWeight:700,fontSize:15}}>{nv.ten}</div>
-          <div style={{display:"flex",gap:6,alignItems:"center",marginTop:4,flexWrap:"wrap"}}>
-            <Tag label={`📅 ${selT}`} color="#3b82f6" sm/>
-            <Tag label={month} color={C.dim} sm/>
-            {!hasKh&&<Tag label="⚠️ Chưa có KH" color={C.bad} sm/>}
+          <div style="font-weight:700;font-size:15px">${nv.ten}</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:3px">
+            📅 ${STATE.selTuan} · ${MONTH}
+            ${!hasKh?'<span style="color:#ef4444;margin-left:6px">⚠️ Chưa có KH</span>':""}
           </div>
         </div>
       </div>
     </div>
-
-    {!hasKh&&<div style={{background:C.bad+"11",border:`1px solid ${C.bad}44`,borderRadius:12,padding:12,marginBottom:14}}>
-      <div style={{fontSize:12,color:C.bad,lineHeight:1.5}}>
-        NV này chưa được giao KH tuần {selT}. Anh vẫn có thể nhập TH nhưng sẽ không tính % so KH.
-      </div>
-    </div>}
-
-    <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:8}}>
-      {KPI_CFG.map(k=>{
-        const khV=kh[k.key]||0, v=vals[k.key];
-        const nv2=n(v); const p=khV>0&&nv2!==null?pct(nv2,khV):null;
-        const tag=st(khV>0?p:null);
-        return <div key={k.key} style={{background:C.bg2,borderRadius:14,padding:14,
-          border:`1px solid ${nv2!==null?k.color+"44":C.border+"66"}`}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:20}}>{k.icon}</span>
-              <div>
-                <div style={{fontWeight:600,fontSize:14,color:k.star?C.gold:C.text}}>{k.star?"⭐ ":""}{k.label}</div>
-                <div style={{fontSize:10,color:C.mute}}>KH {selT}: {khV?fmt(khV,k.unit):"Chưa giao"}</div>
-              </div>
-            </div>
-            <Tag label={tag.l} color={tag.c} sm/>
-          </div>
-          <NInput value={v} onChange={val=>setVals(p=>({...p,[k.key]:val}))}
-            placeholder={`TH lũy kế ${selT} — ${k.label} (${k.unit})`}
-            style={{borderColor:nv2!==null?k.color+"66":undefined}}/>
-          {p!==null&&khV>0&&<div style={{marginTop:8}}>
-            <Bar v={nv2||0} max={khV} color={k.color} h={6}/>
-            <div style={{fontSize:11,color:pc(p),marginTop:4,textAlign:"right",fontWeight:700}}>
-              {p.toFixed(1)}% KH tuần
-            </div>
-          </div>}
-        </div>;
-      })}
-    </div>
-    <SaveBtn onSave={doSave} saving={saving} saved={saved} label={`💾 LƯU TH ${selT}`}/>
-  </div>;
+    ${fields}
+    <button class="btn-primary" id="save-btn" onclick="saveTH()">💾 LƯU TH ${STATE.selTuan}</button>
+  </div>`;
 }
 
-// ═══════════════════════════════════════════
-// VIEW: DASHBOARD
-// ═══════════════════════════════════════════
-function DashView({thTuan,khTuan,khPhong,month}){
-  const [scope,setScope]=useState("thang"); // thang | T1 | T2 | T3 | T4
-  const [selNVs,setSelNVs]=useState([]);
-  const [pickMode,setPickMode]=useState(false);
-  const [detailMA,setDetailMA]=useState(null);
+function updateFieldBar(key, khv, color) {
+  const inp = document.getElementById("f_"+key);
+  const barEl = document.getElementById("bar_"+key);
+  if(!inp||!barEl) return;
+  const v = parseFloat(inp.value);
+  if(!isNaN(v)&&khv>0) barEl.innerHTML = bar(v,khv,color);
+}
 
-  const khP=khPhong[month]||DEFAULT_KH_PHONG;
+async function saveTH() {
+  const nv = NVS.find(n=>n.ma===STATE.selNV);
+  if(!nv) return;
+  const btn = document.getElementById("save-btn");
+  if(btn) { btn.textContent="⏳ Đang lưu..."; btn.disabled=true; }
+  const data = {updatedAt: Date.now()};
+  KPIS.forEach(k=>{
+    const el = document.getElementById("f_"+k.key);
+    if(el&&el.value!=="") data[k.key] = parseFloat(el.value);
+  });
+  // Save to Firebase
+  await fbSet("thTuan/"+MONTH+"/"+STATE.selTuan+"/"+nv.ma, data);
+  // Update local state
+  if(!STATE.thTuan[MONTH]) STATE.thTuan[MONTH]={};
+  if(!STATE.thTuan[MONTH][STATE.selTuan]) STATE.thTuan[MONTH][STATE.selTuan]={};
+  STATE.thTuan[MONTH][STATE.selTuan][nv.ma] = data;
+  if(btn) { btn.textContent="✅ ĐÃ LƯU!"; btn.classList.add("saved"); }
+  setTimeout(()=>{ STATE.selNV=null; render(); }, 1200);
+}
 
-  // KH & TH aggregated theo scope
-  const getKhNV=ma=>{
-    if(scope==="thang"){
-      const o={}; KPI_CFG.forEach(k=>{o[k.key]=TUAN_LIST.reduce((s,t)=>s+(khTuan?.[month]?.[t]?.[ma]?.[k.key]||0),0)}); return o;
-    }
-    return khTuan?.[month]?.[scope]?.[ma]||{};
-  };
-  const getThNV=ma=>{
-    if(scope==="thang"){
-      const o={}; KPI_CFG.forEach(k=>{
-        const vals=TUAN_LIST.map(t=>thTuan?.[month]?.[t]?.[ma]?.[k.key]??null).filter(v=>v!==null);
-        o[k.key]=vals.length?vals.reduce((a,b)=>a+b,0):null;
-      }); return o;
-    }
-    const d=thTuan?.[month]?.[scope]?.[ma]||{};
-    return Object.fromEntries(KPI_CFG.map(k=>[k.key,d[k.key]??null]));
-  };
+// ── GIAO KH PHÒNG ──────────────────────────
+function renderKhPhong() {
+  const kh = getKhPhong();
+  const fields = KPIS.map(k=>`
+    <div class="form-field" style="border-color:${k.color}33">
+      <div class="field-header">
+        <div class="field-label">
+          <span style="font-size:20px">${k.icon}</span>
+          <div>
+            <div class="field-name" style="color:${k.star?"#f59e0b":"var(--text)"}">${k.star?"⭐ ":""}${k.label}</div>
+            <div class="field-kh">Hiện tại: ${fmt(kh[k.key],k.unit)}</div>
+          </div>
+        </div>
+      </div>
+      <input type="number" id="kp_${k.key}" value="${kh[k.key]||""}" placeholder="KH tháng ${k.label} (${k.unit})">
+    </div>`).join("");
+  return `<div style="padding:16px">
+    <div class="sec-title">🏦 KH tháng toàn phòng · ${MONTH}</div>
+    ${fields}
+    <button class="btn-primary" id="kp-btn" onclick="saveKhPhong()">💾 LƯU KH PHÒNG</button>
+  </div>`;
+}
 
-  const getKhPhongScope=()=>{
-    if(scope==="thang") return khP;
-    const o={}; KPI_CFG.forEach(k=>{o[k.key]=NV_LIST.reduce((s,nv)=>s+(khTuan?.[month]?.[scope]?.[nv.ma]?.[k.key]||0),0)}); return o;
-  };
+async function saveKhPhong() {
+  const btn=document.getElementById("kp-btn");
+  if(btn){btn.textContent="⏳ Đang lưu...";btn.disabled=true;}
+  const data={};
+  KPIS.forEach(k=>{
+    const el=document.getElementById("kp_"+k.key);
+    if(el&&el.value!=="") data[k.key]=parseFloat(el.value);
+  });
+  await fbSet("khPhong/"+MONTH, data);
+  if(!STATE.khPhong[MONTH]) STATE.khPhong[MONTH]={};
+  Object.assign(STATE.khPhong[MONTH], data);
+  if(btn){btn.textContent="✅ ĐÃ LƯU!";btn.classList.add("saved");}
+  setTimeout(()=>render(), 1200);
+}
 
-  const khPS=getKhPhongScope();
+// ── GIAO KH TUẦN ──────────────────────────
+function renderKhTuan() {
+  if(STATE.selNV) return renderKhTuanForm();
+  const tuan = STATE.selTuan;
+  const khP = getKhPhong();
+  // Tổng đã giao cho phòng trong tháng
+  function sumGiao(kkey) {
+    return NVS.reduce((s,nv)=>
+      s+["T1","T2","T3","T4"].reduce((s2,t)=>s2+((STATE.khTuan[MONTH]||{})[t]?.[nv.ma]?.[kkey]||0),0),0);
+  }
+  const conLai = KPIS.map(k=>({...k, con:(khP[k.key]||0)-sumGiao(k.key)}));
+  const tuanData = (STATE.khTuan[MONTH]||{})[tuan]||{};
+  return `<div style="padding:16px">
+    <div class="sec-title">📋 KH tuần · ${MONTH}</div>
+    <div class="tabs">${["T1","T2","T3","T4"].map(t=>`
+      <button class="tab-btn ${tuan===t?'active':''}" onclick="setTuanKh('${t}')">${t}</button>
+    `).join("")}</div>
+    <div style="overflow-x:auto;margin-bottom:14px">
+      <div style="display:flex;gap:6px;width:max-content;padding-bottom:2px">
+        ${conLai.map(k=>`<div style="background:var(--bg1);border-radius:10px;padding:7px 11px;text-align:center;min-width:76px;border:1px solid ${k.con<0?"#ef4444":k.color}22">
+          <div style="font-size:10px;color:${k.color};margin-bottom:2px">${k.icon} ${k.key.substring(0,2).toUpperCase()}</div>
+          <div style="font-size:12px;font-weight:800;color:${k.con<0?"#ef4444":"var(--text)"}">${fmt(k.con,k.unit)}</div>
+          <div style="font-size:9px;color:var(--mute)">còn lại</div>
+        </div>`).join("")}
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--dim);margin-bottom:10px">Bấm NV để giao KH ${tuan}</div>
+    ${NVS.map(nv=>{
+      const nvKh = tuanData[nv.ma]||{};
+      const hasKh = KPIS.some(k=>(nvKh[k.key]||0)>0);
+      return `<button class="nv-item" style="border-color:${hasKh?"#f59e0b44":"#1e3a5f22"}" onclick="selNVKh('${nv.ma}')">
+        ${avatar(nv.ten,nv.ma)}
+        <div style="flex:1">
+          <div class="nv-name">${nv.ten}</div>
+          ${hasKh
+            ? `<div class="chips">${KPIS.filter(k=>k.star).map(k=>chip(k.icon+" "+fmt(nvKh[k.key]||0,k.unit),k.color)).join("")}</div>`
+            : `<div class="nv-sub">Chưa giao KH ${tuan}</div>`}
+        </div>
+        <span style="color:${hasKh?"#f59e0b":"var(--mute)"};font-size:20px">›</span>
+      </button>`;
+    }).join("")}
+  </div>`;
+}
 
-  const nvData=useMemo(()=>NV_LIST.map(nv=>{
-    const kh=getKhNV(nv.ma), th=getThNV(nv.ma);
-    const starWithKh=KPI_CFG.filter(k=>k.star&&(kh[k.key]||0)>0);
-    const score=starWithKh.length
-      ? starWithKh.reduce((s,k)=>s+(pct(th[k.key]??0,kh[k.key])||0),0)/starWithKh.length
-      : null;
-    return {...nv,kh,th,score};
-  }),[scope,thTuan,khTuan,month]);
+function renderKhTuanForm() {
+  const nv = NVS.find(n=>n.ma===STATE.selNV);
+  if(!nv) return "";
+  const tuan = STATE.selTuan;
+  const khP = getKhPhong();
+  const cur = getKhTuan(tuan, nv.ma);
+  function sumGiaoPhong(kkey) {
+    return NVS.reduce((s,nv2)=>
+      s+["T1","T2","T3","T4"].reduce((s2,t)=>s2+((STATE.khTuan[MONTH]||{})[t]?.[nv2.ma]?.[kkey]||0),0),0);
+  }
+  const fields = KPIS.map(k=>{
+    const old = cur[k.key]||0;
+    const giaoExcl = sumGiaoPhong(k.key) - ["T1","T2","T3","T4"].reduce((s,t)=>s+((STATE.khTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
+    const nvExcl = ["T1","T2","T3","T4"].reduce((s,t)=>s+((STATE.khTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0) - old;
+    const con = (khP[k.key]||0) - giaoExcl - nvExcl;
+    return `<div class="form-field" style="border-color:${k.color}33">
+      <div class="field-header">
+        <div class="field-label">
+          <span style="font-size:20px">${k.icon}</span>
+          <div>
+            <div class="field-name" style="color:${k.star?"#f59e0b":"var(--text)"}">${k.label}</div>
+            <div class="field-kh">Còn lại phòng: <b style="color:${con<0?"#ef4444":"#10b981"}">${fmt(con,k.unit)}</b></div>
+          </div>
+        </div>
+      </div>
+      <input type="number" id="kt_${k.key}" value="${old||""}" placeholder="KH ${tuan} — ${k.label} (${k.unit})">
+    </div>`;
+  }).join("");
+  return `<div style="padding:16px">
+    <button class="btn-back" onclick="backKhTuan()">← Danh sách NV</button>
+    <div class="card card-highlight" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px">
+        ${avatar(nv.ten,nv.ma,46)}
+        <div>
+          <div style="font-weight:700;font-size:15px">${nv.ten}</div>
+          <div style="font-size:11px;color:var(--dim)">Giao KH ${tuan} · ${MONTH}</div>
+        </div>
+      </div>
+    </div>
+    ${fields}
+    <button class="btn-primary" id="kt-btn" onclick="saveKhTuan()">💾 GIAO KẾ HOẠCH</button>
+  </div>`;
+}
 
-  const totalTH=useMemo(()=>{
-    const nvs=selNVs.length?nvData.filter(nv=>selNVs.includes(nv.ma)):nvData;
-    const o={}; KPI_CFG.forEach(k=>{
-      const vals=nvs.map(nv=>nv.th[k.key]??0);
-      o[k.key]=vals.reduce((a,b)=>a+b,0);
-    }); return o;
-  },[nvData,selNVs]);
+async function saveKhTuan() {
+  const nv = NVS.find(n=>n.ma===STATE.selNV);
+  if(!nv) return;
+  const btn=document.getElementById("kt-btn");
+  if(btn){btn.textContent="⏳...";btn.disabled=true;}
+  const data={};
+  KPIS.forEach(k=>{
+    const el=document.getElementById("kt_"+k.key);
+    if(el&&el.value!=="") data[k.key]=parseFloat(el.value);
+  });
+  await fbSet("khTuan/"+MONTH+"/"+STATE.selTuan+"/"+nv.ma, data);
+  if(!STATE.khTuan[MONTH]) STATE.khTuan[MONTH]={};
+  if(!STATE.khTuan[MONTH][STATE.selTuan]) STATE.khTuan[MONTH][STATE.selTuan]={};
+  STATE.khTuan[MONTH][STATE.selTuan][nv.ma] = data;
+  if(btn){btn.textContent="✅ ĐÃ GIAO!";btn.classList.add("saved");}
+  setTimeout(()=>{ STATE.selNV=null; render(); },1200);
+}
 
-  const totalKH=useMemo(()=>{
-    if(selNVs.length===0) return khPS;
-    const o={}; KPI_CFG.forEach(k=>{
-      o[k.key]=nvData.filter(nv=>selNVs.includes(nv.ma)).reduce((s,nv)=>s+(nv.kh[k.key]||0),0);
-    }); return o;
-  },[nvData,selNVs,khPS]);
+// ── DASHBOARD ──────────────────────────────
+function renderDash() {
+  if(STATE.detailNV) return renderDashDetail();
+  const scope = STATE.scope;
+  const month = MONTH;
+  const tuans = scope==="thang"?["T1","T2","T3","T4"]:[scope];
+  const khP = scope==="thang" ? getKhPhong() : (() => {
+    const o={};
+    KPIS.forEach(k=>{o[k.key]=NVS.reduce((s,nv)=>s+getKhTuan(scope,nv.ma)[k.key]||0,0);});
+    return o;
+  })();
 
-  const ranked=[...nvData].sort((a,b)=>{
-    if(a.score===null&&b.score===null)return 0;
-    if(a.score===null)return 1; if(b.score===null)return -1;
+  // Total TH
+  const totalTH={};
+  KPIS.forEach(k=>{
+    totalTH[k.key]=NVS.reduce((s,nv)=>
+      tuans.reduce((s2,t)=>s2+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),s),0);
+  });
+
+  // Per NV score
+  const nvScores = NVS.map(nv=>{
+    const starKpis = KPIS.filter(k=>k.star);
+    const scores = starKpis.map(k=>{
+      const kh = tuans.reduce((s,t)=>s+(getKhTuan(t,nv.ma)[k.key]||0),0);
+      const th = tuans.reduce((s,t)=>s+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
+      return kh>0 ? pct(th,kh) : null;
+    }).filter(p=>p!==null);
+    const score = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : null;
+    return {...nv, score};
+  }).sort((a,b)=>{
+    if(a.score===null&&b.score===null) return 0;
+    if(a.score===null) return 1;
+    if(b.score===null) return -1;
     return b.score-a.score;
   });
 
-  const toggleNV=ma=>setSelNVs(p=>p.includes(ma)?p.filter(x=>x!==ma):[...p,ma]);
-
-  // ── DETAIL ──
-  if(detailMA){
-    const nv=nvData.find(x=>x.ma===detailMA);
-    return <div style={{padding:16}}>
-      <button onClick={()=>setDetailMA(null)} style={{background:"none",border:"none",color:C.dim,cursor:"pointer",fontSize:13,padding:0,marginBottom:14}}>
-        ← Dashboard
-      </button>
-      <div style={{background:`linear-gradient(135deg,#1a3050,${C.bg0})`,borderRadius:14,padding:16,marginBottom:16,border:`1px solid ${C.border}44`}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <Av name={nv.ten} ma={nv.ma} size={50}/>
-          <div style={{flex:1}}>
-            <div style={{fontWeight:800,fontSize:16}}>{nv.ten}</div>
-            <div style={{fontSize:11,color:C.dim,marginTop:2}}>Mã: {nv.ma}</div>
-          </div>
-          <div style={{textAlign:"right"}}>
-            {nv.score!==null
-              ?<><div style={{fontSize:24,fontWeight:900,color:pc(nv.score)}}>{Math.round(nv.score)}%</div>
-                <Tag label={st(nv.score).l} color={pc(nv.score)} sm/></>
-              :<Tag label="Chưa có KH" color={C.mute}/>}
-          </div>
-        </div>
-      </div>
-
-      {/* Per KPI cards */}
-      {KPI_CFG.map(k=>{
-        const khV=nv.kh[k.key]||0, thV=nv.th[k.key], hasKh=khV>0;
-        const thShow=hasKh?(thV??0):thV;
-        const p=hasKh?pct(thShow,khV):null;
-        return <div key={k.key} style={{background:C.bg2,borderRadius:14,padding:14,marginBottom:10,
-          border:`1px solid ${hasKh?k.color+"44":C.border+"44"}`}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:hasKh?10:0}}>
-            <span style={{fontSize:20}}>{k.icon}</span>
-            <div style={{flex:1}}>
-              <div style={{fontWeight:600,fontSize:14,color:k.star?C.gold:C.text}}>{k.label}</div>
-              <div style={{fontSize:10,color:C.mute}}>
-                KH {scope}: {hasKh?fmt(khV,k.unit):<span style={{color:C.bad}}>Chưa giao</span>}
-              </div>
-            </div>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontSize:20,fontWeight:800,color:hasKh?k.color:C.mute}}>
-                {hasKh?fmt(thShow,k.unit):(thV!==null?fmt(thV,k.unit):"—")}
-              </div>
-              <Tag label={st(p).l} color={pc(p)} sm/>
-            </div>
-          </div>
-          {hasKh&&<>
-            <Bar v={thShow} max={khV} color={k.color} h={7}/>
-            <div style={{display:"flex",justifyContent:"space-between",marginTop:5}}>
-              <div style={{fontSize:10,color:C.mute}}>Còn lại: {fmt(khV-(thShow||0),k.unit)}</div>
-              <div style={{fontSize:11,color:pc(p),fontWeight:800}}>{p2s(p)}</div>
-            </div>
-          </>}
-        </div>;
-      })}
-
-      {/* TH theo từng tuần */}
-      <Sec title="Chi tiết theo tuần"/>
-      <div style={{display:"flex",flexDirection:"column",gap:8}}>
-        {TUAN_LIST.map(t=>{
-          const khT=khTuan?.[month]?.[t]?.[nv.ma]||{};
-          const thT=thTuan?.[month]?.[t]?.[nv.ma]||{};
-          const hasKhT=KPI_CFG.some(k=>(khT[k.key]||0)>0);
-          const hasThT=KPI_CFG.some(k=>(thT[k.key]??null)!==null);
-          if(!hasKhT&&!hasThT) return null;
-          return <div key={t} style={{background:C.bg1,borderRadius:12,padding:12}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-              <Tag label={t} color="#3b82f6" sm/>
-              {thT.updatedAt&&<div style={{fontSize:10,color:C.mute}}>🕐 {fmtTs(thT.updatedAt)}</div>}
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
-              {KPI_CFG.filter(k=>k.star).map(k=>{
-                const khV=khT[k.key]||0, thV=thT[k.key]??null;
-                const p=khV>0?pct(thV??0,khV):null;
-                return <div key={k.key} style={{background:C.bg2,borderRadius:8,padding:"7px 8px",textAlign:"center"}}>
-                  <div style={{fontSize:10,color:k.color,marginBottom:2}}>{k.icon}</div>
-                  <div style={{fontSize:12,fontWeight:700,color:khV>0?pc(p):C.mute}}>{khV>0?fmt(thV??0,k.unit):"—"}</div>
-                  <div style={{fontSize:9,color:C.mute}}>KH:{fmt(khV,k.unit)}</div>
-                  {khV>0&&p!==null&&<div style={{fontSize:9,color:pc(p),fontWeight:700,marginTop:1}}>{Math.round(p)}%</div>}
-                </div>;
-              })}
-            </div>
-          </div>;
-        })}
-      </div>
-    </div>;
-  }
-
-  // ── MAIN DASHBOARD ──
-  return <div>
-    <div style={{padding:"14px 16px 0"}}>
-
-      {/* Scope selector */}
-      <div style={{display:"flex",gap:5,marginBottom:12,overflowX:"auto"}}>
-        {[{k:"thang",l:"📅 Cả tháng"},...TUAN_LIST.map(t=>({k:t,l:"📊 "+t}))].map(s=>(
-          <button key={s.k} onClick={()=>setScope(s.k)}
-            style={{padding:"7px 13px",borderRadius:20,border:"1px solid",whiteSpace:"nowrap",
-              borderColor:scope===s.k?C.gold:C.border,background:scope===s.k?C.gold+"22":C.bg2,
-              color:scope===s.k?C.gold:C.dim,fontSize:12,fontWeight:600,cursor:"pointer"}}>
-            {s.l}
-          </button>
-        ))}
-      </div>
-
-      {/* NV Filter */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-        <div style={{fontSize:11,color:C.dim}}>
-          {selNVs.length===0?"👥 Toàn phòng":`👥 ${selNVs.length} NV được chọn`}
-        </div>
-        <button onClick={()=>setPickMode(p=>!p)}
-          style={{background:pickMode?C.gold+"22":C.bg2,border:`1px solid ${pickMode?C.gold:C.border}`,
-            borderRadius:8,padding:"5px 12px",color:pickMode?C.gold:C.dim,fontSize:11,cursor:"pointer",fontWeight:600}}>
-          {pickMode?"✓ Xong":"🎯 Lọc NV"}
-        </button>
-      </div>
-      {pickMode&&<div style={{background:C.bg1,borderRadius:10,padding:10,marginBottom:10}}>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:selNVs.length?8:0}}>
-          {NV_LIST.map(nv=>{
-            const sel=selNVs.includes(nv.ma);
-            return <button key={nv.ma} onClick={()=>toggleNV(nv.ma)}
-              style={{padding:"6px 10px",borderRadius:20,border:"1px solid",fontSize:11,cursor:"pointer",
-                borderColor:sel?acColor(nv.ma):C.border,background:sel?acColor(nv.ma)+"22":"transparent",
-                color:sel?acColor(nv.ma):C.dim,fontWeight:sel?700:400}}>
-              {sel?"✓ ":""}{nv.ten.split(" ").slice(-2).join(" ")}
-            </button>;
-          })}
-        </div>
-        {selNVs.length>0&&<button onClick={()=>setSelNVs([])}
-          style={{padding:"5px 12px",borderRadius:20,border:`1px solid ${C.bad}`,
-            background:C.bad+"22",color:C.bad,fontSize:11,cursor:"pointer",fontWeight:700}}>✕ Xóa lọc</button>}
-      </div>}
-    </div>
-
-    {/* KPI Summary — 2 col grid */}
-    <div style={{padding:"0 16px 14px"}}>
-      <div style={{fontSize:11,color:C.dim,marginBottom:8,textTransform:"uppercase",letterSpacing:".09em"}}>
-        Tổng hợp · {scope==="thang"?"Cả tháng":scope}{selNVs.length?` (${selNVs.length} NV)`:""}
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-        {KPI_CFG.map(k=>{
-          const th=totalTH[k.key]||0, kh=totalKH[k.key]||0;
-          const p=pct(th,kh);
-          const gap=kh>0?Math.max(0,kh-th):null;
-          return <div key={k.key} style={{background:C.bg2,borderRadius:14,padding:14,
-            border:`1px solid ${kh>0?k.color+"44":C.border+"33"}`,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",bottom:-10,right:-6,fontSize:42,opacity:.04}}>{k.icon}</div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-              <div>
-                <div style={{fontSize:10,color:C.mute,marginBottom:2}}>{k.icon} {k.label}</div>
-                <div style={{fontSize:20,fontWeight:900,color:kh>0?k.color:C.mute,lineHeight:1}}>{fmt(th,k.unit)}</div>
-                <div style={{fontSize:9,color:C.mute,marginTop:2}}>KH: {kh>0?fmt(kh,k.unit):"Chưa có"}</div>
-              </div>
-              <div style={{position:"relative",width:44,height:44}}>
-                <Ring p={kh>0?(p||0):0} size={44}/>
-                <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",
-                  fontSize:9,fontWeight:700,color:kh>0?pc(p):C.mute,textAlign:"center"}}>
-                  {kh>0?p2s(p):"—"}
-                </div>
-              </div>
-            </div>
-            {kh>0&&<>
-              <Bar v={th} max={kh} color={k.color} h={5}/>
-              {gap!==null&&gap>0&&<div style={{fontSize:9,color:C.bad,marginTop:4,fontWeight:600}}>
-                ▼ GAP: {fmt(gap,k.unit)}
-              </div>}
-            </>}
-          </div>;
-        })}
-      </div>
-    </div>
-
-    {/* Ranking */}
-    <div style={{padding:"0 16px 16px"}}>
-      <div style={{fontSize:11,color:C.dim,marginBottom:8,textTransform:"uppercase",letterSpacing:".09em"}}>🏆 Xếp hạng nhân viên</div>
-      {ranked.filter(nv=>selNVs.length===0||selNVs.includes(nv.ma)).map((nv,i)=>{
-        const hasKh=KPI_CFG.filter(k=>k.star).some(k=>(nv.kh[k.key]||0)>0);
-        const tag=st(hasKh?(nv.score??0):null);
-        return <button key={nv.ma} onClick={()=>setDetailMA(nv.ma)}
-          style={{background:C.bg2,border:`1px solid ${C.border}33`,borderRadius:14,
-            padding:"13px 14px",textAlign:"left",cursor:"pointer",width:"100%",marginBottom:8,display:"block"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:28,height:28,borderRadius:"50%",flexShrink:0,
-              background:i===0?"#f59e0b22":i===1?"#94a3b822":i===2?"#d9770622":C.bg1,
-              display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,
-              color:i===0?C.gold:i===1?"#94a3b8":i===2?"#d97706":C.mute}}>{i+1}</div>
-            <Av name={nv.ten} ma={nv.ma} size={36}/>
-            <div style={{flex:1,overflow:"hidden"}}>
-              <div style={{fontWeight:600,fontSize:13,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{nv.ten}</div>
-              <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
-                {KPI_CFG.filter(k=>k.star).map(k=>{
-                  const khV=nv.kh[k.key]||0, thV=nv.th[k.key];
-                  const p=khV>0?pct(thV??0,khV):null;
-                  return <span key={k.key} style={{fontSize:10,color:khV>0?pc(p):C.mute,
-                    background:C.bg1,borderRadius:4,padding:"1px 6px"}}>
-                    {k.icon} {khV>0?<>{fmt(thV??0,k.unit)} <b>({p2s(p)})</b></>:"chưa KH"}
-                  </span>;
-                })}
-              </div>
-            </div>
-            <div style={{textAlign:"right",flexShrink:0}}>
-              <div style={{fontSize:18,fontWeight:800,color:hasKh?pc(nv.score??0):C.mute}}>
-                {hasKh?p2s(nv.score??0):"—"}
-              </div>
-              <Tag label={tag.l} color={tag.c} sm/>
-            </div>
-          </div>
-        </button>;
-      })}
-    </div>
-  </div>;
-}
-
-// ═══════════════════════════════════════════
-// VIEW: CẢNH BÁO
-// ═══════════════════════════════════════════
-function AlertView({thTuan,khTuan,khPhong,month}){
-  const khP=khPhong[month]||DEFAULT_KH_PHONG;
-
-  // Tổng TH tháng
-  const totalTH=useMemo(()=>{
-    const o={}; KPI_CFG.forEach(k=>{
-      o[k.key]=NV_LIST.reduce((s,nv)=>
-        s+TUAN_LIST.reduce((s2,t)=>s2+(thTuan?.[month]?.[t]?.[nv.ma]?.[k.key]??0),0)
-      ,0);
-    }); return o;
-  },[thTuan,month]);
-
-  // NV chưa có TH tuần này (tuần hiện tại)
-  const curDay=new Date().getDate();
-  const curTuan=curDay<=7?"T1":curDay<=14?"T2":curDay<=21?"T3":"T4";
-  const chuaNhap=NV_LIST.filter(nv=>{
-    const hasKh=KPI_CFG.some(k=>(khTuan?.[month]?.[curTuan]?.[nv.ma]?.[k.key]||0)>0);
-    const hasTh=KPI_CFG.some(k=>(thTuan?.[month]?.[curTuan]?.[nv.ma]?.[k.key]??null)!==null);
-    return hasKh&&!hasTh;
-  });
-  const chuaCoKh=NV_LIST.filter(nv=>!KPI_CFG.some(k=>(khTuan?.[month]?.[curTuan]?.[nv.ma]?.[k.key]||0)>0));
-
-  const kpiWarn=KPI_CFG.map(k=>{
-    const p=pct(totalTH[k.key],khP[k.key]);
-    return {...k,th:totalTH[k.key],p};
-  }).filter(k=>k.p!==null&&k.p<70);
-
-  return <div style={{padding:16}}>
-    <Sec title={`🚨 Cảnh báo · ${curTuan} · ${month}`}/>
-
-    {/* Nhập TH */}
-    <div style={{background:C.bg2,borderRadius:14,padding:14,marginBottom:12,
-      border:`1px solid ${chuaNhap.length?C.bad:C.good}44`}}>
-      <div style={{fontWeight:700,fontSize:14,color:chuaNhap.length?C.bad:C.good,marginBottom:chuaNhap.length?10:0}}>
-        {chuaNhap.length?`🚨 ${chuaNhap.length} NV có KH nhưng chưa nhập TH (${curTuan})`:"✅ Tất cả NV có KH đã nhập TH"}
-      </div>
-      {chuaNhap.map(nv=><div key={nv.ma} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderTop:`1px solid ${C.bg1}`}}>
-        <Av name={nv.ten} ma={nv.ma} size={32}/>
-        <div style={{flex:1}}>
-          <div style={{fontSize:13,fontWeight:600}}>{nv.ten}</div>
-          <div style={{fontSize:10,color:C.mute}}>Đã có KH — chưa nhập TH {curTuan}</div>
-        </div>
-        <Tag label="Cần nhập" color={C.warn} sm/>
-      </div>)}
-    </div>
-
-    {/* Chưa có KH */}
-    {chuaCoKh.length>0&&<div style={{background:C.bg2,borderRadius:14,padding:14,marginBottom:12,
-      border:`1px solid ${C.warn}44`}}>
-      <div style={{fontWeight:700,fontSize:14,color:C.warn,marginBottom:10}}>
-        ⚠️ {chuaCoKh.length} NV chưa được giao KH {curTuan}
-      </div>
-      {chuaCoKh.map(nv=><div key={nv.ma} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderTop:`1px solid ${C.bg1}`}}>
-        <Av name={nv.ten} ma={nv.ma} size={30}/>
-        <span style={{fontSize:13,fontWeight:600}}>{nv.ten}</span>
-      </div>)}
-    </div>}
-
-    {/* KPI phòng dưới ngưỡng */}
-    {kpiWarn.length>0&&<>
-      <Sec title="KPI phòng cần đẩy mạnh (dưới 70%)"/>
-      {kpiWarn.map(k=><div key={k.key} style={{background:C.bg2,borderRadius:14,padding:14,marginBottom:10,
-        border:`1px solid ${C.bad}33`}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-          <span style={{fontSize:22}}>{k.icon}</span>
-          <div style={{flex:1}}>
-            <div style={{fontWeight:700,fontSize:14,color:k.star?C.gold:C.text}}>{k.label}</div>
-            <div style={{fontSize:11,color:C.mute}}>TH: {fmt(k.th,k.unit)} / KH: {fmt(khP[k.key],k.unit)}</div>
-          </div>
-          <Tag label={p2s(k.p)} color={pc(k.p)}/>
-        </div>
-        <Bar v={k.th} max={khP[k.key]} color={pc(k.p)} h={7}/>
-      </div>)}
-    </>}
-  </div>;
-}
-
-// ═══════════════════════════════════════════
-// VIEW: SETUP — hướng dẫn kết nối Google Sheets
-// ═══════════════════════════════════════════
-function SetupView({onBack}){
-  const steps=[
-    { n:"1", title:"Tạo Google Sheet", desc:'Vào drive.google.com → New → Google Sheets → đặt tên "KPI Banking - Phòng KHCN"', color:"#f59e0b" },
-    { n:"2", title:"Mở Apps Script", desc:"Trong Sheet: Extensions → Apps Script → xóa hết code mặc định", color:"#3b82f6" },
-    { n:"3", title:"Paste code backend", desc:"Copy toàn bộ nội dung file kpi-apps-script.js → paste vào Apps Script → Save (Ctrl+S)", color:"#8b5cf6" },
-    { n:"4", title:"Chạy setupSheets()", desc:"Trong Apps Script: chọn hàm setupSheets → Run → cho phép quyền truy cập Google Account", color:"#10b981" },
-    { n:"5", title:"Deploy Web App", desc:'Click Deploy → New deployment → Type: Web app → Execute as: Me → Who has access: Anyone → Deploy', color:"#06b6d4" },
-    { n:"6", title:"Copy URL & Paste vào App", desc:'Copy URL vừa tạo → mở file kpi-banking-v4.jsx → tìm dòng SCRIPT_URL = "" → paste URL vào trong dấu ""', color:"#ec4899" },
-  ];
-  return <div style={{padding:16}}>
-    <button onClick={onBack} style={{background:"none",border:"none",color:C.dim,cursor:"pointer",fontSize:13,padding:0,marginBottom:16}}>
-      ← Quay lại
-    </button>
-    <div style={{background:`linear-gradient(135deg,#1a1000,${C.bg0})`,borderRadius:14,padding:16,marginBottom:20,border:`1px solid ${C.gold}44`}}>
-      <div style={{fontSize:16,fontWeight:800,color:C.gold,marginBottom:6}}>☁️ Kết nối Google Sheets</div>
-      <div style={{fontSize:12,color:C.dim,lineHeight:1.7}}>
-        Sau khi cài đặt xong: NV nhập trên điện thoại → anh thấy ngay trên máy tính. Dữ liệu lưu trên Google Drive của anh — không mất, không phụ thuộc thiết bị.
-      </div>
-    </div>
-    {steps.map(s=><div key={s.n} style={{display:"flex",gap:12,marginBottom:14}}>
-      <div style={{width:32,height:32,borderRadius:"50%",background:s.color+"22",border:`2px solid ${s.color}55`,
-        display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,color:s.color,
-        fontSize:14,flexShrink:0}}>{s.n}</div>
-      <div style={{background:C.bg2,borderRadius:12,padding:12,flex:1,border:`1px solid ${s.color}22`}}>
-        <div style={{fontWeight:700,fontSize:13,color:s.color,marginBottom:4}}>{s.title}</div>
-        <div style={{fontSize:12,color:C.dim,lineHeight:1.6}}>{s.desc}</div>
-      </div>
-    </div>)}
-    <div style={{background:"#0a2010",borderRadius:12,padding:14,border:`1px solid ${C.good}44`,marginTop:8}}>
-      <div style={{fontSize:12,color:C.good,fontWeight:700,marginBottom:4}}>✅ Sau khi cài xong</div>
-      <div style={{fontSize:12,color:C.dim,lineHeight:1.6}}>
-        App tự động sync khi mở. Nút ↻ ở góc trên để refresh thủ công. Khi offline vẫn dùng được — dữ liệu sync lại khi có mạng.
-      </div>
-    </div>
-  </div>;
-}
-
-// ═══════════════════════════════════════════
-// ROOT APP
-// ═══════════════════════════════════════════
-function App(){
-  const [tab,setTab]=useState("nhap");
-  const [khTab,setKhTab]=useState("phong");
-  const [khPhong,setKhPhong]=useState({});
-  const [khTuan,setKhTuan]=useState({});
-  const [thTuan,setThTuan]=useState({});
-  const [loading,setLoading]=useState(true);
-  const [online,setOnline]=useState(false);
-  const [syncing,setSyncing]=useState(false);
-  const month=CUR_MONTH;
-
-  const loadData = async (showSyncing=false) => {
-    if(showSyncing) setSyncing(true);
-    const d = await loadAllData(month);
-    setKhPhong(d.khPhong); setKhTuan(d.khTuan); setThTuan(d.thTuan);
-    setOnline(d.online);
-    setLoading(false);
-    if(showSyncing) setSyncing(false);
-  };
-
-  useEffect(()=>{ loadData(); },[]);
-
-  // Wrap setters để gọi đúng save function
-  const handleSaveKhPhong = async (data) => {
-    const next = await saveKhPhongData(month, data, khPhong);
-    setKhPhong(next);
-  };
-  const handleSaveKhTuan = async (tuan, ma_nv, data) => {
-    const next = await saveKhTuanData(month, tuan, ma_nv, data, khTuan);
-    setKhTuan(next);
-  };
-  const handleSaveThTuan = async (tuan, ma_nv, data) => {
-    const next = await saveThTuanData(month, tuan, ma_nv, data, thTuan);
-    setThTuan(next);
-  };
-
-  const curDay=new Date().getDate();
-  const curTuan=curDay<=7?"T1":curDay<=14?"T2":curDay<=21?"T3":"T4";
-  const alertCount=NV_LIST.filter(nv=>{
-    const hasKh=KPI_CFG.some(k=>(khTuan?.[month]?.[curTuan]?.[nv.ma]?.[k.key]||0)>0);
-    const hasTh=KPI_CFG.some(k=>(thTuan?.[month]?.[curTuan]?.[nv.ma]?.[k.key]??null)!==null);
-    return hasKh&&!hasTh;
-  }).length;
-
-  if(loading) return <div style={{minHeight:"100vh",background:C.bg0,display:"flex",flexDirection:"column",
-    alignItems:"center",justifyContent:"center",gap:16}}>
-    <div style={{fontSize:40}}>🏦</div>
-    <div style={{color:C.gold,fontSize:16,fontWeight:700}}>KPI Banking</div>
-    <div style={{color:C.dim,fontSize:12}}>Đang tải dữ liệu...</div>
-    {hasRemote()&&<div style={{color:C.mute,fontSize:11}}>🔄 Đồng bộ Google Sheets...</div>}
-  </div>;
-
-  const TABS=[
-    {k:"nhap", ic:"✏️", lb:"Nhập TH"},
-    {k:"kh",   ic:"🎯", lb:"Giao KH"},
-    {k:"dash", ic:"📊", lb:"Dashboard"},
-    {k:"alert",ic:"🚨", lb:"Cảnh báo", badge:alertCount||null},
-  ];
-
-  return <div style={{minHeight:"100vh",background:C.bg0,color:C.text,
-    fontFamily:"'Segoe UI',system-ui,sans-serif",maxWidth:480,margin:"0 auto"}}>
-
-    {/* HEADER */}
-    <div style={{background:`linear-gradient(180deg,${C.bg1},${C.bg0})`,
-      padding:"16px 16px 12px",borderBottom:`1px solid ${C.border}55`,
-      position:"sticky",top:0,zIndex:100}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+  const kpiCards = KPIS.map(k=>{
+    const th=totalTH[k.key]||0, kh=khP[k.key]||0;
+    const p=pct(th,kh);
+    return `<div class="kpi-card" style="border-color:${k.color}33">
+      <div class="kpi-card-bg">${k.icon}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
         <div>
-          <div style={{fontSize:20,fontWeight:900,letterSpacing:"-.02em"}}>
-            🏦 KPI <span style={{color:C.gold}}>Banking</span>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2,flexWrap:"wrap"}}>
-            <span style={{fontSize:11,color:C.mute}}>
-              {new Date().toLocaleDateString("vi-VN",{weekday:"short",day:"numeric",month:"numeric"})}
-            </span>
-            <span style={{fontSize:11,color:C.gold,fontWeight:700}}>{month}</span>
-            <span style={{fontSize:11,color:"#3b82f6",fontWeight:600}}>{curTuan}</span>
-            {/* Sync status badge */}
-            {hasRemote()
-              ? <span style={{fontSize:10,fontWeight:700,padding:"1px 7px",borderRadius:10,
-                  background:online?"#10b98122":"#f59e0b22",
-                  color:online?C.good:C.warn,border:`1px solid ${online?C.good:C.warn}44`}}>
-                  {syncing?"⟳ Đang đồng bộ...":online?"☁️ Online":"📱 Local cache"}
-                </span>
-              : <span style={{fontSize:10,padding:"1px 7px",borderRadius:10,
-                  background:"#ef444422",color:C.bad,border:`1px solid ${C.bad}44`,
-                  cursor:"pointer"}} onClick={()=>setTab("setup")}>
-                  ⚠️ Chưa kết nối Sheets
-                </span>
-            }
-          </div>
+          <div class="kpi-label">${k.icon} ${k.label}</div>
+          <div class="kpi-value" style="color:${kh>0?k.color:"var(--mute)"}">${fmt(th,k.unit)}</div>
+          <div class="kpi-kh">KH: ${kh>0?fmt(kh,k.unit):"Chưa có"}</div>
         </div>
-        <div style={{display:"flex",gap:6,alignItems:"center"}}>
-          {tab==="kh"&&<div style={{display:"flex",gap:5}}>
-            {[{k:"phong",l:"📋 Phòng"},{k:"tuan",l:"👤 NV"}].map(t=>(
-              <button key={t.k} onClick={()=>setKhTab(t.k)}
-                style={{padding:"6px 11px",borderRadius:20,border:"1px solid",fontSize:11,fontWeight:700,cursor:"pointer",
-                  borderColor:khTab===t.k?C.gold:C.border,background:khTab===t.k?C.gold+"22":"transparent",
-                  color:khTab===t.k?C.gold:C.mute}}>{t.l}</button>
-            ))}
-          </div>}
-          {/* Refresh button */}
-          {hasRemote()&&<button onClick={()=>loadData(true)}
-            style={{background:"none",border:`1px solid ${C.border}`,borderRadius:8,
-              padding:"6px 10px",color:syncing?C.warn:C.dim,fontSize:13,cursor:"pointer"}}>
-            {syncing?"⟳":"↻"}
-          </button>}
+        <div style="position:relative;width:44px;height:44px">
+          ${ring(p||0)}
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:700;color:${pc(p)}">${kh>0?p2s(p):"—"}</div>
         </div>
       </div>
-    </div>
+      ${kh>0?bar(th,kh,k.color):""}
+    </div>`;
+  }).join("");
 
-    {/* SETUP BANNER — khi chưa cấu hình */}
-    {!hasRemote()&&tab!=="setup"&&<div style={{background:"#1a0a00",borderBottom:`1px solid ${C.warn}44`,
-      padding:"10px 16px",cursor:"pointer"}} onClick={()=>setTab("setup")}>
-      <div style={{fontSize:12,color:C.warn,fontWeight:600}}>
-        ⚡ Dữ liệu đang lưu local — chỉ thấy trên thiết bị này.
-        <span style={{color:C.gold,marginLeft:4,textDecoration:"underline"}}>Kết nối Google Sheets để sync →</span>
+  const rankList = nvScores.map((nv,i)=>{
+    const rankColors=["#f59e0b22","#94a3b822","#d9770622"];
+    const rankTextColors=["#f59e0b","#94a3b8","#d97706"];
+    const hasSc = nv.score!==null;
+    const thLabel = KPIS.filter(k=>k.star).map(k=>{
+      const kh=tuans.reduce((s,t)=>s+(getKhTuan(t,nv.ma)[k.key]||0),0);
+      const th=tuans.reduce((s,t)=>s+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
+      const p=kh>0?pct(th,kh):null;
+      return `${k.icon} ${fmt(th,k.unit)}${p!==null?" ("+Math.round(p)+"%)":""}`;
+    }).join(" · ");
+    return `<button class="rank-item" onclick="showDetail('${nv.ma}')">
+      <div class="rank-num" style="background:${rankColors[i]||"var(--bg1)"};color:${rankTextColors[i]||"var(--mute)"}">${i+1}</div>
+      ${avatar(nv.ten,nv.ma,36)}
+      <div style="flex:1;overflow:hidden">
+        <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nv.ten}</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${thLabel}</div>
       </div>
-    </div>}
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:18px;font-weight:800;color:${pc(hasSc?nv.score:null)}">${hasSc?p2s(nv.score):"—"}</div>
+        <div style="font-size:10px;color:${pc(hasSc?nv.score:null)}">${hasSc?(nv.score>=100?"✅ Đạt":nv.score>=70?"⚡ Khá":nv.score>=40?"⚠️ TB":"🚨 Cần đẩy"):"Chưa có KH"}</div>
+      </div>
+    </button>`;
+  }).join("");
 
-    {/* CONTENT */}
-    <div style={{paddingBottom:76}}>
-      {tab==="nhap"&&<NhapView thTuan={thTuan} onSaveTh={handleSaveThTuan} khTuan={khTuan} month={month}/>}
-      {tab==="kh"&&khTab==="phong"&&<KhPhongView khPhong={khPhong} onSave={handleSaveKhPhong} month={month}/>}
-      {tab==="kh"&&khTab==="tuan"&&<KhTuanView khPhong={khPhong} khTuan={khTuan} onSaveKh={handleSaveKhTuan} month={month} thTuan={thTuan}/>}
-      {tab==="dash"&&<DashView thTuan={thTuan} khTuan={khTuan} khPhong={khPhong} month={month} onRefresh={()=>loadData(true)}/>}
-      {tab==="alert"&&<AlertView thTuan={thTuan} khTuan={khTuan} khPhong={khPhong} month={month}/>}
-      {tab==="setup"&&<SetupView onBack={()=>setTab("nhap")}/>}
+  return `<div style="padding:14px 16px 0">
+    <div class="scope-bar">
+      ${[{k:"thang",l:"📅 Cả tháng"},
+         {k:"T1",l:"T1"},{k:"T2",l:"T2"},{k:"T3",l:"T3"},{k:"T4",l:"T4"}]
+        .map(s=>`<button class="scope-btn ${STATE.scope===s.k?'active':''}" onclick="setScope('${s.k}')">${s.l}</button>`)
+        .join("")}
     </div>
-
-    {/* BOTTOM NAV */}
-    <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",
-      width:"100%",maxWidth:480,background:C.bg0,borderTop:`1px solid ${C.border}55`,display:"flex",zIndex:100}}>
-      {TABS.map(t=>(
-        <button key={t.k} onClick={()=>setTab(t.k)}
-          style={{flex:1,padding:"11px 6px",background:"none",border:"none",cursor:"pointer",
-            color:tab===t.k?C.gold:C.mute,fontSize:10,fontWeight:tab===t.k?700:500,
-            borderTop:tab===t.k?`2px solid ${C.gold}`:"2px solid transparent",
-            transition:"all .2s",lineHeight:1.3,position:"relative"}}>
-          {t.badge&&<div style={{position:"absolute",top:8,right:"18%",width:15,height:15,
-            borderRadius:"50%",background:C.bad,fontSize:9,fontWeight:800,color:"#fff",
-            display:"flex",alignItems:"center",justifyContent:"center"}}>{t.badge}</div>}
-          <div style={{fontSize:19,marginBottom:2}}>{t.ic}</div>
-          <div>{t.lb}</div>
-        </button>
-      ))}
-    </div>
-  </div>;
+  </div>
+  <div style="padding:0 16px">
+    <div class="sec-title">Tổng hợp · ${scope==="thang"?"Cả tháng":scope}</div>
+    <div class="kpi-grid">${kpiCards}</div>
+    <div class="sec-title">🏆 Xếp hạng</div>
+    ${rankList}
+  </div>`;
 }
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+
+function renderDashDetail() {
+  const nv = NVS.find(n=>n.ma===STATE.detailNV);
+  if(!nv) return "";
+  const tuans = STATE.scope==="thang"?["T1","T2","T3","T4"]:[STATE.scope];
+  const kpiRows = KPIS.map(k=>{
+    const kh=tuans.reduce((s,t)=>s+(getKhTuan(t,nv.ma)[k.key]||0),0);
+    const th=tuans.reduce((s,t)=>s+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
+    const p=kh>0?pct(th,kh):null;
+    return `<div class="card" style="border-color:${kh>0?k.color+"44":"#1e3a5f22"}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:${kh>0?'8px':'0'}">
+        <span style="font-size:20px">${k.icon}</span>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:14px;color:${k.star?"#f59e0b":"var(--text)"}">${k.label}</div>
+          <div style="font-size:10px;color:var(--mute)">KH: ${kh?fmt(kh,k.unit):"Chưa giao"}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:800;color:${kh>0?k.color:"var(--mute)"}">${fmt(th,k.unit)}</div>
+          <span style="font-size:10px;font-weight:700;color:${pc(p)}">${p2s(p)}</span>
+        </div>
+      </div>
+      ${kh>0?bar(th,kh,k.color):""}
+    </div>`;
+  }).join("");
+
+  const histRows = ["T1","T2","T3","T4"].map(t=>{
+    const kh=getKhTuan(t,nv.ma); const th=getThTuan(t,nv.ma);
+    const hasKh=KPIS.some(k=>(kh[k.key]||0)>0);
+    const hasTh=KPIS.some(k=>(th[k.key]??null)!==null);
+    if(!hasKh&&!hasTh) return "";
+    return `<div style="background:var(--bg1);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="background:#3b82f622;color:#3b82f6;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">${t}</span>
+        ${th.updatedAt?`<span style="font-size:10px;color:var(--mute)">🕐 ${fmtTs(th.updatedAt)}</span>`:""}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        ${KPIS.filter(k=>k.star).map(k=>{
+          const khv=kh[k.key]||0, thv=th[k.key]??null;
+          const p=khv>0?pct(thv??0,khv):null;
+          return `<div style="background:var(--bg2);border-radius:8px;padding:7px;text-align:center">
+            <div style="font-size:10px;color:${k.color}">${k.icon}</div>
+            <div style="font-size:12px;font-weight:700;color:${khv>0?pc(p):"var(--mute)"}">${khv>0?fmt(thv??0,k.unit):"—"}</div>
+            <div style="font-size:9px;color:var(--mute)">KH:${fmt(khv,k.unit)}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }).join("");
+
+  return `<div style="padding:16px">
+    <button class="btn-back" onclick="backDash()">← Dashboard</button>
+    <div class="card card-highlight" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        ${avatar(nv.ten,nv.ma,50)}
+        <div style="flex:1"><div style="font-weight:800;font-size:15px">${nv.ten}</div></div>
+      </div>
+    </div>
+    <div class="sec-title">KPI theo scope</div>
+    ${kpiRows}
+    <div class="sec-title" style="margin-top:8px">Chi tiết từng tuần</div>
+    ${histRows||"<div style='color:var(--mute);text-align:center;padding:16px'>Chưa có dữ liệu</div>"}
+  </div>`;
+}
+
+// ── CẢNH BÁO ──────────────────────────────
+function renderAlert() {
+  const khP = getKhPhong();
+  const chuaCoKh = NVS.filter(nv=>!KPIS.some(k=>(getKhTuan(CUR_TUAN,nv.ma)[k.key]||0)>0));
+  const chuaNhap = NVS.filter(nv=>{
+    const kh=getKhTuan(CUR_TUAN,nv.ma), th=getThTuan(CUR_TUAN,nv.ma);
+    return KPIS.some(k=>(kh[k.key]||0)>0) && !KPIS.some(k=>(th[k.key]??null)!==null);
+  });
+  const totalTH={};
+  KPIS.forEach(k=>{
+    totalTH[k.key]=NVS.reduce((s,nv)=>
+      ["T1","T2","T3","T4"].reduce((s2,t)=>s2+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),s),0);
+  });
+  const kpiWarn = KPIS.map(k=>({...k,th:totalTH[k.key]||0,p:pct(totalTH[k.key],khP[k.key])}))
+    .filter(k=>k.p!==null&&k.p<70);
+
+  return `<div style="padding:16px">
+    <div class="alert-card" style="border-color:${chuaNhap.length?"#ef4444":"#10b981"}">
+      <div class="alert-title" style="color:${chuaNhap.length?"#ef4444":"#10b981"}">
+        ${chuaNhap.length?`🚨 ${chuaNhap.length} NV có KH chưa nhập TH (${CUR_TUAN})`:"✅ Tất cả NV đã nhập TH"}
+      </div>
+      ${chuaNhap.map(nv=>`<div class="alert-item">
+        ${avatar(nv.ten,nv.ma,30)} <span>${nv.ten}</span>
+      </div>`).join("")}
+    </div>
+
+    ${chuaCoKh.length?`<div class="alert-card" style="border-color:#f59e0b">
+      <div class="alert-title" style="color:#f59e0b">⚠️ ${chuaCoKh.length} NV chưa được giao KH ${CUR_TUAN}</div>
+      ${chuaCoKh.map(nv=>`<div class="alert-item">
+        ${avatar(nv.ten,nv.ma,30)} <span>${nv.ten}</span>
+      </div>`).join("")}
+    </div>`:""}
+
+    ${kpiWarn.length?`<div class="sec-title" style="margin-top:4px">KPI dưới 70%</div>
+    ${kpiWarn.map(k=>`<div class="card" style="margin-bottom:10px;border-color:#ef444433">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:22px">${k.icon}</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px;color:${k.star?"#f59e0b":"var(--text)"}">${k.label}</div>
+          <div style="font-size:11px;color:var(--mute)">TH: ${fmt(k.th,k.unit)} / KH: ${fmt(khP[k.key],k.unit)}</div>
+        </div>
+        <span style="font-size:16px;font-weight:800;color:${pc(k.p)}">${p2s(k.p)}</span>
+      </div>
+      ${bar(k.th,khP[k.key],pc(k.p),6)}
+    </div>`).join("")}`:"<div class='sec-title' style='margin-top:4px;color:#10b981'>✅ Tất cả KPI đang trên 70%</div>"}
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// EVENT HANDLERS
+// ══════════════════════════════════════════
+function bindEvents() {}
+
+function setTab(t) { STATE.tab=t; STATE.selNV=null; STATE.detailNV=null; render(); }
+function setKhTab(t) { STATE.khTab=t; STATE.selNV=null; render(); }
+function setTuan(t) { STATE.selTuan=t; render(); }
+function setTuanKh(t) { STATE.selTuan=t; render(); }
+function setScope(s) { STATE.scope=s; render(); }
+function selNV(ma) { STATE.selNV=ma; render(); }
+function selNVKh(ma) { STATE.selNV=ma; render(); }
+function backNhap() { STATE.selNV=null; render(); }
+function backKhTuan() { STATE.selNV=null; render(); }
+function showDetail(ma) { STATE.detailNV=ma; render(); }
+function backDash() { STATE.detailNV=null; render(); }
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+async function init() {
+  try {
+    await loadData();
+  } catch(e) {
+    console.warn("Load error:", e);
+  }
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  render();
+
+  // Realtime: poll mỗi 15 giây
+  setInterval(async ()=>{
+    await loadData();
+    render();
+  }, 15000);
+}
+
+init();
 </script>
 </body>
 </html>

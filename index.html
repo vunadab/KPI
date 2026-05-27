@@ -144,6 +144,36 @@ input[type=number]:focus{border-color:#1a6fff66;}
 .ld{width:34px;height:34px;border:3px solid #0e2a4566;border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
 .pad{padding:16px;}
+
+/* NV PICKER MODAL */
+.nvp-overlay{position:fixed;inset:0;background:rgba(1,5,13,.92);z-index:300;display:flex;align-items:flex-end;backdrop-filter:blur(8px);}
+.nvp-sheet{background:#061525;border-radius:22px 22px 0 0;width:100%;max-width:430px;margin:0 auto;padding:0 0 24px;max-height:88vh;display:flex;flex-direction:column;border-top:1px solid #1a3d5c;}
+.nvp-handle{width:36px;height:4px;border-radius:2px;background:#1a3d5c;margin:10px auto 0;}
+.nvp-head{padding:14px 18px 12px;border-bottom:1px solid #0e2a4444;flex-shrink:0;}
+.nvp-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;}
+.nvp-sub{font-size:11px;color:var(--dim);}
+.nvp-actions{display:flex;gap:7px;margin-top:11px;}
+.nvp-act{flex:1;padding:7px;border-radius:9px;border:1px solid var(--border2);background:var(--bg2);color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;}
+.nvp-act.primary{background:#1a6fff18;border-color:#1a6fff44;color:#4d9fff;}
+.nvp-list{overflow-y:auto;flex:1;padding:8px 14px;}
+.nvp-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:13px;margin-bottom:6px;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s;}
+.nvp-item:active{transform:scale(.98);}
+.nvp-item.sel{border-color:#1a6fff55;background:#1a6fff12;}
+.nvp-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:12px;}
+.nvp-item.sel .nvp-check{background:#1a6fff;border-color:#1a6fff;color:#fff;}
+.nvp-info{flex:1;}
+.nvp-name{font-weight:700;font-size:13px;color:#fff;}
+.nvp-score{font-size:11px;color:var(--dim);margin-top:2px;}
+.nvp-foot{padding:12px 14px 0;flex-shrink:0;}
+.nvp-confirm{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;font-weight:800;font-size:14px;font-family:inherit;}
+
+/* Filter trigger button */
+.nvf-trigger{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;border:1px solid var(--border2);background:var(--card2);cursor:pointer;width:100%;text-align:left;margin-bottom:13px;transition:all .15s;}
+.nvf-trigger:active{transform:scale(.98);}
+.nvf-trigger.active{border-color:#1a6fff55;background:#1a6fff10;}
+.nvf-chips{display:flex;gap:5px;flex:1;overflow:hidden;flex-wrap:nowrap;}
+.nvf-chip{font-size:10px;padding:2px 8px;border-radius:5px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+
 .empty{text-align:center;padding:28px 16px;color:var(--mute);font-size:13px;}
 </style>
 </head>
@@ -184,6 +214,25 @@ input[type=number]:focus{border-color:#1a6fff66;}
       <div class="pk" style="font-size:16px;color:var(--dim)" onclick="pinDel()">⌫</div>
     </div>
     <button onclick="closePinModal()" style="margin-top:14px;background:none;border:none;color:var(--dim);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600">✕ Hủy</button>
+  </div>
+</div>
+
+<div id="nvp-modal" class="nvp-overlay" style="display:none" onclick="nvpClickOutside(event)">
+  <div class="nvp-sheet" id="nvp-sheet">
+    <div class="nvp-handle"></div>
+    <div class="nvp-head">
+      <div class="nvp-title">👤 Chọn nhân viên / nhóm</div>
+      <div class="nvp-sub" id="nvp-sub">Đang xem toàn phòng — chọn để lọc riêng</div>
+      <div class="nvp-actions">
+        <button class="nvp-act" onclick="nvpSelectAll()">✓ Chọn tất cả</button>
+        <button class="nvp-act" onclick="nvpClearAll()">✕ Bỏ chọn</button>
+        <button class="nvp-act primary" onclick="nvpSortByScore()">📊 Sắp xếp điểm</button>
+      </div>
+    </div>
+    <div class="nvp-list" id="nvp-list"></div>
+    <div class="nvp-foot">
+      <button class="nvp-confirm" onclick="nvpConfirm()">Xem kết quả</button>
+    </div>
   </div>
 </div>
 
@@ -281,6 +330,7 @@ var S={
   scope:'thang',
   scopeDay:'', scopeFrom:'', scopeTo:'',
   filterNVs:[],
+  nvpTemp:[], // temp selection trong modal
   online:false,
   khPhong:{}, khTuan:{}, thTuan:{},
 };
@@ -636,27 +686,29 @@ async function saveKhT(){
 // ═══════════════════════════
 function rNVFilter(){
   var filtered=S.filterNVs;
-  var m=S.month;
-  var btns=NVS.map(function(nv){
-    var isOn=filtered.indexOf(nv.ma)>=0;
-    var c=acC(nv.ma);
-    var sc=nvScoreCalc(m,nv.ma);
-    var initials=nv.ten.split(' ').slice(-2).map(function(w){return w[0];}).join('');
-    var pctStr=sc!==null?'<span class="nvf-pct" style="color:'+pc(sc)+'">'+Math.round(sc)+'%</span>':'';
-    return'<div class="nvf-btn'+(isOn?' on':'')+'" onclick="toggleNV(\''+nv.ma+'\')" style="'+(isOn?'border-color:'+c+'55;background:'+c+'18;color:'+c+';':'')+'">'
-      +'<span style="width:16px;height:16px;border-radius:50%;background:'+c+'25;color:'+c+';font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</span>'
-      +nv.ten.split(' ').pop()+pctStr+'</div>';
-  }).join('');
-  var clearBtn=filtered.length>0?'<div class="nvf-btn" onclick="clearNVFilter()" style="border-color:#ff475730;background:#ff475710;color:#ff6b7a;flex-shrink:0">✕ Bỏ lọc</div>':'';
-  return'<div style="margin-bottom:13px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">'
-    +'<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:700">👤 Lọc nhân viên / nhóm</div>'
-    +'<div style="font-size:10px;color:var(--mute)">Đang xem: '+(filtered.length>0?filtered.length+' NV':'Toàn phòng ('+NVS.length+')')+'</div>'
+  var isActive=filtered.length>0;
+  var chips='';
+  if(isActive){
+    chips=filtered.slice(0,4).map(function(ma){
+      var nv=NVS.filter(function(n){return n.ma===ma;})[0];
+      if(!nv)return'';
+      var c=acC(ma);
+      return'<span class="nvf-chip" style="background:'+c+'18;color:'+c+';border:1px solid '+c+'35">'+nv.ten.split(' ').pop()+'</span>';
+    }).join('');
+    if(filtered.length>4)chips+='<span class="nvf-chip" style="background:#1a6fff18;color:#4d9fff;border:1px solid #1a6fff35">+'+(filtered.length-4)+' NV</span>';
+  }
+  return'<div>'
+    +'<button class="nvf-trigger'+(isActive?' active':'')+'" onclick="openNVPicker()">'
+    +'<span style="font-size:17px">'+(isActive?'👤':'👥')+'</span>'
+    +'<div class="nvf-chips">'
+    +(isActive?chips:'<span style="color:var(--dim);font-size:12px;font-weight:600">Toàn phòng ('+NVS.length+' NV) — bấm để lọc</span>')
     +'</div>'
-    +'<div class="nvf-wrap"><div class="nvf-row">'
-    +'<div class="nvf-btn all'+(filtered.length===0?' on':'')+'" onclick="clearNVFilter()">👥 Toàn phòng</div>'
-    +btns+clearBtn
-    +'</div></div></div>';
+    +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
+    +(isActive?'<span style="font-size:10px;font-weight:700;color:#4d9fff;background:#1a6fff18;padding:2px 7px;border-radius:5px">'+filtered.length+' NV</span>':'')
+    +'<span style="color:var(--dim);font-size:16px">›</span>'
+    +'</div></button>'
+    +(isActive?'<button onclick="clearNVFilter()" style="font-size:10px;color:#ff6b7a;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;padding:3px 4px 10px;display:block">✕ Bỏ lọc — xem toàn phòng</button>':'')
+    +'</div>';
 }
 
 function rScopeBar(){
@@ -1031,6 +1083,104 @@ function clearNVFilter(){S.filterNVs=[];render();}
 // ═══════════════════════════
 // INIT
 // ═══════════════════════════
+// ═══════════════════════════════════════════
+// NV PICKER MODAL
+// ═══════════════════════════════════════════
+var nvpSorted = false;
+
+function openNVPicker(){
+  S.nvpTemp = S.filterNVs.slice(); // copy current selection
+  nvpSorted = false;
+  renderNVPicker();
+  document.getElementById('nvp-modal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeNVPicker(){
+  document.getElementById('nvp-modal').style.display='none';
+  document.body.style.overflow='';
+}
+function nvpClickOutside(e){
+  if(e.target===document.getElementById('nvp-modal')) closeNVPicker();
+}
+function nvpSelectAll(){
+  S.nvpTemp=NVS.map(function(nv){return nv.ma;});
+  renderNVPicker();
+}
+function nvpClearAll(){
+  S.nvpTemp=[];
+  renderNVPicker();
+}
+function nvpToggle(ma){
+  var idx=S.nvpTemp.indexOf(ma);
+  if(idx>=0)S.nvpTemp.splice(idx,1);else S.nvpTemp.push(ma);
+  renderNVPicker();
+}
+function nvpSortByScore(){
+  nvpSorted=!nvpSorted;
+  renderNVPicker();
+}
+function nvpConfirm(){
+  S.filterNVs=S.nvpTemp.slice();
+  closeNVPicker();
+  render();
+}
+
+function renderNVPicker(){
+  var m=S.month;
+  var nvList=NVS.slice();
+
+  // Sort by score if requested
+  if(nvpSorted){
+    nvList=nvList.map(function(nv){
+      return{nv:nv,sc:nvScoreCalc(m,nv.ma)};
+    }).sort(function(a,b){
+      if(a.sc===null&&b.sc===null)return 0;
+      if(a.sc===null)return 1;if(b.sc===null)return-1;
+      return b.sc-a.sc;
+    }).map(function(x){return x.nv;});
+  }
+
+  var cnt=S.nvpTemp.length;
+  var sub=document.getElementById('nvp-sub');
+  if(sub)sub.textContent=cnt===0?'Đang xem toàn phòng — chọn để lọc riêng':cnt+' nhân viên được chọn';
+
+  var items=nvList.map(function(nv){
+    var isSel=S.nvpTemp.indexOf(nv.ma)>=0;
+    var sc=nvScoreCalc(m,nv.ma);
+    var c=acC(nv.ma);
+    var scHtml=sc!==null
+      ?'<span style="font-size:11px;font-weight:800;color:'+pc(sc)+'">'+p2s(sc)+'</span> '
+       +'<span style="font-size:10px;color:var(--dim)">· '+stl(sc).l+'</span>'
+      :'<span style="font-size:10px;color:var(--mute)">Chưa có KH</span>';
+
+    // Xem TH tuần hiện tại
+    var th=gTH(m,CUR_T,nv.ma);
+    var kh=gKT(m,CUR_T,nv.ma);
+    var hasTh=KPIS.some(function(k){return th[k.key]!=null;});
+    var hasKh=KPIS.some(function(k){return(kh[k.key]||0)>0;});
+    var statusHtml=hasTh
+      ?'<span style="background:#00c48c18;color:#00c48c;border:1px solid #00c48c30;border-radius:5px;font-size:9px;font-weight:700;padding:1px 6px">✓ Đã nhập</span>'
+      :hasKh?'<span style="background:#e8a02018;color:#ffc84a;border:1px solid #e8a02030;border-radius:5px;font-size:9px;font-weight:700;padding:1px 6px">Cần nhập</span>'
+      :'<span style="background:#2a406018;color:#6a8aab;border:1px solid #2a406030;border-radius:5px;font-size:9px;font-weight:700;padding:1px 6px">Chưa KH</span>';
+
+    return'<div class="nvp-item'+(isSel?' sel':'')+'" onclick="nvpToggle(\'' + nv.ma + '\')">'
+      +av(nv.ten,nv.ma,38)
+      +'<div class="nvp-info">'
+      +'<div style="display:flex;align-items:center;gap:7px"><div class="nvp-name">'+nv.ten+'</div>'+statusHtml+'</div>'
+      +'<div style="margin-top:3px">'+scHtml+'</div>'
+      +'</div>'
+      +'<div class="nvp-check">'+(isSel?'✓':'')+'</div>'
+      +'</div>';
+  }).join('');
+
+  var list=document.getElementById('nvp-list');
+  if(list)list.innerHTML=items;
+
+  // Update confirm button
+  var btn=document.querySelector('.nvp-confirm');
+  if(btn)btn.textContent=cnt===0?'Xem toàn phòng ('+NVS.length+' NV)':'Xem '+cnt+' nhân viên đã chọn';
+}
+
 async function init(){
   try{await loadMonth(CUR_M);}catch(e){console.warn(e);}
   document.getElementById('loading').style.display='none';

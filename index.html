@@ -7,150 +7,220 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>KPI Banking — NAB</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg0:#050d1a;--bg1:#0a1628;--bg2:#111f35;--bg3:#1a2e48;
+  --bg0:#03070f;--bg1:#060e1c;--bg2:#0c1828;--bg3:#122035;
   --gold:#f59e0b;--blue:#3b82f6;--green:#10b981;--red:#ef4444;
   --purple:#8b5cf6;--cyan:#06b6d4;--pink:#ec4899;--orange:#f97316;
-  --text:#e2e8f0;--dim:#94a3b8;--mute:#475569;--border:#1e3a5f;
+  --text:#f1f5ff;--dim:#9ab0cc;--mute:#3d5472;--border:#162840;
 }
-html,body{background:var(--bg0);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
-#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg0);padding-bottom:70px;}
+html,body{background:var(--bg0);color:var(--text);font-family:'Be Vietnam Pro','Segoe UI',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg0);padding-bottom:76px;}
 
-/* Header */
-.header{background:linear-gradient(180deg,var(--bg1),var(--bg0));padding:14px 16px 12px;
-  border-bottom:1px solid #1e3a5f55;position:sticky;top:0;z-index:100;}
-.header-row{display:flex;align-items:center;justify-content:space-between;}
-.header-title{font-size:20px;font-weight:900;letter-spacing:-.02em;}
-.header-title span{color:var(--gold);}
-.header-sub{font-size:11px;color:var(--mute);margin-top:2px;display:flex;align-items:center;gap:6px;}
-.badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
-.badge-green{background:#10b98122;color:var(--green);border:1px solid #10b98144;}
-.badge-yellow{background:#f59e0b22;color:var(--gold);border:1px solid #f59e0b44;}
-.badge-red{background:#ef444422;color:var(--red);border:1px solid #ef444444;}
+/* HEADER */
+.hdr{background:linear-gradient(180deg,#060e1c 0%,transparent 100%);padding:14px 16px 12px;
+  border-bottom:1px solid #162840aa;position:sticky;top:0;z-index:200;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+.hdr-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.hdr-title{font-size:19px;font-weight:900;letter-spacing:-.03em;}
+.hdr-title em{color:var(--gold);font-style:normal;}
+.hdr-meta{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap;}
+.hdr-meta span{font-size:11px;color:var(--dim);}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
 
-/* Bottom nav */
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:480px;background:var(--bg0);
-  border-top:1px solid #1e3a5f55;display:flex;z-index:100;}
-.nav-btn{flex:1;padding:10px 6px;background:none;border:none;cursor:pointer;
-  color:var(--mute);font-size:10px;font-weight:500;font-family:inherit;
-  border-top:2px solid transparent;transition:all .2s;line-height:1.4;}
-.nav-btn.active{color:var(--gold);border-top-color:var(--gold);font-weight:700;}
-.nav-icon{font-size:19px;display:block;margin-bottom:1px;}
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;border:1px solid;}
+.bdg-g{background:#10b98118;color:#34d399;border-color:#10b98135;}
+.bdg-y{background:#f59e0b18;color:#fbbf24;border-color:#f59e0b35;}
+.bdg-r{background:#ef444418;color:#f87171;border-color:#ef444435;}
+.bdg-b{background:#3b82f618;color:#60a5fa;border-color:#3b82f635;}
+.bdg-m{background:#47547018;color:#94a3b8;border-color:#47547035;}
+.bdg-p{background:#8b5cf618;color:#a78bfa;border-color:#8b5cf635;}
 
-/* Cards */
-.card{background:var(--bg2);border-radius:14px;padding:14px;
-  border:1px solid #1e3a5f22;margin-bottom:10px;}
-.card-highlight{background:linear-gradient(135deg,#1a3050,var(--bg1));
-  border:1px solid #1e3a5f44;}
+/* MONTH PICKER */
+.m-sel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:6px 28px 6px 10px;color:var(--text);font-size:12px;font-weight:700;
+  font-family:inherit;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23f59e0b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;}
+.m-sel option{background:#0c1828;color:#f1f5ff;}
 
-/* KPI grid */
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-.kpi-card{background:var(--bg2);border-radius:14px;padding:13px;
-  border:1px solid #1e3a5f22;position:relative;overflow:hidden;}
-.kpi-card-bg{position:absolute;bottom:-8px;right:-4px;font-size:38px;opacity:.04;}
-.kpi-label{font-size:10px;color:var(--mute);margin-bottom:2px;}
-.kpi-value{font-size:20px;font-weight:900;line-height:1;}
-.kpi-kh{font-size:9px;color:var(--mute);margin-top:2px;}
-.kpi-ring-wrap{position:relative;width:44px;height:44px;flex-shrink:0;}
-.kpi-ring-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:9px;font-weight:700;text-align:center;}
+/* BOTTOM NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+  background:linear-gradient(180deg,transparent,#03070f 30%);display:flex;z-index:200;
+  padding-top:8px;border-top:1px solid #16284055;}
+.nb{flex:1;padding:8px 2px 10px;background:none;border:none;cursor:pointer;
+  color:var(--mute);font-size:9.5px;font-weight:600;font-family:inherit;
+  border-top:2px solid transparent;transition:all .2s;line-height:1.5;position:relative;}
+.nb.on{color:var(--gold);border-top-color:var(--gold);}
+.nb .ic{font-size:17px;display:block;margin-bottom:2px;}
+.nb-bdg{position:absolute;top:5px;right:calc(50% - 16px);background:#ef4444;
+  color:#fff;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg0);}
 
-/* Progress bar */
-.bar-wrap{background:#0a1628;border-radius:4px;height:5px;overflow:hidden;margin-top:6px;}
-.bar-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+/* CARDS */
+.card{background:var(--bg2);border-radius:16px;padding:14px;border:1px solid var(--border);margin-bottom:10px;}
+.card-hi{background:linear-gradient(135deg,#0e2040,var(--bg1));border-color:#1e3a5f;}
+.card-gold{border-color:#f59e0b44;}
 
-/* Section title */
-.sec-title{font-size:11px;color:var(--dim);text-transform:uppercase;
-  letter-spacing:.1em;font-weight:700;margin-bottom:10px;}
+/* KPI GRID */
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.kc{background:var(--bg2);border-radius:16px;padding:13px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.kc-bg{position:absolute;bottom:-10px;right:-5px;font-size:42px;opacity:.05;line-height:1;}
+.kc-lbl{font-size:10px;color:var(--dim);margin-bottom:3px;font-weight:600;letter-spacing:.02em;}
+.kc-val{font-size:19px;font-weight:900;line-height:1.1;color:var(--text);}
+.kc-kh{font-size:9px;color:var(--mute);margin-top:3px;}
+.kc-bot{display:flex;justify-content:space-between;align-items:center;margin-top:5px;}
 
-/* NV list items */
-.nv-item{background:var(--bg2);border-radius:14px;padding:13px 14px;
-  margin-bottom:8px;border:1px solid #1e3a5f22;cursor:pointer;
-  display:flex;align-items:center;gap:12px;width:100%;text-align:left;}
-.nv-item:active{opacity:.7;}
-.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;}
-.nv-name{font-weight:600;font-size:13px;color:var(--text);}
-.nv-sub{font-size:11px;color:var(--mute);margin-top:2px;}
-.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
-.chip{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:700;}
+/* BAR */
+.bw{background:#060e1a;border-radius:3px;overflow:hidden;}
+.bf{border-radius:3px;transition:width .6s ease;}
 
-/* Form */
-.form-field{background:var(--bg2);border-radius:14px;padding:14px;
-  margin-bottom:10px;border:1px solid #1e3a5f22;}
-.field-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.field-label{display:flex;align-items:center;gap:8px;}
-.field-name{font-weight:600;font-size:14px;}
-.field-kh{font-size:10px;color:var(--mute);}
-input[type=number]{width:100%;background:var(--bg1);border:1px solid var(--border);
-  border-radius:10px;padding:12px 13px;color:var(--text);font-size:16px;
-  font-weight:600;outline:none;font-family:inherit;}
-input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-input[type=number]:focus{border-color:#3b82f6;}
+/* SECTION TITLE */
+.sec{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:10px;}
 
-/* Buttons */
-.btn-primary{width:100%;padding:15px;border-radius:14px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,var(--gold),#d97706);color:#040a12;
-  font-weight:800;font-size:16px;font-family:inherit;margin-top:4px;}
-.btn-primary:active{opacity:.8;}
-.btn-primary.saved{background:#10b981;color:#fff;}
-.btn-back{background:none;border:none;color:var(--dim);cursor:pointer;
-  font-size:13px;font-family:inherit;padding:0;margin-bottom:14px;}
+/* NV ITEMS */
+.nvi{background:var(--bg2);border-radius:14px;padding:12px 14px;margin-bottom:8px;
+  border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;
+  gap:11px;width:100%;text-align:left;transition:border-color .15s;}
+.nvi:active{opacity:.7;}
+.nvi.hk{border-color:#f59e0b33;}
+.nvi.ht{border-color:#10b98133;}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;}
+.nv-n{font-weight:700;font-size:13px;color:var(--text);}
+.nv-s{font-size:11px;color:var(--dim);margin-top:2px;}
+.cps{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.cp{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:700;}
 
-/* Ranking */
-.rank-item{background:var(--bg2);border-radius:14px;padding:13px 14px;
-  margin-bottom:8px;border:1px solid #1e3a5f22;cursor:pointer;
-  display:flex;align-items:center;gap:10px;width:100%;text-align:left;}
-.rank-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
-
-/* Tuần tabs */
-.tabs{display:flex;gap:6px;margin-bottom:14px;}
-.tab-btn{flex:1;padding:9px 0;border-radius:10px;border:1px solid var(--border);
-  background:var(--bg2);color:var(--dim);font-weight:700;font-size:14px;
+/* TUẦN TABS */
+.tt{display:flex;gap:6px;margin-bottom:14px;}
+.tb{flex:1;padding:9px 0;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--dim);font-weight:700;font-size:13px;
   cursor:pointer;font-family:inherit;transition:all .2s;}
-.tab-btn.active{border-color:#3b82f6;background:#3b82f622;color:#3b82f6;}
+.tb.on{border-color:#3b82f6;background:#3b82f615;color:#60a5fa;}
 
-/* Loading */
-#loading{display:flex;align-items:center;justify-content:center;height:100vh;
-  flex-direction:column;gap:16px;}
-
-/* Alert */
-.alert-card{background:var(--bg2);border-radius:14px;padding:14px;
-  margin-bottom:12px;border-left:4px solid;}
-.alert-title{font-size:14px;font-weight:700;margin-bottom:8px;}
-.alert-item{display:flex;align-items:center;gap:8px;padding:7px 0;
-  border-top:1px solid #ffffff08;font-size:13px;}
-
-/* Scope filter */
-.scope-bar{display:flex;gap:5px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
-.scope-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);
+/* SCOPE BAR */
+.sb{display:flex;gap:5px;overflow-x:auto;padding-bottom:3px;margin-bottom:12px;scrollbar-width:none;}
+.sb::-webkit-scrollbar{display:none;}
+.sbb{padding:6px 13px;border-radius:20px;border:1px solid var(--border);
   background:var(--bg2);color:var(--dim);font-size:12px;font-weight:600;
-  cursor:pointer;font-family:inherit;white-space:nowrap;}
-.scope-btn.active{border-color:var(--gold);background:#f59e0b22;color:var(--gold);}
+  cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;color:var(--dim);}
+.sbb.on{border-color:var(--gold);background:#f59e0b15;color:#fbbf24;}
+
+/* DATE DROPDOWNS */
+.drow{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+.dsel{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:9px 10px;color:var(--text);font-size:12px;outline:none;font-family:inherit;
+  appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ab0cc' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;}
+.dsel option{background:#0c1828;color:#f1f5ff;}
+
+/* FORMS */
+.ff{background:var(--bg2);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid var(--border);}
+.fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.fl{display:flex;align-items:center;gap:10px;}
+.fn{font-weight:700;font-size:14px;color:var(--text);}
+.fk{font-size:10px;color:var(--dim);margin-top:1px;}
+.fp{font-size:13px;font-weight:800;}
+input[type=number]{width:100%;background:var(--bg1);border:1px solid var(--border);
+  border-radius:10px;padding:12px 13px;color:var(--text);font-size:16px;font-weight:600;
+  outline:none;font-family:inherit;-webkit-appearance:none;}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]:focus{border-color:#3b82f666;}
+
+/* BUTTONS */
+.bsave{width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#f59e0b,#d97706);color:#030810;
+  font-weight:800;font-size:15px;font-family:inherit;margin-top:6px;
+  box-shadow:0 4px 24px #f59e0b28;transition:all .2s;}
+.bsave.ok{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 4px 24px #10b98128;}
+.bback{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;
+  font-family:inherit;padding:0;margin-bottom:16px;display:flex;align-items:center;gap:5px;}
+
+/* RANK */
+.ri{background:var(--bg2);border-radius:14px;padding:12px 14px;margin-bottom:8px;
+  border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:10px;
+  width:100%;text-align:left;}
+
+/* STAR NV */
+.star-card{background:linear-gradient(135deg,#1a1200 0%,#0c1828 100%);
+  border:2px solid #f59e0b44;border-radius:18px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;}
+.star-card::before{content:'⭐';position:absolute;top:-8px;right:-8px;font-size:64px;opacity:.06;}
+.sk{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.sk-item{background:#f59e0b15;border:1px solid #f59e0b30;border-radius:10px;
+  padding:8px 10px;text-align:center;flex:1;min-width:72px;}
+
+/* WARN ITEM */
+.wi{display:flex;align-items:center;gap:10px;padding:11px 13px;
+  background:var(--bg2);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);}
+
+/* ALERT */
+.ac{border-radius:14px;padding:13px;margin-bottom:12px;border-left:4px solid;}
+.at{font-size:14px;font-weight:700;margin-bottom:8px;}
+.ai{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #ffffff08;font-size:13px;}
+
+/* LOADING */
+#loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;}
+.ld{width:34px;height:34px;border:3px solid #16284066;border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.pad{padding:16px;}
+.mt6{margin-top:6px;}
+.empty{text-align:center;padding:24px;color:var(--mute);font-size:13px;}
 </style>
 </head>
 <body>
 <div id="loading">
-  <div style="font-size:40px">🏦</div>
-  <div style="color:#f59e0b;font-size:16px;font-weight:700">KPI Banking NAB</div>
-  <div style="color:#64748b;font-size:13px">Đang tải...</div>
+  <div style="font-size:38px">🏦</div>
+  <div style="color:var(--gold);font-size:16px;font-weight:800">KPI Banking NAB</div>
+  <div class="ld"></div>
 </div>
 <div id="app" style="display:none"></div>
-
 <script>
-// ══════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════
-const DB = "https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app";
+// ═══════════════════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════════════════
+const DB   = "https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app";
 const ROOT = "kpi";
-const MONTH = (()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); })();
-const TODAY_DAY = new Date().getDate();
-const CUR_TUAN = TODAY_DAY<=7?"T1":TODAY_DAY<=14?"T2":TODAY_DAY<=21?"T3":"T4";
+async function fbGet(p){
+  try{const r=await fetch(`${DB}/${ROOT}/${p}.json`);if(!r.ok)return null;const d=await r.json();return d===null?null:d;}
+  catch(e){console.warn("fbGet",p,e.message);return null;}
+}
+async function fbSet(p,d){
+  try{await fetch(`${DB}/${ROOT}/${p}.json`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});}
+  catch(e){console.warn("fbSet",p,e.message);}
+}
 
-const NVS = [
+// ═══════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════
+const NOW = new Date();
+const CUR_M = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,"0")}`;
+const CUR_T  = NOW.getDate()<=7?"T1":NOW.getDate()<=14?"T2":NOW.getDate()<=21?"T3":"T4";
+
+// Sinh tháng từ 2026-01 đến tháng hiện tại
+function genMonths(){
+  const ms=[]; const d=new Date(CUR_M+"-01");
+  while(d>=new Date("2026-01-01")){
+    ms.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`);
+    d.setMonth(d.getMonth()-1);
+  }
+  return ms;
+}
+const MONTHS=genMonths();
+
+// Sinh danh sách ngày trong tháng
+function genDays(m){
+  const [y,mo]=m.split("-").map(Number);
+  const days=new Date(y,mo,0).getDate();
+  const arr=[];
+  for(let i=1;i<=days;i++) arr.push(`${m}-${String(i).padStart(2,"0")}`);
+  return arr;
+}
+
+const NVS=[
   {ma:"10924",ten:"TRƯƠNG ANH TOÀN"},
   {ma:"16032",ten:"DƯƠNG HỒNG PHÁP"},
   {ma:"10847",ten:"TRẦN VIẾT DUY"},
@@ -164,691 +234,673 @@ const NVS = [
   {ma:"NV011",ten:"LÊ THỊ BÍCH PHƯỢNG"},
   {ma:"NV012",ten:"NGUYỄN HỒNG PHƯƠNG THANH"},
 ];
-
-const KPIS = [
-  {key:"huy_dong",label:"Huy Động",icon:"💰",unit:"tr đ",star:true, color:"#f59e0b"},
-  {key:"du_no",   label:"Dư Nợ",   icon:"🏦",unit:"tr đ",star:true, color:"#3b82f6"},
-  {key:"the_td",  label:"Thẻ TD",  icon:"💳",unit:"thẻ", star:true, color:"#8b5cf6"},
-  {key:"tk_hkd",  label:"TK HKD",  icon:"🏢",unit:"TK",  star:false,color:"#10b981"},
-  {key:"qr_code", label:"QR Code", icon:"📱",unit:"QR",  star:false,color:"#06b6d4"},
-  {key:"cif",     label:"CIF",     icon:"👤",unit:"CIF", star:false,color:"#ec4899"},
+const KPIS=[
+  {key:"huy_dong",label:"Huy Động",short:"HD",icon:"💰",unit:"tr đ",star:true, color:"#f59e0b"},
+  {key:"du_no",   label:"Dư Nợ",  short:"DN",icon:"🏦",unit:"tr đ",star:true, color:"#3b82f6"},
+  {key:"the_td",  label:"Thẻ TD", short:"TT",icon:"💳",unit:"thẻ", star:true, color:"#8b5cf6"},
+  {key:"tk_hkd",  label:"TK HKD", short:"HK",icon:"🏢",unit:"TK",  star:false,color:"#10b981"},
+  {key:"qr_code", label:"QR Code",short:"QR",icon:"📱",unit:"QR",  star:false,color:"#06b6d4"},
+  {key:"cif",     label:"CIF",    short:"CF",icon:"👤",unit:"CIF", star:false,color:"#ec4899"},
 ];
+const STARS=KPIS.filter(k=>k.star);
+const DEFAULT_KH={huy_dong:47900,du_no:31000,the_td:82,tk_hkd:80,qr_code:220,cif:415};
 
-const DEFAULT_KH = {huy_dong:47900,du_no:31000,the_td:82,tk_hkd:80,qr_code:220,cif:415};
-
-// ══════════════════════════════════════════
-// FIREBASE REST
-// ══════════════════════════════════════════
-async function fbGet(path) {
-  try {
-    const r = await fetch(DB+"/"+ROOT+"/"+path+".json");
-    if(!r.ok) return null;
-    const d = await r.json();
-    return d;
-  } catch(e) { console.warn("GET",path,e.message); return null; }
-}
-
-async function fbSet(path, data) {
-  try {
-    await fetch(DB+"/"+ROOT+"/"+path+".json", {
-      method:"PUT",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(data)
-    });
-  } catch(e) { console.warn("SET",path,e.message); }
-}
-
-// ══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════
-let STATE = {
-  tab: "nhap",           // nhap | kh | dash | alert
-  khTab: "phong",        // phong | tuan
-  selTuan: CUR_TUAN,
-  selNV: null,
-  detailNV: null,
-  khPhong: {},           // {kpi: value}
-  khTuan: {},            // {tuan: {ma: {kpi: value}}}
-  thTuan: {},            // {tuan: {ma: {kpi: value, updatedAt}}}
-  scope: "thang",        // thang | T1..T4
-  online: false,
+// ═══════════════════════════════════════════════
+let S={
+  tab:"nhap", khTab:"phong",
+  month:CUR_M, selT:CUR_T, selNV:null, detailNV:null,
+  scope:"thang",   // thang|T1..T4|ngay|custom
+  scopeDay:"",     // yyyy-mm-dd
+  scopeFrom:"",    // yyyy-mm-dd
+  scopeTo:"",      // yyyy-mm-dd
+  online:false,
+  khPhong:{}, khTuan:{}, thTuan:{},
 };
 
-function getKhPhong() { return STATE.khPhong[MONTH] || DEFAULT_KH; }
-function getKhTuan(tuan, ma) { return (STATE.khTuan[MONTH]||{})[tuan]?.[ma] || {}; }
-function getThTuan(tuan, ma) { return (STATE.thTuan[MONTH]||{})[tuan]?.[ma] || {}; }
+const gKP=(m)=>S.khPhong[m||S.month]||DEFAULT_KH;
+const gKT=(m,t,ma)=>((S.khTuan[m||S.month]||{})[t]||{})[ma]||{};
+const gTH=(m,t,ma)=>((S.thTuan[m||S.month]||{})[t]||{})[ma]||{};
 
-// ══════════════════════════════════════════
+async function loadMonth(m){
+  const[kp,kt,th]=await Promise.all([fbGet(`khPhong/${m}`),fbGet(`khTuan/${m}`),fbGet(`thTuan/${m}`)]);
+  if(kp)S.khPhong[m]=kp; else if(!S.khPhong[m])S.khPhong[m]={};
+  if(kt)S.khTuan[m]=kt;  else if(!S.khTuan[m])S.khTuan[m]={};
+  if(th)S.thTuan[m]=th;  else if(!S.thTuan[m])S.thTuan[m]={};
+  S.online=!!(kp||kt||th);
+}
+
+// ═══════════════════════════════════════════════
 // HELPERS
-// ══════════════════════════════════════════
-function fmt(v, unit="") {
-  if(v===null||v===undefined) return "—";
-  const n = Number(v);
-  if(isNaN(n)) return "—";
-  return n.toLocaleString("vi-VN")+(unit?" "+unit:"");
+// ═══════════════════════════════════════════════
+const fmt=(v,u="")=>{if(v==null)return"—";const n=+v;return isNaN(n)?"—":n.toLocaleString("vi-VN")+(u?" "+u:"");};
+const pct=(th,kh)=>(kh&&kh>0&&th!=null)?th/kh*100:null;
+const p2s=p=>p===null?"—":Math.round(p)+"%";
+const pc=p=>{if(p===null)return"#3d5472";if(p>=100)return"#10b981";if(p>=70)return"#f59e0b";if(p>=40)return"#f97316";return"#ef4444";};
+const stl=p=>{
+  if(p===null)return{l:"Chưa KH",c:"#3d5472"};
+  if(p>=100)return{l:"✅ Đạt",c:"#10b981"};
+  if(p>=70)return{l:"⚡ Khá",c:"#f59e0b"};
+  if(p>=40)return{l:"⚠️ Trung bình",c:"#f97316"};
+  return{l:"🚨 Cần đẩy",c:"#ef4444"};
+};
+function acC(ma){const cols=["#f59e0b","#3b82f6","#8b5cf6","#10b981","#ec4899","#06b6d4","#f97316","#a855f7"];let h=0;for(let c of ma)h=(h*31+c.charCodeAt(0))%cols.length;return cols[h];}
+function av(name,ma,sz=38){const c=acC(ma);return `<div class="av" style="width:${sz}px;height:${sz}px;background:${c}18;border:1.5px solid ${c}50;color:${c};font-size:${Math.round(sz*.38)}px">${name.split(" ").pop()[0]||"?"}</div>`;}
+function cp(l,c){return `<span class="cp" style="background:${c}20;color:${c}">${l}</span>`;}
+function fmtTs(ts){if(!ts)return"";const d=new Date(ts);return `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
+function fmtM(m){const[y,mo]=m.split("-");return `T${+mo}/${y}`;}
+function ring(p,sz=44,sw=5){const r=(sz-sw*2)/2,c=2*Math.PI*r,v=Math.min(Math.max(p||0,0),100);
+  return `<svg width="${sz}" height="${sz}" style="transform:rotate(-90deg)"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="#05091a" stroke-width="${sw}"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${pc(p)}" stroke-width="${sw}" stroke-dasharray="${v/100*c} ${c}" stroke-linecap="round"/></svg>`;}
+function bar(v,mx,col,h=5){const w=mx>0?Math.min(100,Math.max(0,(v||0)/mx*100)):0;return `<div class="bw" style="height:${h}px"><div class="bf" style="width:${w}%;background:${col};height:${h}px"></div></div>`;}
+
+// ── Scope helpers ──
+function scopeTuans(){
+  if(S.scope==="thang"||S.scope==="custom"||S.scope==="ngay") return ["T1","T2","T3","T4"];
+  return [S.scope];
 }
-function pct(th, kh) { return (kh&&kh>0&&th!==null&&th!==undefined) ? th/kh*100 : null; }
-function p2s(p) { return p===null?"—":Math.round(p)+"%"; }
-function pc(p) {
-  if(p===null) return "#475569";
-  if(p>=100) return "#10b981";
-  if(p>=70)  return "#f59e0b";
-  if(p>=40)  return "#f97316";
-  return "#ef4444";
+function thForNV(m,ma){
+  const tuans=scopeTuans();
+  if(S.scope==="ngay"&&S.scopeDay){
+    // Filter by day: ngày nhập gần nhất trong tháng match ngày chọn
+    const dayMs=new Date(S.scopeDay).setHours(0,0,0,0);
+    const dayMe=dayMs+86400000;
+    const r={};KPIS.forEach(k=>r[k.key]=0);
+    tuans.forEach(t=>{
+      const th=gTH(m,t,ma);
+      if(th.updatedAt&&th.updatedAt>=dayMs&&th.updatedAt<dayMe)
+        KPIS.forEach(k=>{if(th[k.key]!=null)r[k.key]=(r[k.key]||0)+th[k.key];});
+    });
+    return r;
+  }
+  if(S.scope==="custom"&&S.scopeFrom&&S.scopeTo){
+    const from=new Date(S.scopeFrom).setHours(0,0,0,0);
+    const to=new Date(S.scopeTo).setHours(23,59,59,999);
+    const r={};KPIS.forEach(k=>r[k.key]=0);
+    tuans.forEach(t=>{
+      const th=gTH(m,t,ma);
+      if(th.updatedAt&&th.updatedAt>=from&&th.updatedAt<=to)
+        KPIS.forEach(k=>{if(th[k.key]!=null)r[k.key]=Math.max(r[k.key]||0,th[k.key]||0);});
+    });
+    return r;
+  }
+  const r={};
+  KPIS.forEach(k=>{r[k.key]=tuans.reduce((s,t)=>s+(gTH(m,t,ma)[k.key]||0),0);});
+  return r;
 }
-function acColor(ma) {
-  const cols=["#f59e0b","#3b82f6","#8b5cf6","#10b981","#ec4899","#06b6d4","#f97316","#a855f7"];
-  let h=0; for(let i=0;i<ma.length;i++) h=(h*31+ma.charCodeAt(i))%cols.length;
-  return cols[h];
+function khForNV(m,ma){
+  const tuans=scopeTuans();
+  const r={};
+  KPIS.forEach(k=>{r[k.key]=tuans.reduce((s,t)=>s+(gKT(m,t,ma)[k.key]||0),0);});
+  return r;
 }
-function ring(p, size=44, sw=6) {
-  const r=(size-sw*2)/2, c=2*Math.PI*r, val=Math.min(Math.max(p||0,0),100);
-  const color=pc(p);
-  return `<svg width="${size}" height="${size}" style="transform:rotate(-90deg)">
-    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#08111e" stroke-width="${sw}"/>
-    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
-      stroke-dasharray="${val/100*c} ${c}" stroke-linecap="round"/>
-  </svg>`;
+function khPhongScope(m){
+  if(S.scope==="thang"||S.scope==="ngay"||S.scope==="custom") return gKP(m);
+  const r={};KPIS.forEach(k=>{r[k.key]=NVS.reduce((s,nv)=>s+(gKT(m,S.scope,nv.ma)[k.key]||0),0);});
+  return r;
 }
-function bar(v, max, color, h=5) {
-  const w = max>0?Math.min(100,Math.max(0,(v||0)/max*100)):0;
-  return `<div class="bar-wrap"><div class="bar-fill" style="width:${w}%;background:${color};height:${h}px"></div></div>`;
-}
-function avatar(name, ma, size=38) {
-  const c=acColor(ma);
-  return `<div class="avatar" style="width:${size}px;height:${size}px;background:${c}1a;border:1.5px solid ${c}55;color:${c};font-size:${size*.38}px">
-    ${name.split(" ").pop()[0]||"?"}
-  </div>`;
-}
-function chip(label, color) {
-  return `<span class="chip" style="background:${color}22;color:${color}">${label}</span>`;
-}
-function fmtTs(ts) {
-  if(!ts) return "";
-  const d=new Date(ts);
-  return `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+function nvScore(m,tuans,ma){
+  const wk=STARS.filter(k=>tuans.some(t=>(gKT(m,t,ma)[k.key]||0)>0));
+  if(!wk.length)return null;
+  return wk.reduce((s,k)=>{
+    const kh=tuans.reduce((a,t)=>a+(gKT(m,t,ma)[k.key]||0),0);
+    const th=tuans.reduce((a,t)=>a+(gTH(m,t,ma)[k.key]||0),0);
+    return s+(pct(th,kh)||0);
+  },0)/wk.length;
 }
 
-// ══════════════════════════════════════════
-// LOAD DATA
-// ══════════════════════════════════════════
-async function loadData() {
-  const [kp, kt, th] = await Promise.all([
-    fbGet("khPhong/"+MONTH),
-    fbGet("khTuan/"+MONTH),
-    fbGet("thTuan/"+MONTH),
-  ]);
-  if(kp) STATE.khPhong[MONTH] = kp;
-  if(kt) STATE.khTuan[MONTH]  = kt;
-  if(th) STATE.thTuan[MONTH]  = th;
-  STATE.online = !!(kp||kt||th);
-}
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function render(){const a=document.getElementById("app");if(!a)return;a.innerHTML=renderHdr()+renderContent()+renderNav();}
 
-// ══════════════════════════════════════════
-// RENDER ENGINE
-// ══════════════════════════════════════════
-function render() {
-  const app = document.getElementById("app");
-  if(!app) return;
-  app.innerHTML = renderHeader() + renderContent() + renderNav();
-  bindEvents();
-}
-
-function renderHeader() {
-  const onlineBadge = STATE.online
-    ? `<span class="badge badge-green">☁️ Online</span>`
-    : `<span class="badge badge-yellow">📱 Offline</span>`;
-  const khTabs = STATE.tab==="kh" ? `
-    <div style="display:flex;gap:5px">
-      <button onclick="setKhTab('phong')" class="scope-btn ${STATE.khTab==='phong'?'active':''}" style="padding:5px 10px;font-size:11px">📋 Phòng</button>
-      <button onclick="setKhTab('tuan')" class="scope-btn ${STATE.khTab==='tuan'?'active':''}" style="padding:5px 10px;font-size:11px">👤 NV</button>
-    </div>` : "";
-  return `<div class="header">
-    <div class="header-row">
-      <div>
-        <div class="header-title">🏦 KPI <span>Banking</span></div>
-        <div class="header-sub">
-          ${new Date().toLocaleDateString("vi-VN",{weekday:"short",day:"numeric",month:"numeric"})}
-          · <b style="color:var(--gold)">${MONTH}</b>
-          · <b style="color:#3b82f6">${CUR_TUAN}</b>
-          · ${onlineBadge}
-        </div>
-      </div>
-      ${khTabs}
-    </div>
-  </div>`;
-}
-
-function renderNav() {
-  const alertCount = NVS.filter(nv=>{
-    const kh = getKhTuan(CUR_TUAN, nv.ma);
-    const th = getThTuan(CUR_TUAN, nv.ma);
-    return KPIS.some(k=>(kh[k.key]||0)>0) && !KPIS.some(k=>(th[k.key]??null)!==null);
-  }).length;
-  const tabs = [
-    {id:"nhap", icon:"✏️", label:"Nhập TH"},
-    {id:"kh",   icon:"🎯", label:"Giao KH"},
-    {id:"dash", icon:"📊", label:"Dashboard"},
-    {id:"alert",icon:"🚨", label:"Cảnh báo"},
-  ];
-  return `<div class="nav">${tabs.map(t=>`
-    <button class="nav-btn ${STATE.tab===t.id?'active':''}" onclick="setTab('${t.id}')">
-      <span class="nav-icon">${t.icon}</span>
-      ${t.id==="alert"&&alertCount>0
-        ? `<span style="position:relative">${t.label}<span style="position:absolute;top:-8px;right:-10px;background:#ef4444;color:#fff;border-radius:50%;width:14px;height:14px;font-size:9px;display:inline-flex;align-items:center;justify-content:center">${alertCount}</span></span>`
-        : t.label}
-    </button>`).join("")}</div>`;
-}
-
-function renderContent() {
-  if(STATE.tab==="nhap")  return renderNhap();
-  if(STATE.tab==="kh")    return STATE.khTab==="phong" ? renderKhPhong() : renderKhTuan();
-  if(STATE.tab==="dash")  return renderDash();
-  if(STATE.tab==="alert") return renderAlert();
-  return "";
-}
-
-// ── NHẬP TH ──────────────────────────────
-function renderNhap() {
-  if(STATE.selNV) return renderNhapForm();
-  return `<div style="padding:16px">
-    <div class="sec-title">✏️ Nhập / Cập nhật TH · ${MONTH}</div>
-    <div class="tabs">${["T1","T2","T3","T4"].map(t=>`
-      <button class="tab-btn ${STATE.selTuan===t?'active':''}" onclick="setTuan('${t}')">${t}</button>
-    `).join("")}</div>
+function renderHdr(){
+  const badge=S.online
+    ?`<span class="bdg bdg-g">☁️ Online</span>`
+    :`<span class="bdg bdg-m">📱 Offline</span>`;
+  const mOpts=MONTHS.map(m=>`<option value="${m}"${m===S.month?" selected":""}>${fmtM(m)}</option>`).join("");
+  const khTabs=S.tab==="kh"?`<div style="display:flex;gap:5px">
+    <button class="sbb${S.khTab==="phong"?" on":""}" onclick="setKhTab('phong')" style="padding:5px 10px;font-size:11px">📋 Phòng</button>
+    <button class="sbb${S.khTab==="tuan"?" on":""}" onclick="setKhTab('tuan')" style="padding:5px 10px;font-size:11px">👤 NV</button>
+  </div>`:"";
+  return `<div class="hdr"><div class="hdr-row">
     <div>
-    ${NVS.map(nv=>{
-      const th = getThTuan(STATE.selTuan, nv.ma);
-      const kh = getKhTuan(STATE.selTuan, nv.ma);
-      const hasKh = KPIS.some(k=>(kh[k.key]||0)>0);
-      const hasTh = KPIS.some(k=>(th[k.key]??null)!==null);
-      const ts = th.updatedAt;
-      let sub = "";
-      if(hasTh) {
-        const parts = KPIS.filter(k=>k.star).map(k=>{
-          const v=th[k.key]; const kv=kh[k.key]||0;
-          const p=kv>0?pct(v,kv):null;
-          return `${k.icon} ${fmt(v,k.unit)}${p!==null?" ("+Math.round(p)+"%)":""}`;
-        });
-        sub = `<div class="chips">${parts.map(s=>`<span style="font-size:10px;color:var(--dim)">${s}</span>`).join("")}</div>`;
-        if(ts) sub += `<div style="font-size:10px;color:var(--mute);margin-top:3px">🕐 ${fmtTs(ts)}</div>`;
-      } else {
-        sub = `<div class="nv-sub">${hasKh?"Có KH — chưa nhập TH":"Chưa có KH tuần này"}</div>`;
-      }
-      return `<button class="nv-item" onclick="selNV('${nv.ma}')">
-        ${avatar(nv.ten, nv.ma)}
-        <div style="flex:1">
-          <div class="nv-name">${nv.ten}</div>
-          ${sub}
-        </div>
-        ${hasTh ? chip("Đã nhập","#10b981") : hasKh ? chip("Cần nhập","#f59e0b") : chip("Chưa KH","#475569")}
-      </button>`;
-    }).join("")}
+      <div class="hdr-title">🏦 KPI <em>Banking</em></div>
+      <div class="hdr-meta">
+        <span>${NOW.toLocaleDateString("vi-VN",{weekday:"short",day:"numeric",month:"numeric"})}</span>
+        <span>·</span><span style="color:#fbbf24;font-weight:700">${fmtM(S.month)}</span>
+        <span>·</span><span style="color:#60a5fa;font-weight:700">${CUR_T}</span>
+        <span>·</span>${badge}
+      </div>
     </div>
-  </div>`;
+    <div class="hdr-right"><select class="m-sel" onchange="setMonth(this.value)">${mOpts}</select>${khTabs}</div>
+  </div></div>`;
 }
 
-function renderNhapForm() {
-  const nv = NVS.find(n=>n.ma===STATE.selNV);
-  if(!nv) return "";
-  const kh = getKhTuan(STATE.selTuan, nv.ma);
-  const th = getThTuan(STATE.selTuan, nv.ma);
-  const hasKh = KPIS.some(k=>(kh[k.key]||0)>0);
-  const fields = KPIS.map(k=>{
-    const khv = kh[k.key]||0;
-    const thv = th[k.key]??null;
-    const p = khv>0&&thv!==null ? pct(thv,khv) : null;
-    return `<div class="form-field" style="border-color:${k.color}33">
-      <div class="field-header">
-        <div class="field-label">
-          <span style="font-size:20px">${k.icon}</span>
-          <div>
-            <div class="field-name" style="color:${k.star?"#f59e0b":"var(--text)"}">${k.star?"⭐ ":""}${k.label}</div>
-            <div class="field-kh">KH ${STATE.selTuan}: ${khv?fmt(khv,k.unit):"Chưa giao"}</div>
-          </div>
+function renderNav(){
+  const cnt=NVS.filter(nv=>{
+    const kh=gKT(S.month,CUR_T,nv.ma),th=gTH(S.month,CUR_T,nv.ma);
+    return KPIS.some(k=>(kh[k.key]||0)>0)&&!KPIS.some(k=>(th[k.key]??null)!==null);
+  }).length;
+  const tabs=[
+    {id:"nhap",ic:"✏️",lb:"Nhập TH"},
+    {id:"kh",  ic:"🎯",lb:"Giao KH"},
+    {id:"dash",ic:"📊",lb:"Dashboard"},
+    {id:"alert",ic:"🚨",lb:"Cảnh báo"},
+    {id:"star",ic:"🌟",lb:"Tuyên dương"},
+  ];
+  return `<div class="nav">${tabs.map(t=>`<button class="nb${S.tab===t.id?" on":""}" onclick="setTab('${t.id}')">
+    <span class="ic">${t.ic}</span>
+    ${t.id==="alert"&&cnt>0?`<span style="position:relative">${t.lb}<span class="nb-bdg">${cnt}</span></span>`:t.lb}
+  </button>`).join("")}</div>`;
+}
+
+function renderContent(){
+  switch(S.tab){
+    case"nhap": return S.selNV?renderNhapForm():renderNhapList();
+    case"kh":   return S.khTab==="phong"?renderKhPhong():(S.selNV?renderKhTuanForm():renderKhTuanList());
+    case"dash": return S.detailNV?renderDashDetail():renderDash();
+    case"alert":return renderAlert();
+    case"star": return renderStar();
+    default:return"";
+  }
+}
+
+// ═══════════════════════════════════════════════
+// NHẬP TH
+// ═══════════════════════════════════════════════
+function renderNhapList(){
+  const rows=NVS.map(nv=>{
+    const th=gTH(S.month,S.selT,nv.ma),kh=gKT(S.month,S.selT,nv.ma);
+    const hasKh=KPIS.some(k=>(kh[k.key]||0)>0);
+    const hasTh=KPIS.some(k=>(th[k.key]??null)!==null);
+    let sub="",cls="";
+    if(hasTh){
+      cls="ht";
+      sub=`<div class="cps">${STARS.map(k=>{const v=th[k.key],kv=kh[k.key]||0,p=kv>0?pct(v,kv):null;return cp(`${k.icon} ${fmt(v,k.unit)}${p!==null?" "+Math.round(p)+"%":""}`,k.color);}).join("")}</div>`;
+      if(th.updatedAt)sub+=`<div style="font-size:10px;color:var(--mute);margin-top:3px">🕐 ${fmtTs(th.updatedAt)}</div>`;
+    }else{
+      cls=hasKh?"hk":"";
+      sub=`<div class="nv-s">${hasKh?`<span style="color:#fbbf24">⚡ Có KH — chưa nhập</span>`:"Chưa có KH tuần này"}</div>`;
+    }
+    const badge=hasTh?cp("✓ Đã nhập","#10b981"):hasKh?cp("Cần nhập","#f59e0b"):cp("Chưa KH","#3d5472");
+    return `<button class="nvi ${cls}" onclick="selNV('${nv.ma}')">${av(nv.ten,nv.ma)}<div style="flex:1;overflow:hidden"><div class="nv-n">${nv.ten}</div>${sub}</div>${badge}</button>`;
+  }).join("");
+  return `<div class="pad"><div class="sec">✏️ Nhập / Cập nhật TH · ${fmtM(S.month)}</div>
+  <div class="tt">${["T1","T2","T3","T4"].map(t=>`<button class="tb${S.selT===t?" on":""}" onclick="setT('${t}')">${t}</button>`).join("")}</div>
+  ${rows}</div>`;
+}
+
+function renderNhapForm(){
+  const nv=NVS.find(n=>n.ma===S.selNV);if(!nv)return"";
+  const kh=gKT(S.month,S.selT,nv.ma),th=gTH(S.month,S.selT,nv.ma);
+  const hasKh=KPIS.some(k=>(kh[k.key]||0)>0);
+  const fields=KPIS.map(k=>{
+    const kv=kh[k.key]||0,tv=th[k.key]??null,p=kv>0&&tv!==null?pct(tv,kv):null,st=stl(kv>0?p:null);
+    return `<div class="ff" id="ff_${k.key}" style="border-color:${k.color}30">
+      <div class="fh">
+        <div class="fl"><span style="font-size:20px">${k.icon}</span>
+          <div><div class="fn" style="color:${k.star?"#fbbf24":"var(--text)"}">${k.star?"⭐ ":""}${k.label}</div>
+          <div class="fk">KH ${S.selT}: ${kv?fmt(kv,k.unit):`<span style="color:var(--mute)">Chưa giao</span>`}</div></div>
         </div>
-        <span style="font-size:11px;font-weight:700;color:${pc(p)}">${p2s(p)}</span>
+        <div style="text-align:right"><div class="fp" style="color:${st.c}">${p!==null?p2s(p):""}</div><div style="font-size:10px;color:${st.c}">${st.l}</div></div>
       </div>
-      <input type="number" id="f_${k.key}" value="${thv!==null?thv:""}" placeholder="${k.label} (${k.unit})"
-        style="border-color:${k.color}44" oninput="updateFieldBar('${k.key}',${khv},'${k.color}')">
-      <div id="bar_${k.key}" style="margin-top:6px">${p!==null&&khv>0?bar(thv,khv,k.color):""}</div>
+      <input type="number" id="fi_${k.key}" value="${tv!==null?tv:""}" placeholder="${k.label} (${k.unit})" style="border-color:${k.color}30" oninput="onFI('${k.key}',${kv},'${k.color}')">
+      <div id="fb_${k.key}" style="margin-top:7px">${p!==null&&kv>0?bar(tv,kv,k.color,5):""}</div>
     </div>`;
   }).join("");
-  return `<div style="padding:16px">
-    <button class="btn-back" onclick="backNhap()">← Chọn lại NV</button>
-    <div class="card card-highlight" style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:12px">
-        ${avatar(nv.ten, nv.ma, 46)}
-        <div>
-          <div style="font-weight:700;font-size:15px">${nv.ten}</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:3px">
-            📅 ${STATE.selTuan} · ${MONTH}
-            ${!hasKh?'<span style="color:#ef4444;margin-left:6px">⚠️ Chưa có KH</span>':""}
-          </div>
-        </div>
+  return `<div class="pad">
+    <button class="bback" onclick="backNhap()">← Chọn lại NV</button>
+    <div class="card card-hi" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px">${av(nv.ten,nv.ma,46)}
+        <div><div style="font-weight:800;font-size:15px;color:var(--text)">${nv.ten}</div>
+        <div style="margin-top:4px;display:flex;gap:5px;align-items:center">
+          <span class="bdg bdg-b">${S.selT}</span><span style="font-size:11px;color:var(--dim)">${fmtM(S.month)}</span>
+          ${!hasKh?`<span class="bdg bdg-r">Chưa có KH</span>`:""}
+        </div></div>
       </div>
     </div>
     ${fields}
-    <button class="btn-primary" id="save-btn" onclick="saveTH()">💾 LƯU TH ${STATE.selTuan}</button>
+    <button class="bsave" id="sv-btn" onclick="saveTH()">💾 LƯU TH ${S.selT}</button>
   </div>`;
 }
 
-function updateFieldBar(key, khv, color) {
-  const inp = document.getElementById("f_"+key);
-  const barEl = document.getElementById("bar_"+key);
-  if(!inp||!barEl) return;
-  const v = parseFloat(inp.value);
-  if(!isNaN(v)&&khv>0) barEl.innerHTML = bar(v,khv,color);
+function onFI(key,kv,col){
+  const inp=document.getElementById("fi_"+key),fb=document.getElementById("fb_"+key),ff=document.getElementById("ff_"+key);
+  if(!inp||!fb)return;
+  const v=parseFloat(inp.value);
+  if(!isNaN(v)&&kv>0){
+    const p=pct(v,kv);
+    fb.innerHTML=bar(v,kv,col,5)+`<div style="font-size:10px;color:${pc(p)};text-align:right;margin-top:3px;font-weight:700">${p2s(p)} KH tuần</div>`;
+    if(ff)ff.style.borderColor=col+"55";
+  }
 }
 
-async function saveTH() {
-  const nv = NVS.find(n=>n.ma===STATE.selNV);
-  if(!nv) return;
-  const btn = document.getElementById("save-btn");
-  if(btn) { btn.textContent="⏳ Đang lưu..."; btn.disabled=true; }
-  const data = {updatedAt: Date.now()};
-  KPIS.forEach(k=>{
-    const el = document.getElementById("f_"+k.key);
-    if(el&&el.value!=="") data[k.key] = parseFloat(el.value);
-  });
-  // Save to Firebase
-  await fbSet("thTuan/"+MONTH+"/"+STATE.selTuan+"/"+nv.ma, data);
-  // Update local state
-  if(!STATE.thTuan[MONTH]) STATE.thTuan[MONTH]={};
-  if(!STATE.thTuan[MONTH][STATE.selTuan]) STATE.thTuan[MONTH][STATE.selTuan]={};
-  STATE.thTuan[MONTH][STATE.selTuan][nv.ma] = data;
-  if(btn) { btn.textContent="✅ ĐÃ LƯU!"; btn.classList.add("saved"); }
-  setTimeout(()=>{ STATE.selNV=null; render(); }, 1200);
-}
-
-// ── GIAO KH PHÒNG ──────────────────────────
-function renderKhPhong() {
-  const kh = getKhPhong();
-  const fields = KPIS.map(k=>`
-    <div class="form-field" style="border-color:${k.color}33">
-      <div class="field-header">
-        <div class="field-label">
-          <span style="font-size:20px">${k.icon}</span>
-          <div>
-            <div class="field-name" style="color:${k.star?"#f59e0b":"var(--text)"}">${k.star?"⭐ ":""}${k.label}</div>
-            <div class="field-kh">Hiện tại: ${fmt(kh[k.key],k.unit)}</div>
-          </div>
-        </div>
-      </div>
-      <input type="number" id="kp_${k.key}" value="${kh[k.key]||""}" placeholder="KH tháng ${k.label} (${k.unit})">
-    </div>`).join("");
-  return `<div style="padding:16px">
-    <div class="sec-title">🏦 KH tháng toàn phòng · ${MONTH}</div>
-    ${fields}
-    <button class="btn-primary" id="kp-btn" onclick="saveKhPhong()">💾 LƯU KH PHÒNG</button>
-  </div>`;
-}
-
-async function saveKhPhong() {
-  const btn=document.getElementById("kp-btn");
+async function saveTH(){
+  const nv=NVS.find(n=>n.ma===S.selNV);if(!nv)return;
+  const btn=document.getElementById("sv-btn");
   if(btn){btn.textContent="⏳ Đang lưu...";btn.disabled=true;}
-  const data={};
-  KPIS.forEach(k=>{
-    const el=document.getElementById("kp_"+k.key);
-    if(el&&el.value!=="") data[k.key]=parseFloat(el.value);
-  });
-  await fbSet("khPhong/"+MONTH, data);
-  if(!STATE.khPhong[MONTH]) STATE.khPhong[MONTH]={};
-  Object.assign(STATE.khPhong[MONTH], data);
-  if(btn){btn.textContent="✅ ĐÃ LƯU!";btn.classList.add("saved");}
-  setTimeout(()=>render(), 1200);
+  const data={updatedAt:Date.now()};
+  KPIS.forEach(k=>{const el=document.getElementById("fi_"+k.key);if(el&&el.value!=="")data[k.key]=parseFloat(el.value);});
+  await fbSet(`thTuan/${S.month}/${S.selT}/${nv.ma}`,data);
+  if(!S.thTuan[S.month])S.thTuan[S.month]={};
+  if(!S.thTuan[S.month][S.selT])S.thTuan[S.month][S.selT]={};
+  S.thTuan[S.month][S.selT][nv.ma]=data;
+  if(btn){btn.textContent="✅ ĐÃ LƯU!";btn.classList.add("ok");}
+  setTimeout(()=>{S.selNV=null;render();},1300);
 }
 
-// ── GIAO KH TUẦN ──────────────────────────
-function renderKhTuan() {
-  if(STATE.selNV) return renderKhTuanForm();
-  const tuan = STATE.selTuan;
-  const khP = getKhPhong();
-  // Tổng đã giao cho phòng trong tháng
-  function sumGiao(kkey) {
-    return NVS.reduce((s,nv)=>
-      s+["T1","T2","T3","T4"].reduce((s2,t)=>s2+((STATE.khTuan[MONTH]||{})[t]?.[nv.ma]?.[kkey]||0),0),0);
-  }
-  const conLai = KPIS.map(k=>({...k, con:(khP[k.key]||0)-sumGiao(k.key)}));
-  const tuanData = (STATE.khTuan[MONTH]||{})[tuan]||{};
-  return `<div style="padding:16px">
-    <div class="sec-title">📋 KH tuần · ${MONTH}</div>
-    <div class="tabs">${["T1","T2","T3","T4"].map(t=>`
-      <button class="tab-btn ${tuan===t?'active':''}" onclick="setTuanKh('${t}')">${t}</button>
-    `).join("")}</div>
-    <div style="overflow-x:auto;margin-bottom:14px">
-      <div style="display:flex;gap:6px;width:max-content;padding-bottom:2px">
-        ${conLai.map(k=>`<div style="background:var(--bg1);border-radius:10px;padding:7px 11px;text-align:center;min-width:76px;border:1px solid ${k.con<0?"#ef4444":k.color}22">
-          <div style="font-size:10px;color:${k.color};margin-bottom:2px">${k.icon} ${k.key.substring(0,2).toUpperCase()}</div>
-          <div style="font-size:12px;font-weight:800;color:${k.con<0?"#ef4444":"var(--text)"}">${fmt(k.con,k.unit)}</div>
-          <div style="font-size:9px;color:var(--mute)">còn lại</div>
-        </div>`).join("")}
-      </div>
-    </div>
-    <div style="font-size:12px;color:var(--dim);margin-bottom:10px">Bấm NV để giao KH ${tuan}</div>
-    ${NVS.map(nv=>{
-      const nvKh = tuanData[nv.ma]||{};
-      const hasKh = KPIS.some(k=>(nvKh[k.key]||0)>0);
-      return `<button class="nv-item" style="border-color:${hasKh?"#f59e0b44":"#1e3a5f22"}" onclick="selNVKh('${nv.ma}')">
-        ${avatar(nv.ten,nv.ma)}
-        <div style="flex:1">
-          <div class="nv-name">${nv.ten}</div>
-          ${hasKh
-            ? `<div class="chips">${KPIS.filter(k=>k.star).map(k=>chip(k.icon+" "+fmt(nvKh[k.key]||0,k.unit),k.color)).join("")}</div>`
-            : `<div class="nv-sub">Chưa giao KH ${tuan}</div>`}
-        </div>
-        <span style="color:${hasKh?"#f59e0b":"var(--mute)"};font-size:20px">›</span>
-      </button>`;
-    }).join("")}
+// ═══════════════════════════════════════════════
+// GIAO KH PHÒNG
+// ═══════════════════════════════════════════════
+function renderKhPhong(){
+  const kh=gKP();
+  const fields=KPIS.map(k=>`<div class="ff" style="border-color:${k.color}30">
+    <div class="fh"><div class="fl"><span style="font-size:20px">${k.icon}</span>
+      <div><div class="fn" style="color:${k.star?"#fbbf24":"var(--text)"}">${k.star?"⭐ ":""}${k.label}</div>
+      <div class="fk">Hiện tại: <b style="color:${k.color}">${fmt(kh[k.key],k.unit)}</b></div></div>
+    </div></div>
+    <input type="number" id="kp_${k.key}" value="${kh[k.key]||""}" placeholder="KH tháng ${k.label} (${k.unit})">
+  </div>`).join("");
+  return `<div class="pad">
+    <div class="sec">🏦 KH tháng toàn phòng · ${fmtM(S.month)}</div>
+    <div class="card" style="margin-bottom:14px;border-color:#f59e0b30"><div style="font-size:12px;color:var(--dim);line-height:1.6">⚡ Tổng KH tháng phòng. Phân bổ xuống từng NV sẽ được kiểm soát không vượt mức này.</div></div>
+    ${fields}
+    <button class="bsave" id="kp-btn" onclick="saveKhP()">💾 LƯU KH PHÒNG ${fmtM(S.month)}</button>
   </div>`;
 }
+async function saveKhP(){
+  const btn=document.getElementById("kp-btn");if(btn){btn.textContent="⏳...";btn.disabled=true;}
+  const d={};KPIS.forEach(k=>{const el=document.getElementById("kp_"+k.key);if(el&&el.value!=="")d[k.key]=parseFloat(el.value);});
+  await fbSet(`khPhong/${S.month}`,d);S.khPhong[S.month]=d;
+  if(btn){btn.textContent="✅ ĐÃ LƯU!";btn.classList.add("ok");}
+  setTimeout(()=>render(),1300);
+}
 
-function renderKhTuanForm() {
-  const nv = NVS.find(n=>n.ma===STATE.selNV);
-  if(!nv) return "";
-  const tuan = STATE.selTuan;
-  const khP = getKhPhong();
-  const cur = getKhTuan(tuan, nv.ma);
-  function sumGiaoPhong(kkey) {
-    return NVS.reduce((s,nv2)=>
-      s+["T1","T2","T3","T4"].reduce((s2,t)=>s2+((STATE.khTuan[MONTH]||{})[t]?.[nv2.ma]?.[kkey]||0),0),0);
-  }
-  const fields = KPIS.map(k=>{
-    const old = cur[k.key]||0;
-    const giaoExcl = sumGiaoPhong(k.key) - ["T1","T2","T3","T4"].reduce((s,t)=>s+((STATE.khTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
-    const nvExcl = ["T1","T2","T3","T4"].reduce((s,t)=>s+((STATE.khTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0) - old;
-    const con = (khP[k.key]||0) - giaoExcl - nvExcl;
-    return `<div class="form-field" style="border-color:${k.color}33">
-      <div class="field-header">
-        <div class="field-label">
-          <span style="font-size:20px">${k.icon}</span>
-          <div>
-            <div class="field-name" style="color:${k.star?"#f59e0b":"var(--text)"}">${k.label}</div>
-            <div class="field-kh">Còn lại phòng: <b style="color:${con<0?"#ef4444":"#10b981"}">${fmt(con,k.unit)}</b></div>
-          </div>
-        </div>
-      </div>
-      <input type="number" id="kt_${k.key}" value="${old||""}" placeholder="KH ${tuan} — ${k.label} (${k.unit})">
+// ═══════════════════════════════════════════════
+// GIAO KH TUẦN
+// ═══════════════════════════════════════════════
+function renderKhTuanList(){
+  const t=S.selT,kp=gKP();
+  const sAll=(ma,kk)=>["T1","T2","T3","T4"].reduce((s,tt)=>s+(gKT(S.month,tt,ma)[kk]||0),0);
+  const sPhong=kk=>NVS.reduce((s,nv)=>s+sAll(nv.ma,kk),0);
+  const tuanData=(S.khTuan[S.month]||{})[t]||{};
+  const rem=KPIS.map(k=>{const con=(kp[k.key]||0)-sPhong(k.key);return `<div style="background:var(--bg1);border-radius:10px;padding:7px 10px;text-align:center;min-width:74px;flex-shrink:0;border:1px solid ${con<0?"#ef444430":k.color+"20"}">
+    <div style="font-size:10px;color:${k.color};font-weight:700;margin-bottom:2px">${k.icon} ${k.short}</div>
+    <div style="font-size:12px;font-weight:800;color:${con<0?"#f87171":"var(--text)"}">${fmt(con,k.unit)}</div>
+    <div style="font-size:9px;color:var(--mute)">còn lại</div>
+  </div>`;}).join("");
+  const rows=NVS.map(nv=>{
+    const nvKh=tuanData[nv.ma]||{},hasKh=KPIS.some(k=>(nvKh[k.key]||0)>0),th=gTH(S.month,t,nv.ma);
+    return `<button class="nvi${hasKh?" hk":""}" onclick="selNVKh('${nv.ma}')">${av(nv.ten,nv.ma)}
+      <div style="flex:1"><div class="nv-n">${nv.ten}</div>
+        ${hasKh?`<div class="cps">${STARS.map(k=>{const kv=nvKh[k.key]||0,tv=th[k.key]||0,p=kv>0?pct(tv,kv):null;return cp(`${k.icon} KH:${fmt(kv,k.unit)}${p!==null?" "+Math.round(p)+"%":""}`,k.color);}).join("")}</div>`:`<div class="nv-s">Chưa giao KH ${t}</div>`}
+      </div><span style="color:${hasKh?"#fbbf24":"var(--mute)"};font-size:18px">›</span>
+    </button>`;
+  }).join("");
+  return `<div class="pad">
+    <div class="sec">📋 KH tuần · ${fmtM(S.month)}</div>
+    <div class="tt">${["T1","T2","T3","T4"].map(t2=>`<button class="tb${S.selT===t2?" on":""}" onclick="setTKh('${t2}')">${t2}</button>`).join("")}</div>
+    <div style="overflow-x:auto;margin-bottom:14px"><div style="display:flex;gap:6px;width:max-content;padding-bottom:2px">${rem}</div></div>
+    <div style="font-size:12px;color:var(--dim);margin-bottom:10px">Bấm NV để giao KH ${t}</div>
+    ${rows}</div>`;
+}
+
+function renderKhTuanForm(){
+  const nv=NVS.find(n=>n.ma===S.selNV);if(!nv)return"";
+  const t=S.selT,kp=gKP(),cur=gKT(S.month,t,nv.ma);
+  const sAll=(ma,kk)=>["T1","T2","T3","T4"].reduce((s,tt)=>s+(gKT(S.month,tt,ma)[kk]||0),0);
+  const sPhong=kk=>NVS.reduce((s,nv2)=>s+sAll(nv2.ma,kk),0);
+  const fields=KPIS.map(k=>{
+    const old=cur[k.key]||0,excP=sPhong(k.key)-sAll(nv.ma,k.key),excNV=sAll(nv.ma,k.key)-old,con=(kp[k.key]||0)-excP-excNV,warn=con<0;
+    return `<div class="ff" style="border-color:${warn?"#ef444440":k.color+"30"}">
+      <div class="fh"><div class="fl"><span style="font-size:20px">${k.icon}</span>
+        <div><div class="fn" style="color:${k.star?"#fbbf24":"var(--text)"}">${k.label}</div>
+        <div class="fk" style="color:${warn?"#f87171":"var(--dim)"}">Còn lại phòng: <b>${fmt(con,k.unit)}</b>${warn?" ⚠️":""}</div></div>
+      </div></div>
+      <input type="number" id="kt_${k.key}" value="${old||""}" placeholder="KH ${t} — ${k.label} (${k.unit})" style="border-color:${k.color}30">
     </div>`;
   }).join("");
-  return `<div style="padding:16px">
-    <button class="btn-back" onclick="backKhTuan()">← Danh sách NV</button>
-    <div class="card card-highlight" style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:12px">
-        ${avatar(nv.ten,nv.ma,46)}
-        <div>
-          <div style="font-weight:700;font-size:15px">${nv.ten}</div>
-          <div style="font-size:11px;color:var(--dim)">Giao KH ${tuan} · ${MONTH}</div>
-        </div>
+  return `<div class="pad">
+    <button class="bback" onclick="backKhT()">← Danh sách NV</button>
+    <div class="card card-hi" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px">${av(nv.ten,nv.ma,46)}
+        <div><div style="font-weight:800;font-size:15px;color:var(--text)">${nv.ten}</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:3px">Giao KH ${t} · ${fmtM(S.month)}</div></div>
       </div>
     </div>
     ${fields}
-    <button class="btn-primary" id="kt-btn" onclick="saveKhTuan()">💾 GIAO KẾ HOẠCH</button>
+    <button class="bsave" id="kt-btn" onclick="saveKhT()">💾 GIAO KẾ HOẠCH ${t}</button>
   </div>`;
 }
-
-async function saveKhTuan() {
-  const nv = NVS.find(n=>n.ma===STATE.selNV);
-  if(!nv) return;
-  const btn=document.getElementById("kt-btn");
-  if(btn){btn.textContent="⏳...";btn.disabled=true;}
-  const data={};
-  KPIS.forEach(k=>{
-    const el=document.getElementById("kt_"+k.key);
-    if(el&&el.value!=="") data[k.key]=parseFloat(el.value);
-  });
-  await fbSet("khTuan/"+MONTH+"/"+STATE.selTuan+"/"+nv.ma, data);
-  if(!STATE.khTuan[MONTH]) STATE.khTuan[MONTH]={};
-  if(!STATE.khTuan[MONTH][STATE.selTuan]) STATE.khTuan[MONTH][STATE.selTuan]={};
-  STATE.khTuan[MONTH][STATE.selTuan][nv.ma] = data;
-  if(btn){btn.textContent="✅ ĐÃ GIAO!";btn.classList.add("saved");}
-  setTimeout(()=>{ STATE.selNV=null; render(); },1200);
+async function saveKhT(){
+  const nv=NVS.find(n=>n.ma===S.selNV);if(!nv)return;
+  const btn=document.getElementById("kt-btn");if(btn){btn.textContent="⏳...";btn.disabled=true;}
+  const d={};KPIS.forEach(k=>{const el=document.getElementById("kt_"+k.key);if(el&&el.value!=="")d[k.key]=parseFloat(el.value);});
+  await fbSet(`khTuan/${S.month}/${S.selT}/${nv.ma}`,d);
+  if(!S.khTuan[S.month])S.khTuan[S.month]={};
+  if(!S.khTuan[S.month][S.selT])S.khTuan[S.month][S.selT]={};
+  S.khTuan[S.month][S.selT][nv.ma]=d;
+  if(btn){btn.textContent="✅ ĐÃ GIAO!";btn.classList.add("ok");}
+  setTimeout(()=>{S.selNV=null;render();},1300);
 }
 
-// ── DASHBOARD ──────────────────────────────
-function renderDash() {
-  if(STATE.detailNV) return renderDashDetail();
-  const scope = STATE.scope;
-  const month = MONTH;
-  const tuans = scope==="thang"?["T1","T2","T3","T4"]:[scope];
-  const khP = scope==="thang" ? getKhPhong() : (() => {
-    const o={};
-    KPIS.forEach(k=>{o[k.key]=NVS.reduce((s,nv)=>s+getKhTuan(scope,nv.ma)[k.key]||0,0);});
-    return o;
-  })();
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderScopeBar(){
+  const days=genDays(S.month);
+  const dayOpts=days.map(d=>{const[,, dd]=d.split("-");return `<option value="${d}"${d===S.scopeDay?" selected":""}>Ngày ${+dd}</option>`;}).join("");
+  const fromOpts=days.map(d=>{const[,,dd]=d.split("-");return `<option value="${d}"${d===S.scopeFrom?" selected":""}>Ngày ${+dd}</option>`;}).join("");
+  const toOpts=days.map(d=>{const[,,dd]=d.split("-");return `<option value="${d}"${d===S.scopeTo?" selected":""}>Ngày ${+dd}</option>`;}).join("");
 
-  // Total TH
-  const totalTH={};
-  KPIS.forEach(k=>{
-    totalTH[k.key]=NVS.reduce((s,nv)=>
-      tuans.reduce((s2,t)=>s2+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),s),0);
-  });
+  const custom=S.scope==="custom"?`<div class="drow">
+    <select class="dsel" onchange="setScopeFrom(this.value)"><option value="">Từ ngày...</option>${fromOpts}</select>
+    <span style="color:var(--dim);font-size:14px;flex-shrink:0">→</span>
+    <select class="dsel" onchange="setScopeTo(this.value)"><option value="">Đến ngày...</option>${toOpts}</select>
+  </div>`:"";
+  const singleDay=S.scope==="ngay"?`<div style="margin-bottom:12px">
+    <select class="dsel" style="width:100%" onchange="setScopeDay(this.value)"><option value="">Chọn ngày...</option>${dayOpts}</select>
+  </div>`:"";
 
-  // Per NV score
-  const nvScores = NVS.map(nv=>{
-    const starKpis = KPIS.filter(k=>k.star);
-    const scores = starKpis.map(k=>{
-      const kh = tuans.reduce((s,t)=>s+(getKhTuan(t,nv.ma)[k.key]||0),0);
-      const th = tuans.reduce((s,t)=>s+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
-      return kh>0 ? pct(th,kh) : null;
-    }).filter(p=>p!==null);
-    const score = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : null;
-    return {...nv, score};
-  }).sort((a,b)=>{
-    if(a.score===null&&b.score===null) return 0;
-    if(a.score===null) return 1;
-    if(b.score===null) return -1;
-    return b.score-a.score;
-  });
+  return `<div class="sb">${[{k:"thang",l:"📅 Tháng"},{k:"T1",l:"T1"},{k:"T2",l:"T2"},{k:"T3",l:"T3"},{k:"T4",l:"T4"},{k:"ngay",l:"📆 Chọn ngày"},{k:"custom",l:"📅 Từ-Đến"}].map(s=>`<button class="sbb${S.scope===s.k?" on":""}" onclick="setScope('${s.k}')">${s.l}</button>`).join("")}</div>
+  ${singleDay}${custom}`;
+}
 
-  const kpiCards = KPIS.map(k=>{
-    const th=totalTH[k.key]||0, kh=khP[k.key]||0;
-    const p=pct(th,kh);
-    return `<div class="kpi-card" style="border-color:${k.color}33">
-      <div class="kpi-card-bg">${k.icon}</div>
+function renderDash(){
+  const m=S.month,khPS=khPhongScope(m);
+  const totalTH={};KPIS.forEach(k=>{totalTH[k.key]=NVS.reduce((s,nv)=>s+(thForNV(m,nv.ma)[k.key]||0),0);});
+  const nvData=NVS.map(nv=>{
+    const kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma);
+    const wk=STARS.filter(k=>(kh[k.key]||0)>0);
+    const score=wk.length?wk.reduce((s,k)=>s+(pct(th[k.key]||0,kh[k.key])||0),0)/wk.length:null;
+    return{...nv,kh,th,score};
+  }).sort((a,b)=>{if(a.score===null&&b.score===null)return 0;if(a.score===null)return 1;if(b.score===null)return-1;return b.score-a.score;});
+
+  const kCards=KPIS.map(k=>{
+    const th=totalTH[k.key]||0,kh=khPS[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;
+    return `<div class="kc" style="border-color:${kh>0?k.color+"40":"var(--border)"}">
+      <div class="kc-bg">${k.icon}</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div>
-          <div class="kpi-label">${k.icon} ${k.label}</div>
-          <div class="kpi-value" style="color:${kh>0?k.color:"var(--mute)"}">${fmt(th,k.unit)}</div>
-          <div class="kpi-kh">KH: ${kh>0?fmt(kh,k.unit):"Chưa có"}</div>
+        <div><div class="kc-lbl">${k.icon} ${k.label}</div>
+          <div class="kc-val" style="color:${kh>0?k.color:"var(--dim)"}">${fmt(th,k.unit)}</div>
+          <div class="kc-kh" style="color:var(--mute)">KH: ${kh>0?fmt(kh,k.unit):"Chưa có"}</div>
         </div>
-        <div style="position:relative;width:44px;height:44px">
-          ${ring(p||0)}
-          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:700;color:${pc(p)}">${kh>0?p2s(p):"—"}</div>
+        <div style="position:relative;width:44px;height:44px">${ring(kh>0?(p||0):0)}
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:700;color:${pc(p)};text-align:center;line-height:1.2">${kh>0?p2s(p):"—"}</div>
         </div>
       </div>
       ${kh>0?bar(th,kh,k.color):""}
+      ${gap!==null&&gap>0?`<div style="font-size:9px;color:#f87171;font-weight:700;margin-top:4px">▼ GAP: ${fmt(gap,k.unit)}</div>`:""}
     </div>`;
   }).join("");
 
-  const rankList = nvScores.map((nv,i)=>{
-    const rankColors=["#f59e0b22","#94a3b822","#d9770622"];
-    const rankTextColors=["#f59e0b","#94a3b8","#d97706"];
-    const hasSc = nv.score!==null;
-    const thLabel = KPIS.filter(k=>k.star).map(k=>{
-      const kh=tuans.reduce((s,t)=>s+(getKhTuan(t,nv.ma)[k.key]||0),0);
-      const th=tuans.reduce((s,t)=>s+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
-      const p=kh>0?pct(th,kh):null;
-      return `${k.icon} ${fmt(th,k.unit)}${p!==null?" ("+Math.round(p)+"%)":""}`;
-    }).join(" · ");
-    return `<button class="rank-item" onclick="showDetail('${nv.ma}')">
-      <div class="rank-num" style="background:${rankColors[i]||"var(--bg1)"};color:${rankTextColors[i]||"var(--mute)"}">${i+1}</div>
-      ${avatar(nv.ten,nv.ma,36)}
+  const ranks=nvData.map((nv,i)=>{
+    const hasKh=STARS.some(k=>(nv.kh[k.key]||0)>0),st=stl(hasKh?nv.score:null);
+    const rb=["#f59e0b20","#94a3b820","#d9770620"][i]||"var(--bg1)";
+    const rc=["#fbbf24","#94a3b8","#d97706"][i]||"var(--mute)";
+    const tags=STARS.map(k=>{const kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return `<span style="font-size:10px;color:${pc(p)};background:var(--bg1);border-radius:4px;padding:1px 5px">${k.icon} ${kh>0?fmt(th,k.unit)+" ("+Math.round(p||0)+"%)":"—"}</span>`;}).join("");
+    return `<button class="ri" onclick="showDetail('${nv.ma}')">
+      <div style="width:26px;height:26px;border-radius:50%;background:${rb};color:${rc};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">${i+1}</div>
+      ${av(nv.ten,nv.ma,34)}
       <div style="flex:1;overflow:hidden">
-        <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nv.ten}</div>
-        <div style="font-size:10px;color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${thLabel}</div>
+        <div style="font-weight:700;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nv.ten}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${tags}</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
-        <div style="font-size:18px;font-weight:800;color:${pc(hasSc?nv.score:null)}">${hasSc?p2s(nv.score):"—"}</div>
-        <div style="font-size:10px;color:${pc(hasSc?nv.score:null)}">${hasSc?(nv.score>=100?"✅ Đạt":nv.score>=70?"⚡ Khá":nv.score>=40?"⚠️ TB":"🚨 Cần đẩy"):"Chưa có KH"}</div>
+        <div style="font-size:17px;font-weight:900;color:${pc(hasKh?nv.score:null)}">${hasKh?p2s(nv.score):"—"}</div>
+        <div style="font-size:10px;color:${st.c}">${st.l}</div>
       </div>
     </button>`;
   }).join("");
 
-  return `<div style="padding:14px 16px 0">
-    <div class="scope-bar">
-      ${[{k:"thang",l:"📅 Cả tháng"},
-         {k:"T1",l:"T1"},{k:"T2",l:"T2"},{k:"T3",l:"T3"},{k:"T4",l:"T4"}]
-        .map(s=>`<button class="scope-btn ${STATE.scope===s.k?'active':''}" onclick="setScope('${s.k}')">${s.l}</button>`)
-        .join("")}
-    </div>
-  </div>
+  return `<div style="padding:14px 16px 0">${renderScopeBar()}</div>
   <div style="padding:0 16px">
-    <div class="sec-title">Tổng hợp · ${scope==="thang"?"Cả tháng":scope}</div>
-    <div class="kpi-grid">${kpiCards}</div>
-    <div class="sec-title">🏆 Xếp hạng</div>
-    ${rankList}
+    <div class="sec">Tổng hợp · ${fmtM(m)} · ${S.scope==="thang"?"Cả tháng":S.scope==="ngay"&&S.scopeDay?S.scopeDay:S.scope==="custom"&&S.scopeFrom&&S.scopeTo?S.scopeFrom+" → "+S.scopeTo:S.scope}</div>
+    <div class="kg">${kCards}</div>
+    <div class="sec">🏆 Xếp hạng nhân viên</div>${ranks}
   </div>`;
 }
 
-function renderDashDetail() {
-  const nv = NVS.find(n=>n.ma===STATE.detailNV);
-  if(!nv) return "";
-  const tuans = STATE.scope==="thang"?["T1","T2","T3","T4"]:[STATE.scope];
-  const kpiRows = KPIS.map(k=>{
-    const kh=tuans.reduce((s,t)=>s+(getKhTuan(t,nv.ma)[k.key]||0),0);
-    const th=tuans.reduce((s,t)=>s+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),0);
-    const p=kh>0?pct(th,kh):null;
-    return `<div class="card" style="border-color:${kh>0?k.color+"44":"#1e3a5f22"}">
+function renderDashDetail(){
+  const nv=NVS.find(n=>n.ma===S.detailNV);if(!nv)return"";
+  const m=S.month,khS=khForNV(m,nv.ma),thS=thForNV(m,nv.ma);
+  const wk=STARS.filter(k=>(khS[k.key]||0)>0);
+  const score=wk.length?wk.reduce((s,k)=>s+(pct(thS[k.key]||0,khS[k.key])||0),0)/wk.length:null;
+  const rows=KPIS.map(k=>{
+    const kh=khS[k.key]||0,th=thS[k.key]||0,p=kh>0?pct(th,kh):null;
+    return `<div class="card" style="margin-bottom:10px;border-color:${kh>0?k.color+"40":"var(--border)"}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:${kh>0?'8px':'0'}">
         <span style="font-size:20px">${k.icon}</span>
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:14px;color:${k.star?"#f59e0b":"var(--text)"}">${k.label}</div>
-          <div style="font-size:10px;color:var(--mute)">KH: ${kh?fmt(kh,k.unit):"Chưa giao"}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:18px;font-weight:800;color:${kh>0?k.color:"var(--mute)"}">${fmt(th,k.unit)}</div>
-          <span style="font-size:10px;font-weight:700;color:${pc(p)}">${p2s(p)}</span>
-        </div>
-      </div>
-      ${kh>0?bar(th,kh,k.color):""}
+        <div style="flex:1"><div style="font-weight:700;font-size:14px;color:${k.star?"#fbbf24":"var(--text)"}">${k.label}</div><div style="font-size:10px;color:var(--dim)">KH: ${kh?fmt(kh,k.unit):"Chưa giao"}</div></div>
+        <div style="text-align:right"><div style="font-size:19px;font-weight:900;color:${kh>0?k.color:"var(--dim)"}">${fmt(th,k.unit)}</div><div style="font-size:11px;font-weight:700;color:${pc(p)}">${p2s(p)}</div></div>
+      </div>${kh>0?bar(th,kh,k.color,6):""}
     </div>`;
   }).join("");
-
-  const histRows = ["T1","T2","T3","T4"].map(t=>{
-    const kh=getKhTuan(t,nv.ma); const th=getThTuan(t,nv.ma);
-    const hasKh=KPIS.some(k=>(kh[k.key]||0)>0);
-    const hasTh=KPIS.some(k=>(th[k.key]??null)!==null);
-    if(!hasKh&&!hasTh) return "";
-    return `<div style="background:var(--bg1);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+  const hist=["T1","T2","T3","T4"].map(t=>{
+    const kh=gKT(m,t,nv.ma),th=gTH(m,t,nv.ma);
+    if(!KPIS.some(k=>(kh[k.key]||0)>0)&&!KPIS.some(k=>(th[k.key]??null)!==null))return"";
+    return `<div style="background:var(--bg1);border-radius:12px;padding:12px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="background:#3b82f622;color:#3b82f6;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">${t}</span>
+        <span class="bdg bdg-b">${t}</span>
         ${th.updatedAt?`<span style="font-size:10px;color:var(--mute)">🕐 ${fmtTs(th.updatedAt)}</span>`:""}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        ${KPIS.filter(k=>k.star).map(k=>{
-          const khv=kh[k.key]||0, thv=th[k.key]??null;
-          const p=khv>0?pct(thv??0,khv):null;
-          return `<div style="background:var(--bg2);border-radius:8px;padding:7px;text-align:center">
-            <div style="font-size:10px;color:${k.color}">${k.icon}</div>
-            <div style="font-size:12px;font-weight:700;color:${khv>0?pc(p):"var(--mute)"}">${khv>0?fmt(thv??0,k.unit):"—"}</div>
-            <div style="font-size:9px;color:var(--mute)">KH:${fmt(khv,k.unit)}</div>
-          </div>`;
-        }).join("")}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        ${STARS.map(k=>{const kh2=kh[k.key]||0,th2=th[k.key]??null,p2=kh2>0?pct(th2??0,kh2):null;return `<div style="background:var(--bg2);border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:11px;color:${k.color}">${k.icon}</div>
+          <div style="font-size:13px;font-weight:800;color:${kh2>0?pc(p2):"var(--dim)"}">${kh2>0?fmt(th2??0,k.unit):"—"}</div>
+          <div style="font-size:9px;color:var(--mute)">KH:${fmt(kh2,k.unit)}</div>
+          ${kh2>0&&p2!==null?`<div style="font-size:9px;font-weight:700;color:${pc(p2)}">${Math.round(p2)}%</div>`:""}
+        </div>`;}).join("")}
       </div>
     </div>`;
   }).join("");
-
-  return `<div style="padding:16px">
-    <button class="btn-back" onclick="backDash()">← Dashboard</button>
-    <div class="card card-highlight" style="margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:12px">
-        ${avatar(nv.ten,nv.ma,50)}
-        <div style="flex:1"><div style="font-weight:800;font-size:15px">${nv.ten}</div></div>
+  return `<div class="pad">
+    <button class="bback" onclick="backDash()">← Dashboard</button>
+    <div class="card card-hi" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:12px">${av(nv.ten,nv.ma,50)}
+        <div style="flex:1"><div style="font-weight:900;font-size:15px;color:var(--text)">${nv.ten}</div><div style="font-size:11px;color:var(--dim);margin-top:2px">${fmtM(m)} · ${S.scope==="thang"?"Cả tháng":S.scope}</div></div>
+        <div style="text-align:right">${score!==null?`<div style="font-size:22px;font-weight:900;color:${pc(score)}">${p2s(score)}</div><div style="font-size:11px;color:${pc(score)}">${stl(score).l}</div>`:`<span class="bdg bdg-m">Chưa KH</span>`}</div>
       </div>
     </div>
-    <div class="sec-title">KPI theo scope</div>
-    ${kpiRows}
-    <div class="sec-title" style="margin-top:8px">Chi tiết từng tuần</div>
-    ${histRows||"<div style='color:var(--mute);text-align:center;padding:16px'>Chưa có dữ liệu</div>"}
+    <div class="sec">KPI chi tiết</div>${rows}
+    <div class="sec mt6">Lịch sử tuần</div>${hist||`<div class="empty">Chưa có dữ liệu</div>`}
   </div>`;
 }
 
-// ── CẢNH BÁO ──────────────────────────────
-function renderAlert() {
-  const khP = getKhPhong();
-  const chuaCoKh = NVS.filter(nv=>!KPIS.some(k=>(getKhTuan(CUR_TUAN,nv.ma)[k.key]||0)>0));
-  const chuaNhap = NVS.filter(nv=>{
-    const kh=getKhTuan(CUR_TUAN,nv.ma), th=getThTuan(CUR_TUAN,nv.ma);
-    return KPIS.some(k=>(kh[k.key]||0)>0) && !KPIS.some(k=>(th[k.key]??null)!==null);
-  });
-  const totalTH={};
-  KPIS.forEach(k=>{
-    totalTH[k.key]=NVS.reduce((s,nv)=>
-      ["T1","T2","T3","T4"].reduce((s2,t)=>s2+((STATE.thTuan[MONTH]||{})[t]?.[nv.ma]?.[k.key]||0),s),0);
-  });
-  const kpiWarn = KPIS.map(k=>({...k,th:totalTH[k.key]||0,p:pct(totalTH[k.key],khP[k.key])}))
-    .filter(k=>k.p!==null&&k.p<70);
+// ═══════════════════════════════════════════════
+// CẢNH BÁO — Logic đúng: cảnh báo NV theo KPI từng người
+// ═══════════════════════════════════════════════
+function renderAlert(){
+  const m=S.month;
 
-  return `<div style="padding:16px">
-    <div class="alert-card" style="border-color:${chuaNhap.length?"#ef4444":"#10b981"}">
-      <div class="alert-title" style="color:${chuaNhap.length?"#ef4444":"#10b981"}">
-        ${chuaNhap.length?`🚨 ${chuaNhap.length} NV có KH chưa nhập TH (${CUR_TUAN})`:"✅ Tất cả NV đã nhập TH"}
-      </div>
-      ${chuaNhap.map(nv=>`<div class="alert-item">
-        ${avatar(nv.ten,nv.ma,30)} <span>${nv.ten}</span>
-      </div>`).join("")}
-    </div>
+  // 1. NV có KH nhưng chưa nhập TH tuần hiện tại
+  const chuaNhap=NVS.filter(nv=>{
+    const kh=gKT(m,CUR_T,nv.ma),th=gTH(m,CUR_T,nv.ma);
+    return KPIS.some(k=>(kh[k.key]||0)>0)&&!KPIS.some(k=>(th[k.key]??null)!==null);
+  });
 
-    ${chuaCoKh.length?`<div class="alert-card" style="border-color:#f59e0b">
-      <div class="alert-title" style="color:#f59e0b">⚠️ ${chuaCoKh.length} NV chưa được giao KH ${CUR_TUAN}</div>
-      ${chuaCoKh.map(nv=>`<div class="alert-item">
-        ${avatar(nv.ten,nv.ma,30)} <span>${nv.ten}</span>
-      </div>`).join("")}
+  // 2. NV chưa được giao KH tuần hiện tại
+  const chuaKh=NVS.filter(nv=>!KPIS.some(k=>(gKT(m,CUR_T,nv.ma)[k.key]||0)>0));
+
+  // 3. NV có TH nhưng dưới 50% ở ít nhất 1 KPI star
+  const duoi50=NVS.filter(nv=>{
+    return STARS.some(k=>{
+      const kh=gKT(m,CUR_T,nv.ma)[k.key]||0;
+      const th=gTH(m,CUR_T,nv.ma)[k.key]??null;
+      if(kh<=0)return false; // không có KH thì không tính
+      if(th===null||th===0)return true; // có KH nhưng chưa phát sinh
+      return pct(th,kh)<50;
+    });
+  }).filter(nv=>!chuaNhap.find(n=>n.ma===nv.ma)); // loại trùng với chuaNhap
+
+  // 4. NV không phát sinh (TH = 0 hoặc null trên tất cả KPI star, dù có KH)
+  const khongPS=NVS.filter(nv=>{
+    const hasKh=STARS.some(k=>(gKT(m,CUR_T,nv.ma)[k.key]||0)>0);
+    if(!hasKh)return false;
+    const th=gTH(m,CUR_T,nv.ma);
+    return STARS.every(k=>{const kh=gKT(m,CUR_T,nv.ma)[k.key]||0;return kh>0&&(th[k.key]??0)===0;});
+  }).filter(nv=>!chuaNhap.find(n=>n.ma===nv.ma));
+
+  const block=(title,color,items,extra="")=>{
+    if(!items.length&&!extra)return"";
+    return `<div class="ac" style="background:var(--bg2);border-left-color:${color}">
+      <div class="at" style="color:${color}">${title}</div>
+      ${items.map(nv=>`<div class="ai">${av(nv.ten,nv.ma,30)}<span style="color:var(--text)">${nv.ten}</span></div>`).join("")}
+      ${extra}
+    </div>`;
+  };
+
+  // Chi tiết NV dưới 50%
+  const duoi50Detail=duoi50.map(nv=>{
+    const detail=STARS.map(k=>{
+      const kh=gKT(m,CUR_T,nv.ma)[k.key]||0,th=gTH(m,CUR_T,nv.ma)[k.key]??null;
+      if(kh<=0)return"";
+      const p=th===null||th===0?0:pct(th,kh);
+      return p<50?cp(`${k.icon} ${p2s(p)}`,pc(p)):"";
+    }).filter(Boolean).join(" ");
+    return `<div class="ai">${av(nv.ten,nv.ma,30)}<div style="flex:1"><span style="color:var(--text)">${nv.ten}</span><div class="cps" style="margin-top:3px">${detail}</div></div></div>`;
+  }).join("");
+
+  return `<div class="pad">
+    <div class="sec">🚨 Cảnh báo · ${CUR_T} · ${fmtM(m)}</div>
+    ${chuaNhap.length?block(`🚨 ${chuaNhap.length} NV có KH chưa nhập TH (${CUR_T})`,"#f87171",chuaNhap)
+      :`<div class="card" style="margin-bottom:12px;border-color:#10b98133"><div class="at" style="color:#34d399;margin-bottom:0">✅ Tất cả NV đã nhập TH tuần này</div></div>`}
+    ${khongPS.length?block(`⛔ ${khongPS.length} NV không phát sinh (${CUR_T})`,"#f87171",khongPS):""}
+    ${duoi50.length?`<div class="ac" style="background:var(--bg2);border-left-color:#f97316">
+      <div class="at" style="color:#fb923c">⚠️ ${duoi50.length} NV dưới 50% KPI trọng điểm</div>${duoi50Detail}
     </div>`:""}
-
-    ${kpiWarn.length?`<div class="sec-title" style="margin-top:4px">KPI dưới 70%</div>
-    ${kpiWarn.map(k=>`<div class="card" style="margin-bottom:10px;border-color:#ef444433">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-size:22px">${k.icon}</span>
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:14px;color:${k.star?"#f59e0b":"var(--text)"}">${k.label}</div>
-          <div style="font-size:11px;color:var(--mute)">TH: ${fmt(k.th,k.unit)} / KH: ${fmt(khP[k.key],k.unit)}</div>
-        </div>
-        <span style="font-size:16px;font-weight:800;color:${pc(k.p)}">${p2s(k.p)}</span>
-      </div>
-      ${bar(k.th,khP[k.key],pc(k.p),6)}
-    </div>`).join("")}`:"<div class='sec-title' style='margin-top:4px;color:#10b981'>✅ Tất cả KPI đang trên 70%</div>"}
+    ${chuaKh.length?block(`📋 ${chuaKh.length} NV chưa được giao KH (${CUR_T})`,"#fbbf24",chuaKh):""}
+    ${!chuaNhap.length&&!khongPS.length&&!duoi50.length&&!chuaKh.length
+      ?`<div class="empty">🎉 Không có cảnh báo nào. Tất cả đang trong tầm kiểm soát!</div>`:""}
   </div>`;
 }
 
-// ══════════════════════════════════════════
-// EVENT HANDLERS
-// ══════════════════════════════════════════
-function bindEvents() {}
+// ═══════════════════════════════════════════════
+// TUYÊN DƯƠNG — Logic chuẩn nghiệp vụ
+// ═══════════════════════════════════════════════
+function renderStar(){
+  const m=S.month,t=S.selT;
 
-function setTab(t) { STATE.tab=t; STATE.selNV=null; STATE.detailNV=null; render(); }
-function setKhTab(t) { STATE.khTab=t; STATE.selNV=null; render(); }
-function setTuan(t) { STATE.selTuan=t; render(); }
-function setTuanKh(t) { STATE.selTuan=t; render(); }
-function setScope(s) { STATE.scope=s; render(); }
-function selNV(ma) { STATE.selNV=ma; render(); }
-function selNVKh(ma) { STATE.selNV=ma; render(); }
-function backNhap() { STATE.selNV=null; render(); }
-function backKhTuan() { STATE.selNV=null; render(); }
-function showDetail(ma) { STATE.detailNV=ma; render(); }
-function backDash() { STATE.detailNV=null; render(); }
+  // Tính điểm từng NV dựa trên 3 KPI trọng điểm
+  const scored=NVS.map(nv=>{
+    const scores=STARS.map(k=>{
+      const kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key]??null;
+      return{k,kh,th,p:kh>0?pct(th??0,kh):null};
+    });
+    const withKh=scores.filter(s=>s.kh>0);
+    const avg=withKh.length?withKh.reduce((a,s)=>a+(s.p||0),0)/withKh.length:null;
+    // Kiểm tra KPI phụ (chỉ ghi nhận nếu >= 100%)
+    const others=KPIS.filter(k=>!k.star).map(k=>{
+      const kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key]??null;
+      return{k,kh,th,p:kh>0?pct(th??0,kh):null};
+    });
+    return{nv,scores,others,avg,withKh};
+  }).filter(x=>x.avg!==null).sort((a,b)=>b.avg-a.avg);
 
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
-async function init() {
-  try {
-    await loadData();
-  } catch(e) {
-    console.warn("Load error:", e);
-  }
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  render();
+  // NV xuất sắc: điểm cao nhất VÀ >= 70%
+  const starNV=scored.length&&scored[0].avg>=70?scored[0]:null;
 
-  // Realtime: poll mỗi 15 giây
-  setInterval(async ()=>{
-    await loadData();
-    render();
-  }, 15000);
+  // Top 3 (có KH và có TH)
+  const top3=scored.slice(0,3);
+
+  // Nhắc nhở: NV có KH nhưng không phát sinh HOẶC dưới 50%
+  const warn=NVS.filter(nv=>{
+    const withKh=STARS.filter(k=>(gKT(m,t,nv.ma)[k.key]||0)>0);
+    if(!withKh.length)return false; // không có KH thì không xét
+    return withKh.some(k=>{
+      const th=gTH(m,t,nv.ma)[k.key]??null;
+      const kh=gKT(m,t,nv.ma)[k.key]||0;
+      if(th===null||th===0)return true; // không phát sinh
+      return pct(th,kh)<50; // dưới 50%
+    });
+  }).map(nv=>{
+    const scores=STARS.map(k=>{const kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key]??null;return{k,kh,th,p:kh>0?pct(th??0,kh):null};});
+    const wk=scores.filter(s=>s.kh>0);
+    const avg=wk.length?wk.reduce((a,s)=>a+(s.p||0),0)/wk.length:0;
+    return{nv,scores,avg};
+  }).sort((a,b)=>a.avg-b.avg);
+
+  const starHtml=starNV?`<div class="star-card">
+    <div style="font-size:26px;margin-bottom:6px">🏆</div>
+    <div style="font-size:11px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${fmtM(m)} · ${t} — NHÂN VIÊN XUẤT SẮC</div>
+    <div style="font-size:17px;font-weight:900;color:#fbbf24">${starNV.nv.ten}</div>
+    <div style="font-size:12px;color:var(--dim);margin-top:3px">Điểm TB 3 KPI trọng điểm: <b style="color:#fbbf24">${p2s(starNV.avg)}</b></div>
+    <div class="sk">${starNV.scores.map(({k,kh,th,p})=>`<div class="sk-item">
+      <div style="font-size:15px">${k.icon}</div>
+      <div style="font-size:13px;font-weight:800;color:${pc(p)}">${kh>0?fmt(th??0,k.unit):"—"}</div>
+      <div style="font-size:9px;color:var(--dim)">${k.label}</div>
+      <div style="font-size:10px;font-weight:800;color:${pc(p)};margin-top:1px">${p!==null?p2s(p):""}</div>
+    </div>`).join("")}</div>
+    ${starNV.others.filter(x=>x.p!==null).length?`<div style="margin-top:10px;font-size:11px;color:var(--dim)">
+      KPI phụ: ${starNV.others.filter(x=>x.p!==null).map(x=>`${x.k.icon} ${p2s(x.p)}`).join(" · ")}
+      ${starNV.others.filter(x=>x.p!==null).every(x=>x.p>=100)?`<span class="bdg bdg-g" style="margin-left:6px">✓ Đạt hết</span>`:""}
+    </div>`:""}
+  </div>`:
+  `<div class="card" style="text-align:center;padding:20px;margin-bottom:14px"><div style="font-size:28px;margin-bottom:8px">🏅</div><div style="font-weight:700;color:var(--dim)">Chưa có NV đạt điều kiện tuyên dương ${t}</div><div style="font-size:12px;color:var(--mute);margin-top:5px">Yêu cầu: đạt ≥70% trên 3 KPI trọng điểm</div></div>`;
+
+  const top3Html=top3.length?`<div class="sec mt6">🥇 Bảng xếp hạng ${t}</div>
+    ${top3.map(({nv,avg},i)=>`<div style="display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:12px;padding:11px 13px;margin-bottom:8px;border:1px solid ${i===0?"#f59e0b35":"var(--border)"}">
+      <div style="width:26px;height:26px;border-radius:50%;background:${["#f59e0b20","#94a3b820","#d9770620"][i]};color:${["#fbbf24","#94a3b8","#d97706"][i]};display:flex;align-items:center;justify-content:center;font-size:14px">${["🥇","🥈","🥉"][i]}</div>
+      ${av(nv.ten,nv.ma,34)}<div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--text)">${nv.ten}</div></div>
+      <div style="font-size:17px;font-weight:900;color:${pc(avg)}">${p2s(avg)}</div>
+    </div>`).join("")}`:"";
+
+  const warnHtml=warn.length?`<div class="sec mt6">⚠️ Cần hỗ trợ & nhắc nhở (${t})</div>
+    ${warn.map(({nv,scores,avg})=>{
+      const issues=scores.filter(s=>s.kh>0).map(s=>{
+        if(s.th===null||s.th===0)return `${s.k.icon} Không phát sinh`;
+        if(s.p<50)return `${s.k.icon} ${p2s(s.p)} (dưới 50%)`;
+        return"";
+      }).filter(Boolean);
+      const wc=avg<20?"#f87171":avg<50?"#fb923c":"#fbbf24";
+      return `<div class="wi" style="border-color:${wc}30">${av(nv.ten,nv.ma,36)}
+        <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--text)">${nv.ten}</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">${issues.join(" · ")||"Dưới 50% trung bình"}</div></div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:15px;font-weight:800;color:${wc}">${p2s(avg)}</div>
+          <div style="font-size:9px;color:${wc}">${avg<20?"Không PH":"Cần đẩy"}</div>
+        </div>
+      </div>`;
+    }).join("")}`:"";
+
+  return `<div class="pad">
+    <div class="sec">🌟 Tuyên dương & Nhắc nhở · ${fmtM(m)}</div>
+    <div class="tt">${["T1","T2","T3","T4"].map(tt=>`<button class="tb${S.selT===tt?" on":""}" onclick="setT('${tt}')">${tt}</button>`).join("")}</div>
+    ${starHtml}${top3Html}${warnHtml}
+    ${!warn.length&&scored.length?`<div class="card" style="text-align:center;padding:14px;margin-top:8px"><span style="color:#34d399;font-weight:700">🎉 Không có NV cần nhắc nhở tuần này!</span></div>`:""}
+  </div>`;
 }
 
+// ═══════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════
+function setTab(t){S.tab=t;S.selNV=null;S.detailNV=null;render();}
+function setKhTab(t){S.khTab=t;S.selNV=null;render();}
+function setMonth(m){S.month=m;S.selNV=null;S.detailNV=null;loadMonth(m).then(()=>render());}
+function setT(t){S.selT=t;render();}
+function setTKh(t){S.selT=t;render();}
+function setScope(s){S.scope=s;render();}
+function setScopeDay(v){S.scopeDay=v;render();}
+function setScopeFrom(v){S.scopeFrom=v;render();}
+function setScopeTo(v){S.scopeTo=v;render();}
+function selNV(ma){S.selNV=ma;render();}
+function selNVKh(ma){S.selNV=ma;render();}
+function backNhap(){S.selNV=null;render();}
+function backKhT(){S.selNV=null;render();}
+function showDetail(ma){S.detailNV=ma;render();}
+function backDash(){S.detailNV=null;render();}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+async function init(){
+  try{await loadMonth(CUR_M);}catch(e){console.warn(e);}
+  document.getElementById("loading").style.display="none";
+  document.getElementById("app").style.display="block";
+  render();
+  setInterval(async()=>{await loadMonth(S.month);render();},20000);
+}
 init();
 </script>
 </body>

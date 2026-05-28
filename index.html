@@ -5,137 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>KPI Banking — NAB</title>
+<title>KPI Banking - NAB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-:root{--bg0:#01050d;--bg1:#020a16;--bg2:#061525;--bg3:#0c2040;--gold:#e8a020;--gold2:#ffc84a;--blue:#1a6fff;--blue2:#4d9fff;--green:#00c48c;--red:#ff4757;--purple:#7c4dff;--cyan:#00d2ff;--text:#ffffff;--dim:#6a8aab;--mute:#2a4060;--border:#0e2a45;--border2:#1a3d5c;--card:#040e1e;--card2:#081830;}
-html,body{background:var(--bg0);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
-#app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg0);padding-bottom:80px;}
-.hdr{position:sticky;top:0;z-index:100;padding:12px 16px 10px;background:rgba(1,5,13,.97);backdrop-filter:blur(20px);border-bottom:1px solid #0e2a4444;}
-.hdr-top{display:flex;align-items:center;justify-content:space-between;}
-.logo-ic{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.logo-tx{font-size:17px;font-weight:900;letter-spacing:-.04em;}
-.logo-tx em{background:linear-gradient(135deg,#e8a020,#ffc84a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal;}
-.hdr-sub{display:flex;align-items:center;gap:5px;margin-top:6px;flex-wrap:wrap;}
-.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;border:1px solid;}
-.tag-g{background:#00c48c12;color:#00c48c;border-color:#00c48c25;}
-.tag-y{background:#e8a02012;color:#ffc84a;border-color:#e8a02025;}
-.tag-b{background:#1a6fff12;color:#4d9fff;border-color:#1a6fff25;}
-.tag-m{background:#2a406012;color:#6a8aab;border-color:#2a406025;}
-.tag-r{background:#ff475712;color:#ff6b7a;border-color:#ff475725;}
-.tag-p{background:#7c4dff12;color:#a78bfa;border-color:#7c4dff25;}
-.m-sel{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:5px 22px 5px 8px;color:#fff;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23e8a020' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;}
-.m-sel option{background:#040e1e;color:#fff;}
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(1,5,13,.97);backdrop-filter:blur(20px);border-top:1px solid #0e2a4555;display:flex;z-index:100;padding:5px 0 7px;}
-.nb{flex:1;padding:6px 2px 4px;background:none;border:none;cursor:pointer;color:var(--mute);font-size:8.5px;font-weight:700;font-family:inherit;line-height:1.5;position:relative;text-transform:uppercase;letter-spacing:.03em;}
-.nb.on{color:var(--gold2);}
-.nb.on::after{content:'';position:absolute;top:0;left:20%;width:60%;height:2px;background:linear-gradient(90deg,#e8a020,#ffc84a);border-radius:0 0 2px 2px;}
-.nb-ic{font-size:17px;display:block;margin-bottom:2px;}
-.nb-bdg{position:absolute;top:4px;right:calc(50% - 14px);background:var(--red);color:#fff;border-radius:50%;width:13px;height:13px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg0);}
-.card{background:var(--card);border-radius:16px;padding:14px;border:1px solid var(--border);margin-bottom:10px;}
-.card-hi{background:linear-gradient(145deg,#0a1e3a,var(--bg1));border-color:var(--border2);}
-.card-gold{border-color:#e8a02030;}
-.card-green{border-color:#00c48c30;}
-.card-red{border-color:#ff475730;}
-.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px;}
-.kc{background:var(--card);border-radius:14px;padding:12px;border:1px solid var(--border);position:relative;overflow:hidden;}
-.kc-bg{position:absolute;bottom:-8px;right:-4px;font-size:42px;opacity:.05;line-height:1;}
-.kc-lbl{font-size:10px;color:var(--dim);margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
-.kc-val{font-size:18px;font-weight:900;line-height:1.1;font-family:'Space Mono',monospace;}
-.kc-kh{font-size:9px;color:var(--mute);margin-top:2px;}
-.bw{background:#060e1a;border-radius:3px;overflow:hidden;}
-.bf{border-radius:3px;transition:width .6s ease;}
-.sec{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.sec::after{content:'';flex:1;height:1px;background:var(--border);}
-.nvi{background:var(--card);border-radius:13px;padding:11px 13px;margin-bottom:7px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;text-align:left;transition:border-color .15s,transform .1s;}
-.nvi:active{transform:scale(.98);}
-.nvi.hk{border-color:#e8a02028;}
-.nvi.ht{border-color:#00c48c22;}
-.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;}
-.nv-n{font-weight:700;font-size:13px;color:#fff;}
-.nv-s{font-size:11px;color:var(--dim);margin-top:2px;}
-.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
-.chip{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;border:1px solid;}
-.tt{display:flex;gap:5px;margin-bottom:13px;}
-.tb{flex:1;padding:8px 0;border-radius:9px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s;}
-.tb.on{border-color:#1a6fff50;background:#1a6fff12;color:#4d9fff;}
-.sb{display:flex;gap:5px;overflow-x:auto;padding-bottom:3px;margin-bottom:12px;scrollbar-width:none;}
-.sb::-webkit-scrollbar{display:none;}
-.sbb{padding:6px 12px;border-radius:18px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;transition:all .15s;}
-.sbb.on{border-color:#e8a02050;background:#e8a02012;color:#ffc84a;}
-.dsel{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:8px 9px;color:#fff;font-size:12px;font-weight:600;outline:none;font-family:inherit;appearance:none;-webkit-appearance:none;cursor:pointer;margin-bottom:9px;}
-.dsel option{background:#040e1e;color:#fff;}
-.drow{display:flex;gap:7px;align-items:center;margin-bottom:9px;}
-.drow .dsel{margin-bottom:0;}
-.ff{background:var(--card);border-radius:13px;padding:13px;margin-bottom:9px;border:1px solid var(--border);}
-.fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.fl{display:flex;align-items:center;gap:9px;}
-.fn{font-weight:700;font-size:14px;color:#fff;}
-.fk{font-size:10px;color:var(--dim);margin-top:2px;}
-input[type=number],input[type=text]{width:100%;background:var(--bg1);border:1px solid var(--border2);border-radius:9px;padding:11px 12px;color:#fff;font-size:15px;font-weight:600;outline:none;font-family:inherit;-webkit-appearance:none;}
-input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-input[type=number]:focus,input[type=text]:focus{border-color:#1a6fff55;}
-.bsave{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;font-weight:800;font-size:14px;font-family:inherit;margin-top:5px;transition:transform .15s;}
-.bsave:active{transform:scale(.98);}
-.bsave.ok{background:linear-gradient(135deg,#00c48c,#00ff9d);}
-.bdanger{width:100%;padding:11px;border-radius:11px;border:1px solid #ff475730;cursor:pointer;background:#ff475710;color:#ff6b7a;font-weight:700;font-size:13px;font-family:inherit;margin-top:7px;}
-.bback{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;font-family:inherit;padding:0;margin-bottom:15px;display:flex;align-items:center;gap:5px;font-weight:600;}
-.nvp-overlay{position:fixed;inset:0;background:rgba(1,5,13,.92);z-index:300;display:flex;align-items:flex-end;backdrop-filter:blur(8px);}
-.nvp-sheet{background:#061525;border-radius:20px 20px 0 0;width:100%;max-width:430px;margin:0 auto;padding:0 0 22px;max-height:86vh;display:flex;flex-direction:column;border-top:1px solid #1a3d5c;}
-.nvp-handle{width:34px;height:4px;border-radius:2px;background:#1a3d5c;margin:9px auto 0;}
-.nvp-list{overflow-y:auto;flex:1;padding:7px 13px;}
-.nvp-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:12px;margin-bottom:5px;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s;}
-.nvp-item:active{transform:scale(.98);}
-.nvp-item.sel{border-color:#1a6fff50;background:#1a6fff10;}
-.nvp-check{width:21px;height:21px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:11px;}
-.nvp-item.sel .nvp-check{background:#1a6fff;border-color:#1a6fff;color:#fff;}
-.pin-overlay{position:fixed;inset:0;background:rgba(1,5,13,.96);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(12px);}
-.pin-box{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:26px 20px;width:100%;max-width:290px;text-align:center;}
-.pin-dots{display:flex;gap:12px;justify-content:center;margin:16px 0;}
-.pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--border2);transition:all .2s;}
-.pin-dot.fill{background:var(--gold);border-color:var(--gold);}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-.pk{aspect-ratio:1;border-radius:12px;border:1px solid var(--border2);background:var(--card2);color:#fff;font-size:19px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.pk:active{background:var(--border2);transform:scale(.92);}
-.ri{background:var(--card);border-radius:13px;padding:11px 13px;margin-bottom:7px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:9px;width:100%;text-align:left;transition:all .15s;}
-.ri:active{transform:scale(.98);}
-.chart-wrap{background:var(--card);border-radius:16px;padding:14px;border:1px solid var(--border);margin-bottom:12px;}
-.ct{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:12px;}
-.pl-stage{margin-bottom:14px;}
-.pl-stage-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;margin-bottom:6px;}
-.pl-deal{background:var(--card);border-radius:11px;padding:11px 12px;margin-bottom:6px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.pl-deal-info{flex:1;overflow:hidden;}
-.pl-actions{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
-.pl-btn{padding:4px 9px;border-radius:6px;border:1px solid var(--border2);background:var(--card2);color:var(--dim);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;}
-.pl-btn.adv{border-color:#00c48c30;background:#00c48c10;color:#00c48c;}
-.pl-btn.del{border-color:#ff475728;background:#ff475710;color:#ff6b7a;}
-.star-card{border-radius:18px;padding:16px;margin-bottom:13px;background:linear-gradient(135deg,#1a1200,#0a1830);border:1px solid #e8a02032;position:relative;overflow:hidden;}
-.star-card::after{content:'';position:absolute;top:-40px;right:-40px;width:110px;height:110px;background:radial-gradient(circle,#e8a02012,transparent);border-radius:50%;}
-.sk{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;}
-.sk-i{background:#e8a02010;border:1px solid #e8a02022;border-radius:10px;padding:8px;text-align:center;flex:1;min-width:68px;}
-.wi{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-radius:11px;margin-bottom:7px;border:1px solid var(--border);}
-.ac{border-radius:13px;padding:12px;margin-bottom:10px;border-left:4px solid;background:var(--card);}
-.at{font-size:13px;font-weight:700;margin-bottom:6px;color:#fff;}
-.ai{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #ffffff07;font-size:13px;color:#fff;}
-.nvf-trigger{display:flex;align-items:center;gap:8px;padding:8px 13px;border-radius:11px;border:1px solid var(--border2);background:var(--card2);cursor:pointer;width:100%;text-align:left;margin-bottom:12px;transition:all .15s;}
-.nvf-trigger:active{transform:scale(.98);}
-.nvf-trigger.active{border-color:#1a6fff50;background:#1a6fff10;}
-.nvf-chips{display:flex;gap:4px;flex:1;overflow:hidden;flex-wrap:nowrap;}
-.nvf-chip{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;white-space:nowrap;flex-shrink:0;}
-.funnel-bar{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
-.funnel-fill{border-radius:4px;height:26px;display:flex;align-items:center;padding-left:8px;transition:width .7s ease;min-width:24px;}
-#loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;}
-.ld{width:32px;height:32px;border:3px solid #0e2a4560;border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;}
-@keyframes sp{to{transform:rotate(360deg)}}
-.pad{padding:15px;}
-.empty{text-align:center;padding:26px 15px;color:var(--mute);font-size:13px;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg0:#01050d;--bg1:#020a16;--bg2:#061525;--bg3:#0c2040;--gold:#e8a020;--gold2:#ffc84a;--blue:#1a6fff;--blue2:#4d9fff;--green:#00c48c;--red:#ff4757;--purple:#7c4dff;--cyan:#00d2ff;--text:#fff;--dim:#6a8aab;--mute:#2a4060;--border:#0e2a45;--border2:#1a3d5c;--card:#040e1e;--card2:#081830}
+html,body{background:var(--bg0);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+#app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg0);padding-bottom:82px}
+.pad{padding:15px}
+.hdr{position:sticky;top:0;z-index:100;padding:12px 16px 10px;background:rgba(1,5,13,.97);backdrop-filter:blur(20px);border-bottom:1px solid #0e2a4444}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.logo-ic{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-tx{font-size:17px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
+.logo-tx em{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
+.sub{font-size:9px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.hdr-sub{display:flex;align-items:center;gap:5px;margin-top:7px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;border:1px solid}
+.tag-g{background:#00c48c12;color:#00c48c;border-color:#00c48c25}.tag-y{background:#e8a02012;color:#ffc84a;border-color:#e8a02025}.tag-b{background:#1a6fff12;color:#4d9fff;border-color:#1a6fff25}.tag-m{background:#2a406012;color:#6a8aab;border-color:#2a406025}.tag-r{background:#ff475712;color:#ff6b7a;border-color:#ff475725}.tag-p{background:#7c4dff12;color:#a78bfa;border-color:#7c4dff25}
+.m-sel,.dsel{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:#fff;font-weight:700;outline:none;appearance:none;-webkit-appearance:none}
+.m-sel{padding:5px 8px;font-size:11px}.dsel{width:100%;padding:9px;font-size:12px;margin-bottom:9px}
+.gold-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#030810;border:none;border-radius:8px;padding:6px 10px;font-weight:900;font-size:11px;white-space:nowrap}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(1,5,13,.97);backdrop-filter:blur(20px);border-top:1px solid #0e2a4555;display:flex;z-index:100;padding:5px 0 7px}
+.nb{flex:1;padding:6px 2px 4px;background:none;border:none;color:var(--mute);font-size:8.5px;font-weight:800;line-height:1.45;position:relative;text-transform:uppercase;letter-spacing:.03em}
+.nb.on{color:var(--gold2)}.nb.on:after{content:"";position:absolute;top:0;left:20%;width:60%;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:0 0 2px 2px}
+.nb-ic{font-size:17px;display:block;margin-bottom:2px}.nb-bdg{position:absolute;top:4px;right:calc(50% - 14px);background:var(--red);color:#fff;border-radius:50%;width:13px;height:13px;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg0)}
+.card,.ff,.chart-wrap{background:var(--card);border-radius:14px;padding:13px;border:1px solid var(--border);margin-bottom:10px}
+.card-hi{background:linear-gradient(145deg,#0a1e3a,var(--bg1));border-color:var(--border2)}.card-gold{border-color:#e8a02030}.card-green{border-color:#00c48c30}.card-red{border-color:#ff475730}
+.sec{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sec:after{content:"";flex:1;height:1px;background:var(--border)}
+.tt,.sb{display:flex;gap:5px;margin-bottom:13px}.sb{overflow-x:auto;scrollbar-width:none}.sb::-webkit-scrollbar{display:none}
+.tb,.sbb{border:1px solid var(--border);background:var(--card2);color:var(--dim);font-weight:800;cursor:pointer;transition:.15s}
+.tb{flex:1;padding:8px 0;border-radius:9px;font-size:13px}.sbb{padding:7px 12px;border-radius:18px;font-size:11px;white-space:nowrap;flex-shrink:0}
+.tb.on{border-color:#1a6fff50;background:#1a6fff12;color:#4d9fff}.sbb.on{border-color:#e8a02050;background:#e8a02012;color:#ffc84a}
+.nvi,.ri,.wi{background:var(--card);border-radius:13px;padding:11px 13px;margin-bottom:7px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;width:100%;text-align:left;color:inherit}
+.nvi:active,.ri:active{transform:scale(.985)}.nvi.hk{border-color:#e8a02028}.nvi.ht{border-color:#00c48c22}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
+.nv-n{font-weight:800;font-size:13px;color:#fff}.nv-s{font-size:11px;color:var(--dim);margin-top:2px}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.chip{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:800;border:1px solid;white-space:nowrap}
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}.kc{background:var(--card);border-radius:14px;padding:12px;border:1px solid var(--border);position:relative;overflow:hidden}.kc-bg{position:absolute;bottom:-8px;right:-4px;font-size:42px;opacity:.05;line-height:1}.kc-lbl{font-size:10px;color:var(--dim);margin-bottom:3px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.kc-val{font-size:18px;font-weight:900;line-height:1.1;font-family:"Space Mono",monospace}.kc-kh{font-size:9px;color:var(--mute);margin-top:2px}
+.bw{background:#060e1a;border-radius:3px;overflow:hidden}.bf{border-radius:3px;transition:width .6s ease}
+.fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.fl{display:flex;align-items:center;gap:9px}.fn{font-weight:800;font-size:14px;color:#fff}.fk{font-size:10px;color:var(--dim);margin-top:2px}
+input[type=number],input[type=text]{width:100%;background:var(--bg1);border:1px solid var(--border2);border-radius:9px;padding:11px 12px;color:#fff;font-size:15px;font-weight:700;outline:none;-webkit-appearance:none}input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focus,select:focus{border-color:#1a6fff55}
+.bsave,.bdanger{width:100%;border-radius:13px;cursor:pointer;font-weight:900;font-size:14px;margin-top:5px}.bsave{padding:13px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#030810}.bsave.ok{background:linear-gradient(135deg,#00c48c,#00ff9d)}.bdanger{padding:11px;border:1px solid #ff475730;background:#ff475710;color:#ff6b7a}
+.bback{background:none;border:none;color:var(--dim);font-size:13px;padding:0;margin-bottom:15px;display:flex;align-items:center;gap:5px;font-weight:800}
+.pin-overlay,.sheet-overlay{position:fixed;inset:0;background:rgba(1,5,13,.94);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(12px)}.sheet-overlay{align-items:flex-end;padding:0}
+.pin-box{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:26px 20px;width:100%;max-width:290px;text-align:center}.pin-dots{display:flex;gap:12px;justify-content:center;margin:16px 0}.pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--border2)}.pin-dot.fill{background:var(--gold);border-color:var(--gold)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.pk{aspect-ratio:1;border-radius:12px;border:1px solid var(--border2);background:var(--card2);color:#fff;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.sheet{background:#061525;border-radius:20px 20px 0 0;width:100%;max-width:430px;margin:0 auto;padding:0 0 22px;max-height:86vh;display:flex;flex-direction:column;border-top:1px solid #1a3d5c}.handle{width:34px;height:4px;border-radius:2px;background:#1a3d5c;margin:9px auto 0}.sheet-list{overflow:auto;flex:1;padding:7px 13px}
+.nvp-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:12px;margin-bottom:5px;cursor:pointer;border:1px solid var(--border);background:var(--card)}.nvp-item.sel{border-color:#1a6fff50;background:#1a6fff10}.nvp-check{width:21px;height:21px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px}.nvp-item.sel .nvp-check{background:#1a6fff;border-color:#1a6fff;color:#fff}
+.pl-stage-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;margin-bottom:6px}.pl-deal{background:var(--card);border-radius:11px;padding:11px 12px;margin-bottom:6px;border:1px solid var(--border);display:flex;align-items:center;gap:10px}.pl-actions{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}.pl-btn{padding:4px 9px;border-radius:6px;border:1px solid var(--border2);background:var(--card2);color:var(--dim);font-size:10px;font-weight:800}.pl-btn.adv{border-color:#00c48c30;background:#00c48c10;color:#00c48c}.pl-btn.del{border-color:#ff475728;background:#ff475710;color:#ff6b7a}
+.star-card{border-radius:18px;padding:16px;margin-bottom:13px;background:linear-gradient(135deg,#1a1200,#0a1830);border:1px solid #e8a02032;position:relative;overflow:hidden}.sk{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}.sk-i{background:#e8a02010;border:1px solid #e8a02022;border-radius:10px;padding:8px;text-align:center;flex:1;min-width:68px}
+.ac{border-radius:13px;padding:12px;margin-bottom:10px;border-left:4px solid;background:var(--card)}.at{font-size:13px;font-weight:800;margin-bottom:6px}.ai{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #ffffff07;font-size:13px}
+#loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px}.ld{width:32px;height:32px;border:3px solid #0e2a4560;border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}.empty{text-align:center;padding:26px 15px;color:var(--mute);font-size:13px}
+.error-box{margin:15px;padding:14px;border-radius:14px;border:1px solid #ff475730;background:#ff475710;color:#ffb3ba;font-size:12px;white-space:pre-wrap}
+@media print{body{background:#fff;color:#111}#loading,#pin-modal,#nvp-modal,#exp-modal,.nav,.hdr{display:none!important}#app{max-width:none;padding:0;background:#fff;color:#111}}
 </style>
 </head>
 <body>
-
 <div id="loading">
   <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:22px">🏦</div>
   <div style="text-align:center">
@@ -145,67 +76,54 @@ input[type=number]:focus,input[type=text]:focus{border-color:#1a6fff55;}
   <div class="ld"></div>
 </div>
 
-<div id="pin-modal" class="pin-overlay" style="display:none">
+<div id="pin-modal" class="pin-overlay">
   <div class="pin-box">
     <div style="font-size:22px;margin-bottom:5px">🔐</div>
     <div style="font-weight:800;font-size:15px;color:#fff">Xác thực Trưởng phòng</div>
     <div style="font-size:12px;color:var(--dim);margin-top:3px">Nhập mã PIN 4 số</div>
-    <div class="pin-dots">
-      <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
-      <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
-    </div>
+    <div class="pin-dots"><div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div><div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div></div>
     <div id="pin-err" style="color:var(--red);font-size:11px;margin-bottom:7px;min-height:15px"></div>
     <div class="pin-pad">
-      <div class="pk" onclick="pinAdd(1)">1</div><div class="pk" onclick="pinAdd(2)">2</div><div class="pk" onclick="pinAdd(3)">3</div>
-      <div class="pk" onclick="pinAdd(4)">4</div><div class="pk" onclick="pinAdd(5)">5</div><div class="pk" onclick="pinAdd(6)">6</div>
-      <div class="pk" onclick="pinAdd(7)">7</div><div class="pk" onclick="pinAdd(8)">8</div><div class="pk" onclick="pinAdd(9)">9</div>
-      <div></div><div class="pk" onclick="pinAdd(0)">0</div>
-      <div class="pk" style="font-size:16px;color:var(--dim)" onclick="pinDel()">&#9003;</div>
+      <button class="pk" onclick="pinAdd(1)">1</button><button class="pk" onclick="pinAdd(2)">2</button><button class="pk" onclick="pinAdd(3)">3</button>
+      <button class="pk" onclick="pinAdd(4)">4</button><button class="pk" onclick="pinAdd(5)">5</button><button class="pk" onclick="pinAdd(6)">6</button>
+      <button class="pk" onclick="pinAdd(7)">7</button><button class="pk" onclick="pinAdd(8)">8</button><button class="pk" onclick="pinAdd(9)">9</button>
+      <div></div><button class="pk" onclick="pinAdd(0)">0</button><button class="pk" style="font-size:16px;color:var(--dim)" onclick="pinDel()">⌫</button>
     </div>
-    <button onclick="closePinModal()" style="margin-top:13px;background:none;border:none;color:var(--dim);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600">&#10005; H&#7911;y</button>
+    <button onclick="closePinModal()" style="margin-top:13px;background:none;border:none;color:var(--dim);font-size:12px;font-weight:700">✕ Hủy</button>
   </div>
 </div>
 
-<div id="nvp-modal" class="nvp-overlay" style="display:none" onclick="nvpClickOut(event)">
-  <div class="nvp-sheet">
-    <div class="nvp-handle"></div>
+<div id="nvp-modal" class="sheet-overlay" onclick="if(event.target===this)closeNVPicker()">
+  <div class="sheet">
+    <div class="handle"></div>
     <div style="padding:13px 16px 11px;border-bottom:1px solid #0e2a4444;flex-shrink:0">
-      <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:3px">&#128100; Ch&#7885;n nh&#226;n vi&#234;n / nh&#243;m</div>
-      <div id="nvp-sub" style="font-size:11px;color:var(--dim)">&#272;ang xem to&#224;n ph&#242;ng</div>
+      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:3px">👥 Chọn nhân viên / nhóm</div>
+      <div id="nvp-sub" style="font-size:11px;color:var(--dim)">Đang xem toàn phòng</div>
       <div style="display:flex;gap:6px;margin-top:10px">
-        <button onclick="nvpSelectAll()" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--dim);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">&#10003; Ch&#7885;n t&#7845;t</button>
-        <button onclick="nvpClearAll()" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--dim);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">&#10005; B&#7887; ch&#7885;n</button>
-        <button onclick="nvpSortScore()" style="flex:1;padding:6px;border-radius:8px;border:1px solid #1a6fff35;background:#1a6fff12;color:#4d9fff;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">&#128202; S&#7855;p x&#7871;p</button>
+        <button onclick="nvpSelectAll()" class="sbb" style="flex:1;border-radius:8px">✓ Chọn tất</button>
+        <button onclick="nvpClearAll()" class="sbb" style="flex:1;border-radius:8px">✕ Bỏ chọn</button>
+        <button onclick="nvpSortScore()" class="sbb" style="flex:1;border-radius:8px">📊 Sắp xếp</button>
       </div>
     </div>
-    <div class="nvp-list" id="nvp-list"></div>
-    <div style="padding:11px 14px 0;flex-shrink:0">
-      <button class="nvp-confirm bsave" onclick="nvpConfirm()">Xem k&#7871;t qu&#7843;</button>
-    </div>
+    <div class="sheet-list" id="nvp-list"></div>
+    <div style="padding:11px 14px 0;flex-shrink:0"><button class="bsave" onclick="nvpConfirm()">Xem kết quả</button></div>
   </div>
 </div>
 
-<div id="exp-modal" class="nvp-overlay" style="display:none" onclick="if(event.target===this)closeExpModal()">
-  <div style="background:#061525;border-radius:20px 20px 0 0;width:100%;max-width:430px;margin:0 auto;padding:0 0 24px;border-top:1px solid #1a3d5c">
-    <div style="width:34px;height:4px;border-radius:2px;background:#1a3d5c;margin:9px auto 0"></div>
+<div id="exp-modal" class="sheet-overlay" onclick="if(event.target===this)closeExpModal()">
+  <div class="sheet" style="max-height:none">
+    <div class="handle"></div>
     <div style="padding:14px 16px 12px;border-bottom:1px solid #0e2a4444">
-      <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:3px">&#128202; Xu&#7845;t B&#225;o C&#225;o PDF</div>
-      <div style="font-size:11px;color:var(--dim)">In ho&#7863;c l&#432;u PDF &#8212; chu&#7849;n g&#7917;i Ban l&#227;nh &#273;&#7841;o</div>
+      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:3px">📄 Xuất báo cáo PDF</div>
+      <div style="font-size:11px;color:var(--dim)">In hoặc lưu PDF từ trình duyệt</div>
     </div>
     <div style="padding:13px 15px;display:flex;flex-direction:column;gap:8px">
-      <button onclick="printReport('thang')" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:13px;padding:13px 15px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px;text-align:left">
-        <span style="font-size:20px">&#128197;</span>
-        <div><div>B&#225;o c&#225;o c&#7843; th&#225;ng</div><div style="font-size:10px;font-weight:600;opacity:.75;margin-top:1px">T&#7893;ng h&#7907;p 4 tu&#7847;n · KPI + NV + Pipeline</div></div>
-      </button>
+      <button onclick="printReport('thang')" class="bsave" style="margin:0;text-align:left">📅 Báo cáo cả tháng</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button onclick="printReport('T1')" style="background:#0c2040;color:#fff;border:1px solid #1a3d5c;border-radius:11px;padding:11px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px"><span>&#128203;</span> Tu&#7847;n 1</button>
-        <button onclick="printReport('T2')" style="background:#0c2040;color:#fff;border:1px solid #1a3d5c;border-radius:11px;padding:11px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px"><span>&#128203;</span> Tu&#7847;n 2</button>
-        <button onclick="printReport('T3')" style="background:#0c2040;color:#fff;border:1px solid #1a3d5c;border-radius:11px;padding:11px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px"><span>&#128203;</span> Tu&#7847;n 3</button>
-        <button onclick="printReport('T4')" style="background:#0c2040;color:#fff;border:1px solid #1a3d5c;border-radius:11px;padding:11px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px"><span>&#128203;</span> Tu&#7847;n 4</button>
+        <button onclick="printReport('T1')" class="tb">T1</button><button onclick="printReport('T2')" class="tb">T2</button>
+        <button onclick="printReport('T3')" class="tb">T3</button><button onclick="printReport('T4')" class="tb">T4</button>
       </div>
-    </div>
-    <div style="padding:0 15px">
-      <button onclick="closeExpModal()" style="width:100%;background:none;border:1px solid #1a3d5c;border-radius:11px;padding:11px;color:var(--dim);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit">&#10005; H&#7911;y</button>
+      <button onclick="closeExpModal()" class="bdanger" style="margin:0;background:none;color:var(--dim);border-color:var(--border2)">✕ Hủy</button>
     </div>
   </div>
 </div>
@@ -213,634 +131,682 @@ input[type=number]:focus,input[type=text]:focus{border-color:#1a6fff55;}
 <div id="app" style="display:none"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// KPI BANKING NAB — FULL APP v3.0
-// Firebase REST + Pipeline + KPI + Export
-// Tested with Node.js --check before deploy
-// ═══════════════════════════════════════════════════════
+"use strict";
 
-// ── FIREBASE ──
-var DB = 'https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app';
-var ROOT = 'kpi';
-async function fbGet(p) {
-  try {
-    var r = await fetch(DB + '/' + ROOT + '/' + p + '.json');
-    if (!r.ok) return null;
-    var d = await r.json();
-    return d === null ? null : d;
-  } catch(e) { console.warn('fbGet', e.message); return null; }
-}
-async function fbSet(p, d) {
-  try {
-    await fetch(DB + '/' + ROOT + '/' + p + '.json', {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(d)
-    });
-  } catch(e) { console.warn('fbSet', e.message); }
-}
-async function fbDel(p) {
-  try {
-    await fetch(DB + '/' + ROOT + '/' + p + '.json', {method: 'DELETE'});
-  } catch(e) { console.warn('fbDel', e.message); }
-}
+const DB = "https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app";
+const ROOT = "kpi";
+const PIN = "1234";
+const FB_TIMEOUT = 4500;
+const LS_KEY = "kpi_banking_nab_v4";
 
-// ── PIN AUTH ──
-var PIN = '1234';
-var pinBuf = '', pinAuth = false, pinCb = null;
-function openPinModal(cb) {
-  pinBuf = ''; pinCb = cb;
-  document.getElementById('pin-modal').style.display = 'flex';
-  document.getElementById('pin-err').textContent = '';
-  rPinDots();
-}
-function closePinModal() {
-  document.getElementById('pin-modal').style.display = 'none';
-  pinBuf = ''; pinCb = null;
-}
-function rPinDots() {
-  for (var i = 0; i < 4; i++) {
-    var d = document.getElementById('pd' + i);
-    if (d) d.className = 'pin-dot' + (i < pinBuf.length ? ' fill' : '');
-  }
-}
-function pinAdd(n) {
-  if (pinBuf.length >= 4) return;
-  pinBuf += n; rPinDots();
-  if (pinBuf.length === 4) {
-    if (pinBuf === PIN) {
-      pinAuth = true; closePinModal();
-      if (pinCb) pinCb();
-    } else {
-      document.getElementById('pin-err').textContent = 'Mã PIN không đúng. Thử lại.';
-      setTimeout(function() { pinBuf = ''; rPinDots(); }, 700);
-    }
-  }
-}
-function pinDel() { if (pinBuf.length > 0) { pinBuf = pinBuf.slice(0, -1); rPinDots(); } }
+const NOW = new Date();
+const CUR_M = `${NOW.getFullYear()}-${String(NOW.getMonth() + 1).padStart(2, "0")}`;
+const CUR_T = NOW.getDate() <= 7 ? "T1" : NOW.getDate() <= 14 ? "T2" : NOW.getDate() <= 21 ? "T3" : "T4";
 
-// ── CONSTANTS ──
-var NOW = new Date();
-var CUR_M = NOW.getFullYear() + '-' + (NOW.getMonth() < 9 ? '0' : '') + (NOW.getMonth() + 1);
-var CUR_T = NOW.getDate() <= 7 ? 'T1' : NOW.getDate() <= 14 ? 'T2' : NOW.getDate() <= 21 ? 'T3' : 'T4';
-
-function genMonths() {
-  var ms = [];
-  for (var i = 1; i <= 12; i++) ms.push('2026-' + (i < 10 ? '0' : '') + i);
-  if (NOW.getFullYear() > 2026) {
-    var y = NOW.getFullYear();
-    for (var m2 = 1; m2 <= NOW.getMonth() + 1; m2++) ms.push(y + '-' + (m2 < 10 ? '0' : '') + m2);
-  }
-  return ms.reverse();
-}
-var MONTHS = genMonths();
-
-function genDays(m) {
-  var p = m.split('-'), y = +p[0], mo = +p[1];
-  var days = new Date(y, mo, 0).getDate(), arr = [];
-  for (var i = 1; i <= days; i++) arr.push(m + '-' + (i < 10 ? '0' : '') + i);
-  return arr;
-}
-
-var NVS = [
-  {ma:'10924', ten:'TRƯƠNG ANH TOÀN'},
-  {ma:'16032', ten:'DƯƠNG HỒNG PHÁP'},
-  {ma:'10847', ten:'TRẦN VIẾT DUY'},
-  {ma:'10852', ten:'ĐỖ THỊ HỒNG SƯƠNG'},
-  {ma:'13933', ten:'VÕ UYÊN BÌNH'},
-  {ma:'15642', ten:'TRẦN CÔNG LUẬT'},
-  {ma:'17339', ten:'PHẠM THỊ NGỌC HUYỀN'},
-  {ma:'17489', ten:'NGUYỄN LÂM KHA'},
-  {ma:'NV009', ten:'NGUYỄN THÀNH ĐẠT'},
-  {ma:'NV010', ten:'ĐẶNG VÕ DUYÊN TRINH'},
-  {ma:'NV011', ten:'LÊ THỊ BÍCH PHƯỢNG'},
-  {ma:'NV012', ten:'NGUYỄN HỒNG PHƯƠNG THANH'},
+const NVS = [
+  {ma:"10924", ten:"TRƯƠNG ANH TOÀN"},
+  {ma:"16032", ten:"DƯƠNG HỒNG PHÁP"},
+  {ma:"10847", ten:"TRẦN VIẾT DUY"},
+  {ma:"10852", ten:"ĐỖ THỊ HỒNG SƯƠNG"},
+  {ma:"13933", ten:"VÕ UYÊN BÌNH"},
+  {ma:"15642", ten:"TRẦN CÔNG LUẬT"},
+  {ma:"17339", ten:"PHẠM THỊ NGỌC HUYỀN"},
+  {ma:"17489", ten:"NGUYỄN LÂM KHA"},
+  {ma:"NV009", ten:"NGUYỄN THÀNH ĐẠT"},
+  {ma:"NV010", ten:"ĐẶNG VÕ DUYÊN TRINH"},
+  {ma:"NV011", ten:"LÊ THỊ BÍCH PHƯỢNG"},
+  {ma:"NV012", ten:"NGUYỄN HỒNG PHƯƠNG THANH"}
 ];
 
-var KPIS = [
-  {key:'huy_dong', label:'Huy Động', short:'HD', icon:'💰', unit:'tr đ', star:true,  color:'#e8a020'},
-  {key:'du_no',    label:'Dư Nợ',   short:'DN', icon:'🏦', unit:'tr đ', star:true,  color:'#1a6fff'},
-  {key:'the_td',   label:'Thẻ TD',  short:'TT', icon:'💳', unit:'thẻ', star:true,  color:'#7c4dff'},
-  {key:'tk_hkd',   label:'TK HKD',  short:'HK', icon:'🏢', unit:'TK',  star:false, color:'#00c48c'},
-  {key:'qr_code',  label:'QR Code', short:'QR', icon:'📱', unit:'QR',  star:false, color:'#00d2ff'},
-  {key:'cif',      label:'CIF',     short:'CF', icon:'👤', unit:'CIF', star:false, color:'#ff6b9d'},
+const KPIS = [
+  {key:"huy_dong", label:"Huy Động", short:"HD", icon:"💰", unit:"tr đ", star:true, color:"#e8a020"},
+  {key:"du_no", label:"Dư Nợ", short:"DN", icon:"🏦", unit:"tr đ", star:true, color:"#1a6fff"},
+  {key:"the_td", label:"Thẻ TD", short:"TT", icon:"💳", unit:"thẻ", star:true, color:"#7c4dff"},
+  {key:"tk_hkd", label:"TK HKD", short:"HK", icon:"🏢", unit:"TK", star:false, color:"#00c48c"},
+  {key:"qr_code", label:"QR Code", short:"QR", icon:"📱", unit:"QR", star:false, color:"#00d2ff"},
+  {key:"cif", label:"CIF", short:"CF", icon:"👤", unit:"CIF", star:false, color:"#ff6b9d"}
 ];
-var STARS = KPIS.filter(function(k) { return k.star; });
-var DEFAULT_KH = {huy_dong:47900, du_no:31000, the_td:82, tk_hkd:80, qr_code:220, cif:415};
-
-var PL_STAGES = [
-  {key:'tiep_can',   label:'Tiếp cận',   icon:'🟡', color:'#f59e0b'},
-  {key:'tu_van',     label:'Tư vấn',     icon:'🔵', color:'#1a6fff'},
-  {key:'de_xuat',    label:'Đề xuất',    icon:'🟠', color:'#f97316'},
-  {key:'xu_ly',      label:'Xử lý',      icon:'🟣', color:'#7c4dff'},
-  {key:'cho_duyet',  label:'Chờ duyệt',  icon:'⚪', color:'#94a3b8'},
-  {key:'hoan_tat',   label:'Hoàn tất',   icon:'✅', color:'#00c48c'},
+const STARS = KPIS.filter(k => k.star);
+const DEFAULT_KH = {huy_dong:47900, du_no:31000, the_td:82, tk_hkd:80, qr_code:220, cif:415};
+const PL_STAGES = [
+  {key:"tiep_can", label:"Tiếp cận", icon:"🟡", color:"#f59e0b"},
+  {key:"tu_van", label:"Tư vấn", icon:"🔵", color:"#1a6fff"},
+  {key:"de_xuat", label:"Đề xuất", icon:"🟠", color:"#f97316"},
+  {key:"xu_ly", label:"Xử lý", icon:"🟣", color:"#7c4dff"},
+  {key:"cho_duyet", label:"Chờ duyệt", icon:"⚪", color:"#94a3b8"},
+  {key:"hoan_tat", label:"Hoàn tất", icon:"✅", color:"#00c48c"}
 ];
 
-// ── STATE ──
-var S = {
-  tab: 'nhap', khTab: 'phong',
-  month: CUR_M, selT: CUR_T,
-  selNV: null, detailNV: null,
-  scope: 'thang', scopeDay: '', scopeFrom: '', scopeTo: '',
-  filterNVs: [],
-  nvpTemp: [],
-  plTab: 'mine',       // mine | phong
-  plStage: '',         // filter by stage
-  plFormNV: null,      // NV adding deal
-  plEditId: null,      // editing deal id
-  online: false,
-  khPhong: {}, khTuan: {}, thTuan: {},
-  pipeline: {},        // {month: {ma: {dealId: deal}}}
+let pinBuf = "";
+let pinAuth = false;
+let pinCb = null;
+let nvpSorted = false;
+
+const S = {
+  tab:"nhap", khTab:"phong", month:CUR_M, selT:CUR_T,
+  selNV:null, detailNV:null, filterNVs:[], nvpTemp:[],
+  scope:"thang", scopeDay:"", scopeFrom:"", scopeTo:"",
+  plTab:"mine", plFormNV:null, plEditId:null,
+  online:false, loadError:"",
+  khPhong:{}, khTuan:{}, thTuan:{}, pipeline:{}
 };
 
-function gKP(m) { return S.khPhong[m || S.month] || DEFAULT_KH; }
-function gKT(m, t, ma) { return ((S.khTuan[m || S.month] || {})[t] || {})[ma] || {}; }
-function gTH(m, t, ma) { return ((S.thTuan[m || S.month] || {})[t] || {})[ma] || {}; }
-function gPL(m, ma) { return ((S.pipeline[m || S.month] || {})[ma]) || {}; }
-
-async function loadMonth(m) {
-  var results = await Promise.all([
-    fbGet('khPhong/' + m),
-    fbGet('khTuan/' + m),
-    fbGet('thTuan/' + m),
-    fbGet('pipeline/' + m),
-  ]);
-  if (results[0]) S.khPhong[m] = results[0]; else if (!S.khPhong[m]) S.khPhong[m] = {};
-  if (results[1]) S.khTuan[m] = results[1];  else if (!S.khTuan[m])  S.khTuan[m] = {};
-  if (results[2]) S.thTuan[m] = results[2];  else if (!S.thTuan[m])  S.thTuan[m] = {};
-  if (results[3]) S.pipeline[m] = results[3]; else if (!S.pipeline[m]) S.pipeline[m] = {};
-  S.online = !!(results[0] || results[1] || results[2] || results[3]);
+function escapeHtml(v) {
+  return String(v == null ? "" : v).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
 }
-
-// ── HELPERS ──
+function safeAttr(v) { return escapeHtml(v); }
 function fmt(v, u) {
-  if (v == null) return '—';
-  var n = +v; if (isNaN(n)) return '—';
-  return n.toLocaleString('vi-VN') + (u ? ' ' + u : '');
+  if (v == null || v === "") return "—";
+  const n = Number(v);
+  if (Number.isNaN(n)) return "—";
+  return n.toLocaleString("vi-VN") + (u ? " " + u : "");
 }
-function pct(th, kh) { return (kh && kh > 0 && th != null) ? th / kh * 100 : null; }
-function p2s(p) { return p === null ? '—' : Math.round(p) + '%'; }
+function pct(th, kh) { return kh > 0 && th != null ? Number(th || 0) / kh * 100 : null; }
+function p2s(p) { return p == null || Number.isNaN(p) ? "—" : `${Math.round(p)}%`; }
 function pc(p) {
-  if (p === null) return '#2a4060';
-  if (p >= 100) return '#00c48c';
-  if (p >= 70)  return '#e8a020';
-  if (p >= 40)  return '#ff9f43';
-  return '#ff4757';
+  if (p == null || Number.isNaN(p)) return "#2a4060";
+  if (p >= 100) return "#00c48c";
+  if (p >= 70) return "#e8a020";
+  if (p >= 40) return "#ff9f43";
+  return "#ff4757";
 }
 function stl(p) {
-  if (p === null) return {l: 'Chưa KH', c: '#2a4060'};
-  if (p >= 100) return {l: '✅ Đạt',  c: '#00c48c'};
-  if (p >= 70)  return {l: '⚡ Tốt',  c: '#e8a020'};
-  if (p >= 40)  return {l: '⚠️ TB',   c: '#ff9f43'};
-  return {l: '🚨 Yếu', c: '#ff4757'};
+  if (p == null || Number.isNaN(p)) return {l:"Chưa KH", c:"#2a4060"};
+  if (p >= 100) return {l:"✅ Đạt", c:"#00c48c"};
+  if (p >= 70) return {l:"⚡ Tốt", c:"#e8a020"};
+  if (p >= 40) return {l:"⚠️ TB", c:"#ff9f43"};
+  return {l:"🚨 Yếu", c:"#ff4757"};
 }
 function acC(ma) {
-  var c = ['#e8a020','#1a6fff','#7c4dff','#00c48c','#ff6b9d','#00d2ff','#ff9f43','#a855f7'];
-  var h = 0;
-  for (var i = 0; i < ma.length; i++) h = (h * 31 + ma.charCodeAt(i)) % c.length;
-  return c[h];
+  const colors = ["#e8a020","#1a6fff","#7c4dff","#00c48c","#ff6b9d","#00d2ff","#ff9f43","#a855f7"];
+  let h = 0;
+  for (let i = 0; i < ma.length; i++) h = (h * 31 + ma.charCodeAt(i)) % colors.length;
+  return colors[h];
 }
-function av(name, ma, sz) {
-  sz = sz || 36;
-  var c = acC(ma);
-  var init = name.split(' ').pop()[0] || '?';
-  return '<div class="av" style="width:' + sz + 'px;height:' + sz + 'px;background:' + c + '18;border:1.5px solid ' + c + '42;color:' + c + ';font-size:' + Math.round(sz * .38) + 'px">' + init + '</div>';
+function av(name, ma, sz = 36) {
+  const c = acC(ma);
+  const init = (String(name).trim().split(/\s+/).pop() || "?")[0];
+  return `<div class="av" style="width:${sz}px;height:${sz}px;background:${c}18;border:1.5px solid ${c}42;color:${c};font-size:${Math.round(sz * .38)}px">${escapeHtml(init)}</div>`;
 }
-function chip(l, c) {
-  return '<span class="chip" style="background:' + c + '18;color:' + c + ';border-color:' + c + '30">' + l + '</span>';
+function chip(label, color) {
+  return `<span class="chip" style="background:${color}18;color:${color};border-color:${color}30">${escapeHtml(label)}</span>`;
+}
+function bar(v, mx, col, h = 5) {
+  const w = mx > 0 ? Math.min(100, Math.max(0, Number(v || 0) / mx * 100)) : 0;
+  return `<div class="bw" style="height:${h}px"><div class="bf" style="width:${w}%;background:${col};height:${h}px"></div></div>`;
+}
+function ring(p, sz = 42, sw = 5) {
+  const r = (sz - sw * 2) / 2;
+  const c = 2 * Math.PI * r;
+  const v = Math.min(Math.max(p || 0, 0), 100);
+  return `<svg width="${sz}" height="${sz}" style="transform:rotate(-90deg)"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="#060e1a" stroke-width="${sw}"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${pc(p)}" stroke-width="${sw}" stroke-dasharray="${v/100*c} ${c}" stroke-linecap="round"/></svg>`;
 }
 function fmtTs(ts) {
-  if (!ts) return '';
-  var d = new Date(ts);
-  return d.getDate() + '/' + (d.getMonth() + 1) + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  if (!ts) return "";
+  const d = new Date(ts);
+  return `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
-function fmtM(m) { var p = m.split('-'); return 'T' + (+p[1]) + '/' + p[0]; }
-function fmtDate(s) {
-  if (!s) return '';
-  var p = s.split('-');
-  return p[2] + '/' + p[1];
+function fmtM(m) { const [y, mo] = m.split("-"); return `T${Number(mo)}/${y}`; }
+function genMonths() {
+  const out = [];
+  for (let y = 2026; y <= NOW.getFullYear(); y++) {
+    const maxM = y === NOW.getFullYear() ? NOW.getMonth() + 1 : 12;
+    for (let m = 1; m <= maxM; m++) out.push(`${y}-${String(m).padStart(2, "0")}`);
+  }
+  return out.reverse();
 }
-function genDealId() { return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+function genDays(m) {
+  const [y, mo] = m.split("-").map(Number);
+  const days = new Date(y, mo, 0).getDate();
+  return Array.from({length:days}, (_, i) => `${m}-${String(i + 1).padStart(2, "0")}`);
+}
 function daysLeft(dateStr) {
   if (!dateStr) return null;
-  var diff = new Date(dateStr).getTime() - Date.now();
-  return Math.ceil(diff / 86400000);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const due = new Date(dateStr); due.setHours(0,0,0,0);
+  return Math.ceil((due.getTime() - today.getTime()) / 86400000);
 }
-function ring(p, sz, sw) {
-  sz = sz || 42; sw = sw || 5;
-  var r = (sz - sw * 2) / 2, c = 2 * Math.PI * r, v = Math.min(Math.max(p || 0, 0), 100);
-  return '<svg width="' + sz + '" height="' + sz + '" style="transform:rotate(-90deg)">'
-    + '<circle cx="' + (sz/2) + '" cy="' + (sz/2) + '" r="' + r + '" fill="none" stroke="#060e1a" stroke-width="' + sw + '"/>'
-    + '<circle cx="' + (sz/2) + '" cy="' + (sz/2) + '" r="' + r + '" fill="none" stroke="' + pc(p) + '" stroke-width="' + sw + '" stroke-dasharray="' + (v/100*c) + ' ' + c + '" stroke-linecap="round"/>'
-    + '</svg>';
+function genDealId() { return "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function getLocalState() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch { return {}; }
 }
-function bar(v, mx, col, h) {
-  h = h || 5;
-  var w = mx > 0 ? Math.min(100, Math.max(0, (v || 0) / mx * 100)) : 0;
-  return '<div class="bw" style="height:' + h + 'px"><div class="bf" style="width:' + w + '%;background:' + col + ';height:' + h + 'px"></div></div>';
+function saveLocalState() {
+  localStorage.setItem(LS_KEY, JSON.stringify({
+    khPhong:S.khPhong, khTuan:S.khTuan, thTuan:S.thTuan, pipeline:S.pipeline
+  }));
+}
+function withTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), FB_TIMEOUT);
+  return fetch(url, {...options, signal:controller.signal}).finally(() => clearTimeout(t));
+}
+async function fbGet(p) {
+  try {
+    const r = await withTimeout(`${DB}/${ROOT}/${p}.json`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    S.online = true;
+    return d == null ? null : d;
+  } catch (e) {
+    S.online = false;
+    S.loadError = e.name === "AbortError" ? "Firebase timeout - dùng dữ liệu local" : e.message;
+    return null;
+  }
+}
+async function fbSet(p, d) {
+  saveLocalState();
+  try {
+    const r = await withTimeout(`${DB}/${ROOT}/${p}.json`, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(d)});
+    S.online = r.ok;
+  } catch {
+    S.online = false;
+  }
+}
+async function fbDel(p) {
+  saveLocalState();
+  try {
+    const r = await withTimeout(`${DB}/${ROOT}/${p}.json`, {method:"DELETE"});
+    S.online = r.ok;
+  } catch {
+    S.online = false;
+  }
+}
+async function loadMonth(m) {
+  const local = getLocalState();
+  ["khPhong","khTuan","thTuan","pipeline"].forEach(k => {
+    if (local[k]) S[k] = {...S[k], ...local[k]};
+  });
+  const [kp, kt, th, pl] = await Promise.all([
+    fbGet(`khPhong/${m}`), fbGet(`khTuan/${m}`), fbGet(`thTuan/${m}`), fbGet(`pipeline/${m}`)
+  ]);
+  S.khPhong[m] = kp || S.khPhong[m] || {};
+  S.khTuan[m] = kt || S.khTuan[m] || {};
+  S.thTuan[m] = th || S.thTuan[m] || {};
+  S.pipeline[m] = pl || S.pipeline[m] || {};
+  saveLocalState();
 }
 
-// ── SCOPE HELPERS ──
-function scopeTuans() {
-  if (S.scope === 'thang' || S.scope === 'ngay' || S.scope === 'custom') return ['T1','T2','T3','T4'];
-  return [S.scope];
-}
-function filteredNVs() {
-  return S.filterNVs.length > 0
-    ? NVS.filter(function(nv) { return S.filterNVs.indexOf(nv.ma) >= 0; })
-    : NVS;
-}
-function thForNV(m, ma) {
-  var tuans = scopeTuans();
-  if (S.scope === 'ngay' && S.scopeDay) {
-    var d0 = new Date(S.scopeDay).setHours(0,0,0,0), d1 = d0 + 86400000;
-    var rv = {}; KPIS.forEach(function(k) { rv[k.key] = 0; });
-    tuans.forEach(function(t) {
-      var th = gTH(m, t, ma);
-      if (th.updatedAt && th.updatedAt >= d0 && th.updatedAt < d1)
-        KPIS.forEach(function(k) { if (th[k.key] != null) rv[k.key] += th[k.key]; });
-    });
-    return rv;
-  }
-  if (S.scope === 'custom' && S.scopeFrom && S.scopeTo) {
-    var f = new Date(S.scopeFrom).setHours(0,0,0,0), t2 = new Date(S.scopeTo).setHours(23,59,59,999);
-    var rc = {}; KPIS.forEach(function(k) { rc[k.key] = 0; });
-    tuans.forEach(function(t) {
-      var th = gTH(m, t, ma);
-      if (th.updatedAt && th.updatedAt >= f && th.updatedAt <= t2)
-        KPIS.forEach(function(k) { if (th[k.key] != null) rc[k.key] = Math.max(rc[k.key] || 0, th[k.key] || 0); });
-    });
-    return rc;
-  }
-  var rr = {};
-  KPIS.forEach(function(k) {
-    rr[k.key] = tuans.reduce(function(s, t) { return s + (gTH(m, t, ma)[k.key] || 0); }, 0);
-  });
+function gKP(m = S.month) { return S.khPhong[m] && Object.keys(S.khPhong[m]).length ? S.khPhong[m] : DEFAULT_KH; }
+function gKT(m = S.month, t = S.selT, ma) { return (((S.khTuan[m] || {})[t] || {})[ma] || {}); }
+function gTH(m = S.month, t = S.selT, ma) { return (((S.thTuan[m] || {})[t] || {})[ma] || {}); }
+function gPL(m = S.month, ma) { return (((S.pipeline[m] || {})[ma]) || {}); }
+function scopeTuans() { return ["T1","T2","T3","T4"].includes(S.scope) ? [S.scope] : ["T1","T2","T3","T4"]; }
+function filteredNVs() { return S.filterNVs.length ? NVS.filter(nv => S.filterNVs.includes(nv.ma)) : NVS; }
+function khForNV(m, ma) {
+  const rr = {};
+  KPIS.forEach(k => rr[k.key] = scopeTuans().reduce((s,t) => s + (gKT(m,t,ma)[k.key] || 0), 0));
   return rr;
 }
-function khForNV(m, ma) {
-  var rr = {};
-  KPIS.forEach(function(k) {
-    rr[k.key] = scopeTuans().reduce(function(s, t) { return s + (gKT(m, t, ma)[k.key] || 0); }, 0);
-  });
+function thForNV(m, ma) {
+  const rr = {};
+  KPIS.forEach(k => rr[k.key] = scopeTuans().reduce((s,t) => s + (gTH(m,t,ma)[k.key] || 0), 0));
   return rr;
 }
 function khPScope(m) {
-  if (S.scope === 'thang' || S.scope === 'ngay' || S.scope === 'custom') return gKP(m);
-  var fnvs = filteredNVs(), rr = {};
-  KPIS.forEach(function(k) {
-    rr[k.key] = fnvs.reduce(function(s, nv) { return s + (gKT(m, S.scope, nv.ma)[k.key] || 0); }, 0);
-  });
+  if (S.scope === "thang" || S.scope === "ngay" || S.scope === "custom") return gKP(m);
+  const rr = {};
+  KPIS.forEach(k => rr[k.key] = filteredNVs().reduce((s,nv) => s + (gKT(m,S.scope,nv.ma)[k.key] || 0), 0));
   return rr;
 }
 function nvScoreCalc(m, ma) {
-  var tuans = scopeTuans();
-  var wk = STARS.filter(function(k) { return tuans.some(function(t) { return (gKT(m, t, ma)[k.key] || 0) > 0; }); });
+  const tuans = scopeTuans();
+  const wk = STARS.filter(k => tuans.some(t => (gKT(m,t,ma)[k.key] || 0) > 0));
   if (!wk.length) return null;
-  return wk.reduce(function(s, k) {
-    var kh = tuans.reduce(function(a, t) { return a + (gKT(m, t, ma)[k.key] || 0); }, 0);
-    var th = tuans.reduce(function(a, t) { return a + (gTH(m, t, ma)[k.key] || 0); }, 0);
+  return wk.reduce((s,k) => {
+    const kh = tuans.reduce((a,t) => a + (gKT(m,t,ma)[k.key] || 0), 0);
+    const th = tuans.reduce((a,t) => a + (gTH(m,t,ma)[k.key] || 0), 0);
     return s + (pct(th, kh) || 0);
   }, 0) / wk.length;
 }
-
-// Pipeline helpers
 function getDealsForNV(m, ma) {
-  var pl = gPL(m, ma);
-  var deals = [];
-  Object.keys(pl).forEach(function(id) { deals.push(Object.assign({id: id}, pl[id])); });
-  return deals.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+  return Object.entries(gPL(m, ma)).map(([id, d]) => ({id, ...d})).sort((a,b) => (b.ts || 0) - (a.ts || 0));
 }
 function getAllDeals(m) {
-  var all = [];
-  NVS.forEach(function(nv) {
-    getDealsForNV(m, nv.ma).forEach(function(d) { all.push(Object.assign({ma: nv.ma, ten: nv.ten}, d)); });
-  });
-  return all;
+  return NVS.flatMap(nv => getDealsForNV(m, nv.ma).map(d => ({...d, ma:nv.ma, ten:nv.ten})));
 }
-function plStageCfg(key) {
-  return PL_STAGES.filter(function(s) { return s.key === key; })[0] || PL_STAGES[0];
-}
-function plTotalValue(deals) {
-  return deals.reduce(function(s, d) { return s + (d.gt || 0); }, 0);
-}
-// Dự báo KPI từ pipeline
+function plTotalValue(deals) { return deals.reduce((s,d) => s + Number(d.gt || 0), 0); }
 function plForecast(m) {
-  var deals = getAllDeals(m);
-  var activeDone = deals.filter(function(d) { return d.gd === 'hoan_tat'; });
-  var activePipe = deals.filter(function(d) { return d.gd !== 'hoan_tat'; });
-  // Conversion: 60% deals đề xuất trở lên về đích
-  var forecast = {};
-  KPIS.forEach(function(k) {
-    var done = activeDone.filter(function(d) { return d.sp === k.key; }).reduce(function(s,d){return s+(d.gt||0);},0);
-    var pipe = activePipe.filter(function(d) { return d.sp === k.key && ['de_xuat','xu_ly','cho_duyet'].indexOf(d.gd) >= 0; }).reduce(function(s,d){return s+(d.gt||0);},0);
-    forecast[k.key] = done + Math.round(pipe * 0.6);
+  const deals = getAllDeals(m);
+  const fc = {};
+  KPIS.forEach(k => {
+    const done = deals.filter(d => d.sp === k.key && d.gd === "hoan_tat").reduce((s,d) => s + Number(d.gt || 0), 0);
+    const pipe = deals.filter(d => d.sp === k.key && d.gd !== "hoan_tat" && ["de_xuat","xu_ly","cho_duyet"].includes(d.gd)).reduce((s,d) => s + Number(d.gt || 0), 0);
+    fc[k.key] = done + Math.round(pipe * .6);
   });
-  return forecast;
+  return fc;
 }
 
-// ═══════════════════════════════════════════════════════
-// RENDER ENGINE
-// ═══════════════════════════════════════════════════════
 function render() {
-  var a = document.getElementById('app');
-  if (a) a.innerHTML = rHdr() + rContent() + rNav();
-}
-
-function rHdr() {
-  var badge = S.online
-    ? '<span class="tag tag-g">● Online</span>'
-    : '<span class="tag tag-m">○ Offline</span>';
-  var mOpts = MONTHS.map(function(m) {
-    return '<option value="' + m + '"' + (m === S.month ? ' selected' : '') + '>' + fmtM(m) + '</option>';
-  }).join('');
-  var khTabs = S.tab === 'kh'
-    ? '<div style="display:flex;gap:5px;margin-top:7px">'
-      + '<button class="sbb' + (S.khTab === 'phong' ? ' on' : '') + '" onclick="setKhTab(\'phong\')" style="padding:4px 10px;font-size:10px">📋 Phòng</button>'
-      + '<button class="sbb' + (S.khTab === 'tuan' ? ' on' : '') + '" onclick="setKhTab(\'tuan\')" style="padding:4px 10px;font-size:10px">👤 NV</button>'
-      + '</div>'
-    : '';
-  return '<div class="hdr"><div class="hdr-top">'
-    + '<div style="display:flex;align-items:center;gap:9px">'
-    + '<div class="logo-ic">🏦</div>'
-    + '<div><div class="logo-tx">KPI <em>Banking</em></div>'
-    + '<div style="font-size:9px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-top:1px">Nam A Bank · KHCN</div>'
-    + '</div></div>'
-    + '<div style="display:flex;align-items:center;gap:6px">'
-    + '<select class="m-sel" onchange="setMonth(this.value)">' + mOpts + '</select>'
-    + '<button onclick="openExpModal()" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:8px;padding:5px 10px;font-weight:800;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">📄 PDF</button>'
-    + badge + '</div></div>'
-    + '<div class="hdr-sub">'
-    + '<span class="tag tag-y">' + NOW.toLocaleDateString('vi-VN', {weekday:'short', day:'numeric', month:'numeric'}) + '</span>'
-    + '<span class="tag tag-b">' + fmtM(S.month) + '</span>'
-    + '<span class="tag tag-b">' + CUR_T + '</span>'
-    + '</div>' + khTabs + '</div>';
-}
-
-function rNav() {
-  var alertCnt = NVS.filter(function(nv) {
-    var kh = gKT(S.month, CUR_T, nv.ma), th = gTH(S.month, CUR_T, nv.ma);
-    return KPIS.some(function(k) { return (kh[k.key] || 0) > 0; })
-      && !KPIS.some(function(k) { return th[k.key] != null; });
-  }).length;
-  // Pipeline alert: deals quá hạn
-  var plAlert = getAllDeals(S.month).filter(function(d) {
-    return d.gd !== 'hoan_tat' && d.han && daysLeft(d.han) < 0;
-  }).length;
-  var totalAlert = alertCnt + plAlert;
-
-  var tabs = [
-    {id:'nhap', ic:'✏️', lb:'Nhập TH'},
-    {id:'pl',   ic:'📋', lb:'Pipeline'},
-    {id:'dash', ic:'📊', lb:'Dashboard'},
-    {id:'alert',ic:'🚨', lb:'Cảnh báo'},
-    {id:'star', ic:'🌟', lb:'Tuyên dương'},
-    {id:'kh',   ic:'🎯', lb:'Giao KH'},
-  ];
-  return '<div class="nav">' + tabs.map(function(t) {
-    var bdg = (t.id === 'alert' && totalAlert > 0)
-      ? '<span class="nb-bdg">' + totalAlert + '</span>'
-      : '';
-    return '<button class="nb' + (S.tab === t.id ? ' on' : '') + '" onclick="setTab(\'' + t.id + '\')">'
-      + '<span class="nb-ic">' + t.ic + '</span>' + t.lb + bdg + '</button>';
-  }).join('') + '</div>';
-}
-
-function rContent() {
-  switch (S.tab) {
-    case 'nhap':  return S.selNV ? rNhapForm() : rNhapList();
-    case 'pl':    return S.plFormNV ? rPlForm() : rPipeline();
-    case 'dash':  return S.detailNV ? rDashDetail() : rDash();
-    case 'alert': return rAlert();
-    case 'star':  return rStar();
-    case 'kh':    return S.khTab === 'phong' ? rKhPhong() : (S.selNV ? rKhTuanForm() : rKhTuanList());
-    default: return '';
+  const app = document.getElementById("app");
+  try {
+    app.innerHTML = rHdr() + rContent() + rNav();
+  } catch (e) {
+    console.error(e);
+    app.innerHTML = `<div class="error-box">Lỗi render:\n${escapeHtml(e.stack || e.message)}</div>`;
   }
 }
-
-// ═══════════════════════════════════════════════════════
-// NHẬP TH
-// ═══════════════════════════════════════════════════════
-function rNhapList() {
-  var rows = NVS.map(function(nv) {
-    var th = gTH(S.month, S.selT, nv.ma), kh = gKT(S.month, S.selT, nv.ma);
-    var hasKh = KPIS.some(function(k) { return (kh[k.key] || 0) > 0; });
-    var hasTh = KPIS.some(function(k) { return th[k.key] != null; });
-    var sub, cls;
-    if (hasTh) {
-      cls = 'ht';
-      sub = '<div class="chips">' + STARS.map(function(k) {
-        var v = th[k.key], kv = kh[k.key] || 0, p = kv > 0 ? pct(v, kv) : null;
-        return chip(k.icon + ' ' + fmt(v, k.unit) + (p !== null ? ' ' + Math.round(p) + '%' : ''), k.color);
-      }).join('') + '</div>';
-      if (th.updatedAt) sub += '<div style="font-size:10px;color:var(--mute);margin-top:3px">🕐 ' + fmtTs(th.updatedAt) + '</div>';
-    } else {
-      cls = hasKh ? 'hk' : '';
-      sub = '<div class="nv-s">' + (hasKh ? '<span style="color:#ffc84a;font-weight:600">⚡ Có KH — chưa nhập</span>' : '<span style="color:var(--mute)">Chưa có KH tuần này</span>') + '</div>';
-    }
-    var badge = hasTh ? chip('✓ Đã nhập', '#00c48c') : hasKh ? chip('Cần nhập', '#e8a020') : chip('Chưa KH', '#2a4060');
-    return '<button class="nvi ' + cls + '" onclick="selNV(\'' + nv.ma + '\')">'
-      + av(nv.ten, nv.ma) + '<div style="flex:1;overflow:hidden"><div class="nv-n">' + nv.ten + '</div>' + sub + '</div>' + badge + '</button>';
-  }).join('');
-  return '<div class="pad"><div class="sec">✏️ Nhập / Cập nhật TH</div>'
-    + '<div class="tt">' + ['T1','T2','T3','T4'].map(function(t) {
-      return '<button class="tb' + (S.selT === t ? ' on' : '') + '" onclick="setT(\'' + t + '\')">' + t + '</button>';
-    }).join('') + '</div>' + rows + '</div>';
+function rHdr() {
+  const months = genMonths().map(m => `<option value="${m}" ${m === S.month ? "selected" : ""}>${fmtM(m)}</option>`).join("");
+  const badge = S.online ? `<span class="tag tag-g">● Online</span>` : `<span class="tag tag-m">○ Offline</span>`;
+  const khTabs = S.tab === "kh" ? `<div style="display:flex;gap:5px;margin-top:7px"><button class="sbb ${S.khTab === "phong" ? "on" : ""}" onclick="setKhTab('phong')" style="padding:4px 10px;font-size:10px">📋 Phòng</button><button class="sbb ${S.khTab === "tuan" ? "on" : ""}" onclick="setKhTab('tuan')" style="padding:4px 10px;font-size:10px">👤 NV</button></div>` : "";
+  return `<div class="hdr"><div class="hdr-top"><div class="brand"><div class="logo-ic">🏦</div><div><div class="logo-tx">KPI <em>Banking</em></div><div class="sub">Nam A Bank · KHCN</div></div></div><div class="hdr-actions"><select class="m-sel" onchange="setMonth(this.value)">${months}</select><button class="gold-btn" onclick="openExpModal()">📄 PDF</button>${badge}</div></div><div class="hdr-sub"><span class="tag tag-y">${NOW.toLocaleDateString("vi-VN", {weekday:"short", day:"numeric", month:"numeric"})}</span><span class="tag tag-b">${fmtM(S.month)}</span><span class="tag tag-b">${CUR_T}</span>${S.loadError ? `<span class="tag tag-m">${escapeHtml(S.loadError)}</span>` : ""}</div>${khTabs}</div>`;
+}
+function rNav() {
+  const alertCnt = NVS.filter(nv => {
+    const kh = gKT(S.month, CUR_T, nv.ma);
+    const th = gTH(S.month, CUR_T, nv.ma);
+    return KPIS.some(k => (kh[k.key] || 0) > 0) && !KPIS.some(k => th[k.key] != null);
+  }).length;
+  const plAlert = getAllDeals(S.month).filter(d => d.gd !== "hoan_tat" && d.han && daysLeft(d.han) < 0).length;
+  const totalAlert = alertCnt + plAlert;
+  const tabs = [
+    {id:"nhap", ic:"✏️", lb:"Nhập TH"},
+    {id:"pl", ic:"📋", lb:"Pipeline"},
+    {id:"dash", ic:"📊", lb:"Dashboard"},
+    {id:"alert", ic:"🚨", lb:"Cảnh báo"},
+    {id:"star", ic:"🌟", lb:"Tuyên dương"},
+    {id:"kh", ic:"🎯", lb:"Giao KH"}
+  ];
+  return `<div class="nav">${tabs.map(t => `<button class="nb ${S.tab === t.id ? "on" : ""}" onclick="setTab('${t.id}')"><span class="nb-ic">${t.ic}</span>${t.lb}${t.id === "alert" && totalAlert > 0 ? `<span class="nb-bdg">${totalAlert}</span>` : ""}</button>`).join("")}</div>`;
+}
+function rContent() {
+  if (S.tab === "nhap") return S.selNV ? rNhapForm() : rNhapList();
+  if (S.tab === "pl") return S.plFormNV ? rPlForm() : rPipeline();
+  if (S.tab === "dash") return S.detailNV ? rDashDetail() : rDash();
+  if (S.tab === "alert") return rAlert();
+  if (S.tab === "star") return rStar();
+  if (S.tab === "kh") return S.khTab === "phong" ? rKhPhong() : (S.selNV ? rKhTuanForm() : rKhTuanList());
+  return "";
 }
 
+function rNhapList() {
+  const rows = NVS.map(nv => {
+    const th = gTH(S.month, S.selT, nv.ma);
+    const kh = gKT(S.month, S.selT, nv.ma);
+    const hasKh = KPIS.some(k => (kh[k.key] || 0) > 0);
+    const hasTh = KPIS.some(k => th[k.key] != null);
+    const sub = hasTh ? `<div class="chips">${STARS.map(k => chip(`${k.icon} ${fmt(th[k.key], k.unit)}${kh[k.key] ? " " + p2s(pct(th[k.key], kh[k.key])) : ""}`, k.color)).join("")}</div>${th.updatedAt ? `<div style="font-size:10px;color:var(--mute);margin-top:3px">🕐 ${fmtTs(th.updatedAt)}</div>` : ""}` : `<div class="nv-s">${hasKh ? `<span style="color:#ffc84a;font-weight:700">⚡ Có KH - chưa nhập</span>` : `<span>Chưa có KH tuần này</span>`}</div>`;
+    return `<button class="nvi ${hasTh ? "ht" : hasKh ? "hk" : ""}" onclick="selNV('${safeAttr(nv.ma)}')">${av(nv.ten,nv.ma)}<div style="flex:1;overflow:hidden"><div class="nv-n">${escapeHtml(nv.ten)}</div>${sub}</div>${hasTh ? chip("✓ Đã nhập","#00c48c") : hasKh ? chip("Cần nhập","#e8a020") : chip("Chưa KH","#2a4060")}</button>`;
+  }).join("");
+  return `<div class="pad"><div class="sec">✏️ Nhập / Cập nhật TH</div><div class="tt">${["T1","T2","T3","T4"].map(t => `<button class="tb ${S.selT === t ? "on" : ""}" onclick="setT('${t}')">${t}</button>`).join("")}</div>${rows}</div>`;
+}
 function rNhapForm() {
-  var nv = NVS.filter(function(n) { return n.ma === S.selNV; })[0];
-  if (!nv) return '';
-  var kh = gKT(S.month, S.selT, nv.ma), th = gTH(S.month, S.selT, nv.ma);
-  var hasKh = KPIS.some(function(k) { return (kh[k.key] || 0) > 0; });
-  var fields = KPIS.map(function(k) {
-    var kv = kh[k.key] || 0, tv = th[k.key] != null ? th[k.key] : null;
-    var p = kv > 0 && tv !== null ? pct(tv, kv) : null;
-    var st = stl(kv > 0 ? p : null);
-    return '<div class="ff" id="ff_' + k.key + '" style="border-color:' + k.color + '28">'
-      + '<div class="fh"><div class="fl"><span style="font-size:20px">' + k.icon + '</span>'
-      + '<div><div class="fn" style="color:' + (k.star ? '#ffc84a' : '#fff') + '">' + (k.star ? '⭐ ' : '') + k.label + '</div>'
-      + '<div class="fk">KH ' + S.selT + ': <b style="color:' + (kv ? k.color : 'var(--dim)') + '">' + (kv ? fmt(kv, k.unit) : 'Chưa giao') + '</b></div></div></div>'
-      + '<div style="text-align:right"><div style="font-size:12px;font-weight:800;color:' + st.c + '">' + (p !== null ? p2s(p) : '') + '</div>'
-      + '<div style="font-size:10px;color:' + st.c + '">' + st.l + '</div></div></div>'
-      + '<input type="number" id="fi_' + k.key + '" value="' + (tv !== null ? tv : '') + '" placeholder="' + k.label + ' (' + k.unit + ')" style="border-color:' + k.color + '28" oninput="onFI(\'' + k.key + '\',' + kv + ',\'' + k.color + '\')">'
-      + '<div id="fb_' + k.key + '" style="margin-top:6px">' + (p !== null && kv > 0 ? bar(tv, kv, k.color, 5) : '') + '</div></div>';
-  }).join('');
-  return '<div class="pad">'
-    + '<button class="bback" onclick="backNhap()">← Chọn nhân viên</button>'
-    + '<div class="card card-hi" style="margin-bottom:15px">'
-    + '<div style="display:flex;align-items:center;gap:12px">' + av(nv.ten, nv.ma, 44)
-    + '<div><div style="font-weight:800;font-size:14px;color:#fff">' + nv.ten + '</div>'
-    + '<div style="margin-top:4px;display:flex;gap:5px">'
-    + '<span class="tag tag-b">' + S.selT + '</span><span class="tag tag-y">' + fmtM(S.month) + '</span>'
-    + (hasKh ? '' : '<span class="tag tag-r">Chưa có KH</span>')
-    + '</div></div></div></div>'
-    + fields
-    + '<button class="bsave" id="sv-btn" onclick="saveTH()">💾 Lưu TH ' + S.selT + ' — ' + nv.ten.split(' ').pop() + '</button></div>';
+  const nv = NVS.find(n => n.ma === S.selNV);
+  if (!nv) return "";
+  const kh = gKT(S.month, S.selT, nv.ma);
+  const th = gTH(S.month, S.selT, nv.ma);
+  const fields = KPIS.map(k => {
+    const kv = Number(kh[k.key] || 0);
+    const tv = th[k.key] != null ? th[k.key] : "";
+    const p = kv > 0 && tv !== "" ? pct(tv, kv) : null;
+    const st = stl(kv > 0 ? p : null);
+    return `<div class="ff" style="border-color:${k.color}28"><div class="fh"><div class="fl"><span style="font-size:20px">${k.icon}</span><div><div class="fn" style="color:${k.star ? "#ffc84a" : "#fff"}">${k.star ? "⭐ " : ""}${k.label}</div><div class="fk">KH ${S.selT}: <b style="color:${kv ? k.color : "var(--dim)"}">${kv ? fmt(kv,k.unit) : "Chưa giao"}</b></div></div></div><div style="text-align:right"><div style="font-size:12px;font-weight:900;color:${st.c}">${p != null ? p2s(p) : ""}</div><div style="font-size:10px;color:${st.c}">${st.l}</div></div></div><input type="number" id="fi_${k.key}" value="${tv}" placeholder="${k.label} (${k.unit})" oninput="onFI('${k.key}',${kv},'${k.color}')"><div id="fb_${k.key}" style="margin-top:6px">${p != null && kv > 0 ? bar(tv,kv,k.color,5) : ""}</div></div>`;
+  }).join("");
+  return `<div class="pad"><button class="bback" onclick="backNhap()">← Chọn nhân viên</button><div class="card card-hi" style="margin-bottom:15px"><div style="display:flex;align-items:center;gap:12px">${av(nv.ten,nv.ma,44)}<div><div style="font-weight:900;font-size:14px;color:#fff">${escapeHtml(nv.ten)}</div><div style="margin-top:4px;display:flex;gap:5px"><span class="tag tag-b">${S.selT}</span><span class="tag tag-y">${fmtM(S.month)}</span></div></div></div></div>${fields}<button class="bsave" id="sv-btn" onclick="saveTH()">💾 Lưu TH ${S.selT} - ${escapeHtml(nv.ten.split(" ").pop())}</button></div>`;
 }
 function onFI(key, kv, col) {
-  var inp = document.getElementById('fi_' + key), fb = document.getElementById('fb_' + key);
+  const inp = document.getElementById(`fi_${key}`);
+  const fb = document.getElementById(`fb_${key}`);
   if (!inp || !fb) return;
-  var v = parseFloat(inp.value);
-  if (!isNaN(v) && kv > 0) {
-    var p = pct(v, kv);
-    fb.innerHTML = bar(v, kv, col, 5) + '<div style="font-size:10px;color:' + pc(p) + ';text-align:right;margin-top:3px;font-weight:700">' + p2s(p) + ' KH tuần</div>';
-  }
+  const v = Number(inp.value);
+  if (!Number.isNaN(v) && kv > 0) fb.innerHTML = bar(v, kv, col, 5) + `<div style="font-size:10px;color:${pc(pct(v,kv))};text-align:right;margin-top:3px;font-weight:800">${p2s(pct(v,kv))} KH tuần</div>`;
 }
 async function saveTH() {
-  var nv = NVS.filter(function(n) { return n.ma === S.selNV; })[0];
+  const nv = NVS.find(n => n.ma === S.selNV);
   if (!nv) return;
-  var btn = document.getElementById('sv-btn');
-  if (btn) { btn.textContent = '⏳ Đang lưu...'; btn.disabled = true; }
-  var data = {updatedAt: Date.now()};
-  KPIS.forEach(function(k) {
-    var el = document.getElementById('fi_' + k.key);
-    if (el && el.value !== '') data[k.key] = parseFloat(el.value);
+  const btn = document.getElementById("sv-btn");
+  if (btn) { btn.textContent = "⏳ Đang lưu..."; btn.disabled = true; }
+  const data = {updatedAt:Date.now()};
+  KPIS.forEach(k => {
+    const el = document.getElementById(`fi_${k.key}`);
+    if (el && el.value !== "") data[k.key] = Number(el.value);
   });
-  await fbSet('thTuan/' + S.month + '/' + S.selT + '/' + nv.ma, data);
-  if (!S.thTuan[S.month]) S.thTuan[S.month] = {};
-  if (!S.thTuan[S.month][S.selT]) S.thTuan[S.month][S.selT] = {};
+  S.thTuan[S.month] ||= {};
+  S.thTuan[S.month][S.selT] ||= {};
   S.thTuan[S.month][S.selT][nv.ma] = data;
-  if (btn) { btn.textContent = '✅ Đã lưu!'; btn.classList.add('ok'); }
-  setTimeout(function() { S.selNV = null; render(); }, 1300);
+  await fbSet(`thTuan/${S.month}/${S.selT}/${nv.ma}`, data);
+  if (btn) { btn.textContent = "✅ Đã lưu!"; btn.classList.add("ok"); }
+  setTimeout(() => { S.selNV = null; render(); }, 700);
 }
 
-// ═══════════════════════════════════════════════════════
-// PIPELINE
-// ═══════════════════════════════════════════════════════
 function rPipeline() {
-  var m = S.month;
-  var isTP = pinAuth;
-  var activeTab = S.plTab;
-  // Tab bar
-  var tabBar = '<div class="tt" style="margin-bottom:12px">'
-    + '<button class="tb' + (activeTab === 'mine' ? ' on' : '') + '" onclick="setPlTab(\'mine\')">👤 Của tôi</button>'
-    + (isTP ? '<button class="tb' + (activeTab === 'phong' ? ' on' : '') + '" onclick="setPlTab(\'phong\')">👥 Toàn phòng</button>' : '')
-    + '</div>';
-
-  if (activeTab === 'phong' && isTP) return rPlPhong(m, tabBar);
-  return rPlMine(m, tabBar);
+  const tabBar = `<div class="tt" style="margin-bottom:12px"><button class="tb ${S.plTab === "mine" ? "on" : ""}" onclick="setPlTab('mine')">👤 Của tôi</button>${pinAuth ? `<button class="tb ${S.plTab === "phong" ? "on" : ""}" onclick="setPlTab('phong')">👥 Toàn phòng</button>` : ""}</div>`;
+  if (S.plTab === "phong" && pinAuth) return rPlPhong(tabBar);
+  if (S.selNV) return rPlNVDetail(S.selNV, tabBar);
+  const rows = NVS.map(nv => {
+    const deals = getDealsForNV(S.month, nv.ma);
+    const active = deals.filter(d => d.gd !== "hoan_tat").length;
+    const done = deals.filter(d => d.gd === "hoan_tat").length;
+    const overdue = deals.filter(d => d.gd !== "hoan_tat" && d.han && daysLeft(d.han) < 0).length;
+    return `<button class="nvi ${active ? "hk" : ""}" onclick="plOpenNV('${safeAttr(nv.ma)}')">${av(nv.ten,nv.ma,40)}<div style="flex:1"><div class="nv-n">${escapeHtml(nv.ten)}</div><div style="font-size:11px;color:var(--dim);margin-top:3px">${active ? `<span style="color:#ffc84a;font-weight:800">${active} đang xử lý</span>` : `<span>Chưa có deal</span>`}${done ? ` · <span style="color:#00c48c">${done} hoàn tất</span>` : ""}${overdue ? ` · <span style="color:#ff4757">⚠️ ${overdue} quá hạn</span>` : ""}</div>${deals.length ? `<div style="font-size:11px;font-weight:800;color:#4d9fff;margin-top:2px;font-family:'Space Mono',monospace">${fmt(plTotalValue(deals),"tr đ")} tổng giá trị</div>` : ""}</div><button onclick="event.stopPropagation();openPlForm('${safeAttr(nv.ma)}')" class="gold-btn">+ Deal</button></button>`;
+  }).join("");
+  return `<div class="pad"><div class="sec">📋 Pipeline · ${fmtM(S.month)}</div>${tabBar}<div class="card"><div style="font-size:11px;color:var(--dim)">Bấm vào nhân viên để xem chi tiết deals. Bấm <b style="color:#ffc84a">+ Deal</b> để thêm nhanh.</div></div>${rows}</div>`;
+}
+function rPlNVDetail(ma, tabBar) {
+  const nv = NVS.find(n => n.ma === ma);
+  if (!nv) return "";
+  const deals = getDealsForNV(S.month, ma);
+  const blocks = PL_STAGES.map(st => {
+    const stDeals = deals.filter(d => d.gd === st.key);
+    const items = stDeals.map(d => {
+      const k = KPIS.find(x => x.key === d.sp) || KPIS[0];
+      const dl = daysLeft(d.han);
+      const dlColor = dl == null ? "var(--dim)" : dl < 0 ? "#ff4757" : dl <= 3 ? "#ff9f43" : "#00c48c";
+      const dlText = dl == null ? "" : dl < 0 ? `Quá ${Math.abs(dl)} ngày` : dl === 0 ? "Hôm nay" : `Còn ${dl} ngày`;
+      const nextBtns = st.key !== "hoan_tat" ? PL_STAGES.filter(x => x.key !== st.key).slice(0,3).map(ns => `<button class="pl-btn adv" onclick="advDeal('${ma}','${d.id}','${ns.key}')">${ns.icon} ${ns.label}</button>`).join("") : `<span style="font-size:10px;color:#00c48c;font-weight:800">✅ Đã hoàn tất</span>`;
+      return `<div class="pl-deal"><div style="width:34px;height:34px;border-radius:9px;background:${k.color}18;border:1px solid ${k.color}30;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${k.icon}</div><div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:13px;color:#fff">${escapeHtml(d.kh || "KH")}</div><div style="font-size:11px;color:var(--dim);margin-top:2px">${k.label} · <b style="color:${k.color};font-family:'Space Mono',monospace">${fmt(d.gt,k.unit)}</b>${d.han ? ` · <span style="color:${dlColor}">${dlText}</span>` : ""}</div>${d.note ? `<div style="font-size:10px;color:var(--mute);margin-top:2px">${escapeHtml(d.note)}</div>` : ""}<div class="pl-actions">${nextBtns}<button class="pl-btn" onclick="editDeal('${ma}','${d.id}')">Sửa</button><button class="pl-btn del" onclick="delDeal('${ma}','${d.id}')">🗑</button></div></div></div>`;
+    }).join("");
+    return `<div class="pl-stage"><div class="pl-stage-hdr" style="background:${st.color}18;border:1px solid ${st.color}30"><div style="display:flex;align-items:center;gap:8px"><span>${st.icon}</span><span style="font-weight:800;font-size:13px">${st.label}</span><span class="tag" style="background:${st.color}22;color:${st.color};border-color:${st.color}35">${stDeals.length}</span></div><span style="font-size:11px;font-weight:800;color:${st.color};font-family:'Space Mono',monospace">${plTotalValue(stDeals) ? fmt(plTotalValue(stDeals),"tr") : ""}</span></div>${items || `<div style="font-size:11px;color:var(--mute);padding:8px 12px">Chưa có deal</div>`}</div>`;
+  }).join("");
+  return `<div class="pad"><button class="bback" onclick="backPl()">← Danh sách nhân viên</button><div class="sec">📋 Pipeline · ${fmtM(S.month)}</div>${tabBar}<div class="card card-hi"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="display:flex;align-items:center;gap:10px">${av(nv.ten,nv.ma,38)}<div><div style="font-weight:800;font-size:13px">${escapeHtml(nv.ten)}</div><div style="font-size:11px;color:var(--dim);margin-top:2px">${deals.length} deals · ${fmt(plTotalValue(deals),"tr đ")}</div></div></div><button onclick="openPlForm('${ma}')" class="gold-btn">+ Deal</button></div></div>${blocks}</div>`;
+}
+function rPlPhong(tabBar) {
+  const allDeals = getAllDeals(S.month);
+  const fc = plForecast(S.month);
+  const kp = gKP(S.month);
+  const funnel = PL_STAGES.map(st => {
+    const ds = allDeals.filter(d => d.gd === st.key);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><div style="width:78px;font-size:11px;color:#fff;font-weight:800">${st.icon} ${st.label}</div><div style="flex:1">${bar(ds.length, Math.max(1, ...PL_STAGES.map(s => allDeals.filter(d => d.gd === s.key).length)), st.color, 24)}</div><div style="width:76px;text-align:right;font-size:11px;color:${st.color};font-family:'Space Mono',monospace;font-weight:800">${fmt(plTotalValue(ds),"tr")}</div></div>`;
+  }).join("");
+  const fcCards = STARS.map(k => {
+    const p = pct(fc[k.key] || 0, kp[k.key] || 0);
+    return `<div style="flex:1;min-width:80px;background:var(--bg1);border-radius:10px;padding:9px;text-align:center;border:1px solid ${k.color}25"><div>${k.icon}</div><div style="font-size:14px;font-weight:900;color:${pc(p)};font-family:'Space Mono',monospace">${p2s(p)}</div><div style="font-size:9px;color:var(--dim)">${k.label}</div></div>`;
+  }).join("");
+  return `<div class="pad"><div class="sec">📋 Pipeline Phòng · ${fmtM(S.month)}</div>${tabBar}<div class="chart-wrap"><div class="ct">Funnel tổng phòng · ${allDeals.length} deals · ${fmt(plTotalValue(allDeals),"tr đ")}</div>${funnel}</div><div class="chart-wrap"><div class="ct">🔮 Dự báo đạt KH cuối tháng</div><div style="display:flex;gap:7px;flex-wrap:wrap">${fcCards}</div><div style="font-size:10px;color:var(--mute);margin-top:8px">Ước tính: TH hoàn tất + 60% deals từ giai đoạn đề xuất trở lên.</div></div><div class="sec">Nhân viên</div>${NVS.map(nv => `<button class="nvi" onclick="plOpenNV('${nv.ma}')">${av(nv.ten,nv.ma)}<div style="flex:1"><div class="nv-n">${escapeHtml(nv.ten)}</div><div class="nv-s">${getDealsForNV(S.month,nv.ma).filter(d => d.gd !== "hoan_tat").length} đang xử lý · ${getDealsForNV(S.month,nv.ma).filter(d => d.gd === "hoan_tat").length} hoàn tất</div></div><button onclick="event.stopPropagation();openPlForm('${nv.ma}')" class="gold-btn">+ Deal</button></button>`).join("")}</div>`;
+}
+function rPlForm() {
+  const nv = NVS.find(n => n.ma === S.plFormNV);
+  if (!nv) return "";
+  const isEdit = !!S.plEditId;
+  const deal = isEdit ? (gPL(S.month, nv.ma)[S.plEditId] || {}) : {};
+  return `<div class="pad"><button class="bback" onclick="closePlForm()">← Quay lại Pipeline</button><div class="card card-hi"><div style="display:flex;align-items:center;gap:10px">${av(nv.ten,nv.ma,40)}<div><div style="font-weight:900;font-size:14px">${escapeHtml(nv.ten)}</div><div class="nv-s">${isEdit ? "Chỉnh sửa deal" : "Thêm deal mới"} · ${fmtM(S.month)}</div></div></div></div><div class="ff"><div class="fk" style="margin-bottom:6px">Sản phẩm</div><select id="pl-sp" class="dsel" style="margin:0"><option value="">Chọn sản phẩm...</option>${KPIS.map(k => `<option value="${k.key}" ${deal.sp === k.key ? "selected" : ""}>${k.icon} ${k.label} (${k.unit})</option>`).join("")}</select></div><div class="ff"><div class="fk" style="margin-bottom:6px">Mã / Tên KH</div><input type="text" id="pl-kh" value="${safeAttr(deal.kh || "")}" placeholder="VD: KH001, Anh Minh..."></div><div class="ff"><div class="fk" style="margin-bottom:6px">Giá trị dự kiến</div><input type="number" id="pl-gt" value="${deal.gt || ""}" placeholder="Nhập giá trị"></div><div class="ff"><div class="fk" style="margin-bottom:6px">Giai đoạn</div><select id="pl-gd" class="dsel" style="margin:0">${PL_STAGES.map(st => `<option value="${st.key}" ${(deal.gd || "tiep_can") === st.key ? "selected" : ""}>${st.icon} ${st.label}</option>`).join("")}</select></div><div class="ff"><div class="fk" style="margin-bottom:6px">Ngày dự kiến hoàn tất</div><select id="pl-han" class="dsel" style="margin:0"><option value="">Không xác định</option>${genDays(S.month).map(d => `<option value="${d}" ${deal.han === d ? "selected" : ""}>Ngày ${Number(d.slice(-2))}</option>`).join("")}</select></div><div class="ff"><div class="fk" style="margin-bottom:6px">Ghi chú</div><input type="text" id="pl-note" value="${safeAttr(deal.note || "")}" placeholder="Không bắt buộc"></div><button class="bsave" id="pl-save-btn" onclick="saveDeal()">${isEdit ? "💾 Lưu chỉnh sửa" : "➕ Thêm deal"}</button>${isEdit ? `<button class="bdanger" onclick="delDeal('${nv.ma}','${S.plEditId}')">🗑 Xóa deal này</button>` : ""}</div>`;
+}
+async function saveDeal() {
+  const ma = S.plFormNV;
+  const sp = document.getElementById("pl-sp").value;
+  const kh = document.getElementById("pl-kh").value.trim();
+  const gt = Number(document.getElementById("pl-gt").value || 0);
+  const gd = document.getElementById("pl-gd").value;
+  const han = document.getElementById("pl-han").value;
+  const note = document.getElementById("pl-note").value.trim();
+  if (!sp) return alert("Vui lòng chọn sản phẩm");
+  if (!kh) return alert("Vui lòng nhập mã/tên KH");
+  const id = S.plEditId || genDealId();
+  const deal = {sp, kh, gt, gd, han, note, ts:Date.now()};
+  S.pipeline[S.month] ||= {};
+  S.pipeline[S.month][ma] ||= {};
+  S.pipeline[S.month][ma][id] = deal;
+  await fbSet(`pipeline/${S.month}/${ma}/${id}`, deal);
+  closePlForm();
+  if (gd === "hoan_tat" && confirm("Deal đã hoàn tất. Cập nhật TH tuần ngay?")) { S.tab = "nhap"; S.selNV = ma; render(); }
+}
+function editDeal(ma, id) { S.plFormNV = ma; S.plEditId = id; render(); }
+async function advDeal(ma, id, gd) {
+  const deal = gPL(S.month, ma)[id];
+  if (!deal) return;
+  deal.gd = gd; deal.ts = Date.now();
+  await fbSet(`pipeline/${S.month}/${ma}/${id}`, deal);
+  render();
+  if (gd === "hoan_tat" && confirm("Deal đã hoàn tất. Cập nhật TH tuần ngay?")) { S.tab = "nhap"; S.selNV = ma; render(); }
+}
+async function delDeal(ma, id) {
+  if (!confirm("Xóa deal này?")) return;
+  if (S.pipeline[S.month]?.[ma]) delete S.pipeline[S.month][ma][id];
+  await fbDel(`pipeline/${S.month}/${ma}/${id}`);
+  closePlForm();
 }
 
-function rPlMine(m, tabBar) {
-  // Nếu đã chọn NV cụ thể thì hiện detail
-  if (S.selNV) {
-    return rPlNVDetail(m, S.selNV, tabBar);
+function rScopeBar() {
+  const scopes = [{k:"thang",l:"📅 Tháng"},{k:"T1",l:"T1"},{k:"T2",l:"T2"},{k:"T3",l:"T3"},{k:"T4",l:"T4"}];
+  return `<div class="sb">${scopes.map(s => `<button class="sbb ${S.scope === s.k ? "on" : ""}" onclick="setScope('${s.k}')">${s.l}</button>`).join("")}</div>`;
+}
+function rNVFilter() {
+  const active = S.filterNVs.length;
+  const label = active ? S.filterNVs.slice(0,4).map(ma => NVS.find(n => n.ma === ma)?.ten.split(" ").pop()).filter(Boolean).join(", ") + (active > 4 ? ` +${active - 4}` : "") : `Toàn phòng (${NVS.length} NV) - bấm để lọc`;
+  return `<button class="nvi ${active ? "ht" : ""}" onclick="openNVPicker()"><span style="font-size:18px">${active ? "👤" : "👥"}</span><div style="flex:1"><div class="nv-n">${escapeHtml(label)}</div></div>${active ? `<button onclick="event.stopPropagation();clearNVFilter()" class="pl-btn del">Bỏ lọc</button>` : `<span style="color:var(--dim);font-size:15px">›</span>`}</button>`;
+}
+function rBarChart(m) {
+  const fnvs = filteredNVs();
+  const rows = STARS.map(k => {
+    const data = ["T1","T2","T3","T4"].map(t => {
+      const th = fnvs.reduce((s,nv) => s + (gTH(m,t,nv.ma)[k.key] || 0), 0);
+      const kh = fnvs.reduce((s,nv) => s + (gKT(m,t,nv.ma)[k.key] || 0), 0);
+      return {t, p:pct(th,kh), kh};
+    });
+    const mx = Math.max(100, ...data.map(d => d.p || 0));
+    return `<div style="margin-bottom:11px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span>${k.icon}</span><span style="font-size:11px;font-weight:800">${k.label}</span></div><div style="display:flex;gap:5px;align-items:flex-end;height:70px">${data.map(d => `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="font-size:8px;font-weight:800;color:${d.kh ? pc(d.p) : "var(--mute)"}">${d.p != null ? Math.round(d.p) + "%" : ""}</div><div style="width:100%;height:${d.p != null ? Math.max(4, d.p / mx * 60) : 4}px;background:${d.kh ? pc(d.p) : "var(--mute)"};border-radius:4px 4px 0 0;opacity:${d.kh ? 1 : .2}"></div><div style="font-size:8px;color:var(--dim);font-weight:800">${d.t}</div></div>`).join("")}</div></div>`;
+  }).join("");
+  return `<div class="chart-wrap"><div class="ct">📊 Tiến độ theo tuần</div>${rows}</div>`;
+}
+function rPlWidget(m) {
+  const all = getAllDeals(m);
+  if (!all.length) return `<div class="chart-wrap"><div class="ct">🔮 Dự báo từ Pipeline</div><div class="empty">Chưa có deals trong Pipeline</div><button class="bsave" onclick="setTab('pl')">Thêm deal</button></div>`;
+  const fc = plForecast(m), kp = gKP(m);
+  return `<div class="chart-wrap"><div class="ct">🔮 Dự báo từ Pipeline</div>${STARS.map(k => { const p = pct(fc[k.key] || 0, kp[k.key] || 0); return `<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="width:18px">${k.icon}</span><div style="flex:1">${bar(fc[k.key]||0,kp[k.key]||0,pc(p),6)}</div><span style="font-size:10px;font-weight:800;color:${pc(p)};width:32px;text-align:right">${p2s(p)}</span></div>`; }).join("")}</div>`;
+}
+function rDash() {
+  const m = S.month, fnvs = filteredNVs(), khPS = khPScope(m);
+  const totalTH = {};
+  KPIS.forEach(k => totalTH[k.key] = fnvs.reduce((s,nv) => s + (thForNV(m,nv.ma)[k.key] || 0), 0));
+  const kCards = KPIS.map(k => {
+    const th = totalTH[k.key] || 0, kh = khPS[k.key] || 0, p = pct(th,kh);
+    return `<div class="kc" style="border-color:${kh ? k.color+"32" : "var(--border)"}"><div class="kc-bg">${k.icon}</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px"><div><div class="kc-lbl">${k.label}</div><div class="kc-val" style="color:${kh ? k.color : "var(--dim)"}">${fmt(th,k.unit)}</div><div class="kc-kh">KH: ${kh ? fmt(kh,k.unit) : "—"}</div></div><div style="position:relative;width:42px;height:42px">${ring(kh ? p || 0 : 0)}<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:900;color:${pc(p)}">${kh ? p2s(p) : "—"}</div></div></div>${kh ? bar(th,kh,k.color) : ""}</div>`;
+  }).join("");
+  const nvData = fnvs.map(nv => {
+    const kh = khForNV(m,nv.ma), th = thForNV(m,nv.ma);
+    const wk = STARS.filter(k => (kh[k.key] || 0) > 0);
+    const score = wk.length ? wk.reduce((s,k) => s + (pct(th[k.key] || 0, kh[k.key]) || 0), 0) / wk.length : null;
+    return {nv,kh,th,score};
+  }).sort((a,b) => (b.score ?? -1) - (a.score ?? -1));
+  const ranks = nvData.slice(0,10).map((d,i) => {
+    const st = stl(d.score);
+    return `<button class="ri" onclick="showDetail('${d.nv.ma}')"><div style="width:24px;height:24px;border-radius:50%;background:${i === 0 ? "#e8a02018" : "var(--bg1)"};color:${i === 0 ? "#ffc84a" : "var(--dim)"};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">${i+1}</div>${av(d.nv.ten,d.nv.ma,32)}<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(d.nv.ten)}</div><div class="chips">${STARS.map(k => chip(`${k.icon} ${d.kh[k.key] ? p2s(pct(d.th[k.key] || 0, d.kh[k.key])) : "—"}`, d.kh[k.key] ? pc(pct(d.th[k.key] || 0, d.kh[k.key])) : "#2a4060")).join("")}</div></div><div style="text-align:right"><div style="font-size:16px;font-weight:900;color:${pc(d.score)};font-family:'Space Mono',monospace">${p2s(d.score)}</div><div style="font-size:10px;color:${st.c}">${st.l}</div></div></button>`;
+  }).join("");
+  return `<div style="padding:13px 15px 0">${rScopeBar()}</div><div class="pad" style="padding-top:4px">${rNVFilter()}<div class="sec">Tổng hợp · ${S.scope === "thang" ? "Cả tháng" : S.scope} · ${fmtM(m)}</div><div class="kg">${kCards}</div>${S.scope === "thang" ? rBarChart(m) : ""}${rPlWidget(m)}<div class="sec">🏆 Xếp hạng</div>${ranks || `<div class="empty">Chưa có dữ liệu</div>`}</div>`;
+}
+function rDashDetail() {
+  const nv = NVS.find(n => n.ma === S.detailNV);
+  if (!nv) return "";
+  const kh = khForNV(S.month,nv.ma), th = thForNV(S.month,nv.ma);
+  const wk = STARS.filter(k => (kh[k.key] || 0) > 0);
+  const score = wk.length ? wk.reduce((s,k) => s + (pct(th[k.key] || 0, kh[k.key]) || 0), 0) / wk.length : null;
+  const rows = KPIS.map(k => `<div class="card" style="border-color:${(kh[k.key] || 0) ? k.color+"30" : "var(--border)"}"><div style="display:flex;align-items:center;gap:9px;margin-bottom:${(kh[k.key] || 0) ? "7px" : "0"}"><span style="font-size:19px">${k.icon}</span><div style="flex:1"><div style="font-weight:800;font-size:13px;color:${k.star ? "#ffc84a" : "#fff"}">${k.label}</div><div class="fk">KH: ${kh[k.key] ? fmt(kh[k.key],k.unit) : "Chưa giao"}</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:900;color:${kh[k.key] ? k.color : "var(--dim)"};font-family:'Space Mono',monospace">${fmt(th[k.key] || 0,k.unit)}</div><div style="font-size:11px;font-weight:800;color:${pc(pct(th[k.key] || 0, kh[k.key]))}">${p2s(pct(th[k.key] || 0, kh[k.key]))}</div></div></div>${kh[k.key] ? bar(th[k.key] || 0, kh[k.key], k.color, 6) : ""}</div>`).join("");
+  return `<div class="pad"><button class="bback" onclick="backDash()">← Dashboard</button><div class="card card-hi"><div style="display:flex;align-items:center;gap:12px">${av(nv.ten,nv.ma,46)}<div style="flex:1"><div style="font-weight:900;font-size:14px">${escapeHtml(nv.ten)}</div><div class="nv-s">${fmtM(S.month)} · ${S.scope === "thang" ? "Cả tháng" : S.scope}</div></div><div style="text-align:right"><div style="font-size:21px;font-weight:900;color:${pc(score)};font-family:'Space Mono',monospace">${p2s(score)}</div><div style="font-size:10px;color:${pc(score)}">${stl(score).l}</div></div></div></div><div class="sec">KPI chi tiết</div>${rows}</div>`;
+}
+
+function rAlert() {
+  const m = S.month;
+  const chuaNhap = NVS.filter(nv => KPIS.some(k => (gKT(m,CUR_T,nv.ma)[k.key] || 0) > 0) && !KPIS.some(k => gTH(m,CUR_T,nv.ma)[k.key] != null));
+  const chuaKh = NVS.filter(nv => !KPIS.some(k => (gKT(m,CUR_T,nv.ma)[k.key] || 0) > 0));
+  const duoi50 = NVS.filter(nv => STARS.some(k => {
+    const kh = gKT(m,CUR_T,nv.ma)[k.key] || 0;
+    const th = gTH(m,CUR_T,nv.ma)[k.key];
+    return kh > 0 && th != null && th > 0 && pct(th,kh) < 50;
+  }));
+  const overdue = getAllDeals(m).filter(d => d.gd !== "hoan_tat" && d.han && daysLeft(d.han) < 0);
+  function block(title, color, items) {
+    return `<div class="ac" style="border-left-color:${color}"><div class="at">${title}</div>${items.map(nv => `<div class="ai">${av(nv.ten,nv.ma,28)}<span>${escapeHtml(nv.ten)}</span></div>`).join("")}</div>`;
   }
-  // Danh sách NV để chọn
-  var nvRows = NVS.map(function(nv) {
-    var deals = getDealsForNV(m, nv.ma);
-    var active = deals.filter(function(d) { return d.gd !== 'hoan_tat'; }).length;
-    var done = deals.filter(function(d) { return d.gd === 'hoan_tat'; }).length;
-    var overdue = deals.filter(function(d) { return d.gd !== 'hoan_tat' && d.han && daysLeft(d.han) < 0; }).length;
-    var totalVal = plTotalValue(deals);
-    return '<button class="nvi' + (active > 0 ? ' hk' : '') + '" onclick="plOpenNV(\'' + nv.ma + '\')">'
-      + av(nv.ten, nv.ma, 40)
-      + '<div style="flex:1">'
-      + '<div class="nv-n">' + nv.ten + '</div>'
-      + '<div style="font-size:11px;color:var(--dim);margin-top:3px;display:flex;gap:5px;flex-wrap:wrap">'
-      + (active > 0 ? '<span style="color:#ffc84a;font-weight:600">' + active + ' đang xử lý</span>' : '<span style="color:var(--mute)">Chưa có deal</span>')
-      + (done > 0 ? '<span style="color:#00c48c">· ' + done + ' hoàn tất</span>' : '')
-      + (overdue > 0 ? '<span style="color:#ff4757">· ⚠️ ' + overdue + ' quá hạn</span>' : '')
-      + '</div>'
-      + (totalVal > 0 ? '<div style="font-size:11px;font-weight:700;color:#4d9fff;margin-top:2px;font-family:\'Space Mono\',monospace">' + fmt(totalVal, 'tr đ') + ' tổng giá trị</div>' : '')
-      + '</div>'
-      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">'
-      + '<button onclick="event.stopPropagation();openPlForm(\'' + nv.ma + '\')" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:8px;padding:5px 11px;font-weight:800;font-size:11px;cursor:pointer;font-family:inherit">+ Deal</button>'
-      + '<span style="color:var(--dim);font-size:14px">›</span>'
-      + '</div></button>';
-  }).join('');
-  return '<div class="pad"><div class="sec">📋 Pipeline · ' + fmtM(m) + '</div>'
-    + tabBar
-    + '<div style="background:var(--card);border-radius:13px;padding:11px 13px;margin-bottom:12px;border:1px solid var(--border)">'
-    + '<div style="font-size:11px;color:var(--dim)">Bấm vào nhân viên để xem chi tiết deals · Bấm <b style="color:#ffc84a">+ Deal</b> để thêm nhanh</div>'
-    + '</div>'
-    + nvRows + '</div>';
+  const ok = !chuaNhap.length && !duoi50.length && !overdue.length && !chuaKh.length;
+  return `<div class="pad"><div class="sec">🚨 Cảnh báo · ${CUR_T} · ${fmtM(m)}</div>${ok ? `<div class="card card-green" style="text-align:center;padding:18px"><div style="font-size:28px;margin-bottom:6px">✅</div><div style="font-weight:800;color:#00c48c">Không có cảnh báo</div></div>` : ""}${chuaNhap.length ? block(`🚨 ${chuaNhap.length} NV có KH chưa nhập TH`, "#ff4757", chuaNhap) : ""}${duoi50.length ? block(`⚠️ ${duoi50.length} NV dưới 50% KPI trọng điểm`, "#ff9f43", duoi50) : ""}${chuaKh.length ? block(`📋 ${chuaKh.length} NV chưa được giao KH`, "#e8a020", chuaKh) : ""}${overdue.length ? `<div class="ac" style="border-left-color:#ff4757"><div class="at">⏰ ${overdue.length} deal Pipeline quá hạn</div>${overdue.map(d => `<div class="ai"><span>📋</span><div><span>${escapeHtml(d.ten)}</span><div class="nv-s">${escapeHtml(d.kh || "Deal")} · Quá ${Math.abs(daysLeft(d.han))} ngày</div></div></div>`).join("")}</div>` : ""}</div>`;
+}
+function rStar() {
+  const scored = NVS.map(nv => {
+    const scores = STARS.map(k => {
+      const kh = gKT(S.month,S.selT,nv.ma)[k.key] || 0, th = gTH(S.month,S.selT,nv.ma)[k.key] || 0;
+      return {k, kh, th, p:pct(th,kh)};
+    });
+    const wk = scores.filter(s => s.kh > 0);
+    return {nv, scores, avg:wk.length ? wk.reduce((a,s) => a + (s.p || 0), 0) / wk.length : null};
+  }).filter(x => x.avg != null).sort((a,b) => b.avg - a.avg);
+  const best = scored[0] && scored[0].avg >= 70 ? scored[0] : null;
+  const starHtml = best ? `<div class="star-card"><div style="font-size:24px;margin-bottom:5px">🏆</div><div style="font-size:10px;color:#e8a020;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">${fmtM(S.month)} · ${S.selT} - Nhân viên xuất sắc</div><div style="font-size:16px;font-weight:900;color:#ffc84a">${escapeHtml(best.nv.ten)}</div><div class="sk">${best.scores.map(s => `<div class="sk-i"><div>${s.k.icon}</div><div style="font-size:13px;font-weight:900;color:${pc(s.p)};font-family:'Space Mono',monospace">${s.kh ? fmt(s.th,s.k.unit) : "—"}</div><div style="font-size:9px;color:var(--dim)">${s.k.label}</div><div style="font-size:10px;font-weight:900;color:${pc(s.p)}">${p2s(s.p)}</div></div>`).join("")}</div></div>` : `<div class="card" style="text-align:center;padding:20px"><div style="font-size:28px;margin-bottom:6px">🏅</div><div style="font-weight:800;color:var(--dim)">Chưa có NV xuất sắc ${S.selT}</div></div>`;
+  return `<div class="pad"><div class="sec">🌟 Tuyên dương & Nhắc nhở</div><div class="tt">${["T1","T2","T3","T4"].map(t => `<button class="tb ${S.selT === t ? "on" : ""}" onclick="setT('${t}')">${t}</button>`).join("")}</div>${starHtml}<div class="sec">🥇 Top tuần ${S.selT}</div>${scored.slice(0,3).map((x,i) => `<div class="wi">${["🥇","🥈","🥉"][i]}${av(x.nv.ten,x.nv.ma,32)}<div style="flex:1"><div class="nv-n">${escapeHtml(x.nv.ten)}</div></div><div style="font-size:16px;font-weight:900;color:${pc(x.avg)};font-family:'Space Mono',monospace">${p2s(x.avg)}</div></div>`).join("") || `<div class="empty">Chưa có dữ liệu</div>`}</div>`;
 }
 
-function rPlNVDetail(m, ma, tabBar) {
-  var nv = NVS.filter(function(n) { return n.ma === ma; })[0];
-  if (!nv) return '';
-  var deals = getDealsForNV(m, ma);
-  var stageBlocks = PL_STAGES.map(function(st) {
-    var stDeals = deals.filter(function(d) { return d.gd === st.key; });
-    var total = plTotalValue(stDeals);
-    var hdr = '<div class="pl-stage-hdr" style="background:' + st.color + '18;border:1px solid ' + st.color + '30">'
-      + '<div style="display:flex;align-items:center;gap:8px">'
-      + '<span style="font-size:14px">' + st.icon + '</span>'
-      + '<span style="font-weight:700;font-size:13px;color:#fff">' + st.label + '</span>'
-      + '<span class="tag" style="background:' + st.color + '22;color:' + st.color + ';border-color:' + st.color + '35">' + stDeals.length + '</span>'
-      + '</div>'
-      + (total > 0 ? '<span style="font-size:11px;font-weight:700;color:' + st.color + ';font-family:\'Space Mono\',monospace">' + fmt(total, 'tr') + '</span>' : '')
-      + '</div>';
-    var items = stDeals.map(function(d) {
-      var kpiCfg = KPIS.filter(function(k) { return k.key === d.sp; })[0] || KPIS[0];
-      var dl = daysLeft(d.han);
-      var dlColor = dl === null ? 'var(--dim)' : dl < 0 ? '#ff4757' : dl <= 3 ? '#ff9f43' : '#00c48c';
-      var dlText = dl === null ? '' : dl < 0 ? '⚠️ Quá ' + Math.abs(dl) + ' ngày' : dl === 0 ? '⏰ Hôm nay' : 'Còn ' + dl + ' ngày';
-      return '<div class="pl-deal">'
-        + '<div style="width:34px;height:34px;border-radius:9px;background:' + kpiCfg.color + '18;border:1px solid ' + kpiCfg.color + '30;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">' + kpiCfg.icon + '</div>'
-        + '<div class="pl-deal-info">'
-        + '<div style="font-weight:700;font-size:13px;color:#fff">' + (d.kh || 'KH' + d.id.slice(-3)) + '</div>'
-        + '<div style="font-size:11px;color:var(--dim);margin-top:2px">'
-        + kpiCfg.label + ' · <b style="color:' + kpiCfg.color + ';font-family:\'Space Mono\',monospace">' + fmt(d.gt, kpiCfg.unit) + '</b>'
-        + (d.han ? ' · <span style="color:' + dlColor + '">' + dlText + '</span>' : '')
-        + '</div>'
-        + (d.note ? '<div style="font-size:10px;color:var(--mute);margin-top:2px">' + d.note + '</div>' : '')
-        + '<div class="pl-actions">'
-        + (st.key !== 'hoan_tat' ? PL_STAGES.filter(function(s2) { return s2.key !== st.key; }).slice(0,3).map(function(ns) {
-          return '<button class="pl-btn adv" onclick="advDeal(\'' + ma + '\',\'' + d.id + '\',\'' + ns.key + '\')">' + ns.icon + ' ' + ns.label + '</button>';
-        }).join('') : '<span style="font-size:10px;color:#00c48c;font-weight:700">✅ Đã hoàn tất</span>')
-        + '<button class="pl-btn del" onclick="delDeal(\'' + ma + '\',\'' + d.id + '\')">🗑</button>'
-        + '</div></div></div>';
-    }).join('');
-    return '<div class="pl-stage">' + hdr + (items || '<div style="font-size:11px;color:var(--mute);padding:8px 12px">Chưa có deal</div>') + '</div>';
-  }).join('');
-
-  return '<div class="pad">'
-    + '<button class="bback" onclick="backPl()">← Danh sách nhân viên</button>'
-    + '<div class="sec">📋 Pipeline · ' + fmtM(m) + '</div>'
-    + tabBar
-    + '<div class="card card-hi" style="margin-bottom:12px">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between">'
-    + '<div style="display:flex;align-items:center;gap:10px">' + av(nv.ten, nv.ma, 38)
-    + '<div><div style="font-weight:700;font-size:13px;color:#fff">' + nv.ten + '</div>'
-    + '<div style="font-size:11px;color:var(--dim);margin-top:2px">'
-    + deals.length + ' deals · ' + fmt(plTotalValue(deals), 'tr đ') + ' tổng giá trị</div></div></div>'
-    + '<button onclick="openPlForm(\'' + ma + '\')" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:9px;padding:7px 13px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">+ Deal</button>'
-    + '</div></div>'
-    + stageBlocks + '</div>';
+function rKhPhong() {
+  const kh = gKP();
+  return `<div class="pad"><div class="sec">🏦 KH tháng phòng · ${fmtM(S.month)}</div><div class="card card-gold"><div style="display:flex;align-items:center;gap:9px"><span style="font-size:18px">🔐</span><div><div style="font-weight:800;font-size:13px">Chế độ Trưởng phòng</div><div class="nv-s">PIN mặc định: 1234</div></div></div></div>${KPIS.map(k => `<div class="ff" style="border-color:${k.color}25"><div class="fh"><div class="fl"><span style="font-size:19px">${k.icon}</span><div><div class="fn" style="color:${k.star ? "#ffc84a" : "#fff"}">${k.star ? "⭐ " : ""}${k.label}</div><div class="fk">Hiện tại: <b style="color:${k.color}">${fmt(kh[k.key],k.unit)}</b></div></div></div></div><input type="number" id="kp_${k.key}" value="${kh[k.key] || ""}" placeholder="KH tháng ${k.label} (${k.unit})"></div>`).join("")}<button class="bsave" id="kp-btn" onclick="saveKhP()">💾 Lưu KH Phòng ${fmtM(S.month)}</button></div>`;
+}
+async function saveKhP() {
+  const d = {};
+  KPIS.forEach(k => {
+    const el = document.getElementById(`kp_${k.key}`);
+    if (el && el.value !== "") d[k.key] = Number(el.value);
+  });
+  S.khPhong[S.month] = d;
+  await fbSet(`khPhong/${S.month}`, d);
+  render();
+}
+function rKhTuanList() {
+  const rows = NVS.map(nv => {
+    const kh = gKT(S.month,S.selT,nv.ma);
+    const has = KPIS.some(k => (kh[k.key] || 0) > 0);
+    return `<button class="nvi ${has ? "hk" : ""}" onclick="selNVKh('${nv.ma}')">${av(nv.ten,nv.ma)}<div style="flex:1"><div class="nv-n">${escapeHtml(nv.ten)}</div>${has ? `<div class="chips">${STARS.map(k => chip(`${k.icon} ${fmt(kh[k.key] || 0,k.unit)}`, k.color)).join("")}</div>` : `<div class="nv-s">Chưa giao KH ${S.selT}</div>`}</div><span style="color:${has ? "#ffc84a" : "var(--dim)"}">›</span></button>`;
+  }).join("");
+  return `<div class="pad"><div class="sec">📋 KH Tuần · ${fmtM(S.month)}</div><div class="tt">${["T1","T2","T3","T4"].map(t => `<button class="tb ${S.selT === t ? "on" : ""}" onclick="setTKh('${t}')">${t}</button>`).join("")}</div>${rows}</div>`;
+}
+function rKhTuanForm() {
+  const nv = NVS.find(n => n.ma === S.selNV);
+  if (!nv) return "";
+  const cur = gKT(S.month,S.selT,nv.ma);
+  return `<div class="pad"><button class="bback" onclick="backKhT()">← Danh sách NV</button><div class="card card-hi"><div style="display:flex;align-items:center;gap:11px">${av(nv.ten,nv.ma,44)}<div><div style="font-weight:900;font-size:14px">${escapeHtml(nv.ten)}</div><div class="nv-s">Giao KH ${S.selT} · ${fmtM(S.month)}</div></div></div></div>${KPIS.map(k => `<div class="ff" style="border-color:${k.color}25"><div class="fh"><div class="fl"><span style="font-size:19px">${k.icon}</span><div><div class="fn" style="color:${k.star ? "#ffc84a" : "#fff"}">${k.label}</div><div class="fk">KH tháng phòng: ${fmt(gKP()[k.key],k.unit)}</div></div></div></div><input type="number" id="kt_${k.key}" value="${cur[k.key] || ""}" placeholder="KH ${S.selT} - ${k.label}"></div>`).join("")}<button class="bsave" id="kt-btn" onclick="saveKhT()">💾 Giao KH ${S.selT} - ${escapeHtml(nv.ten.split(" ").pop())}</button></div>`;
+}
+async function saveKhT() {
+  const nv = NVS.find(n => n.ma === S.selNV);
+  if (!nv) return;
+  const d = {};
+  KPIS.forEach(k => {
+    const el = document.getElementById(`kt_${k.key}`);
+    if (el && el.value !== "") d[k.key] = Number(el.value);
+  });
+  S.khTuan[S.month] ||= {};
+  S.khTuan[S.month][S.selT] ||= {};
+  S.khTuan[S.month][S.selT][nv.ma] = d;
+  await fbSet(`khTuan/${S.month}/${S.selT}/${nv.ma}`, d);
+  S.selNV = null;
+  render();
 }
 
-function rPlPhong(m, tabBar) {
-  var allDeals = getAllDeals(m);
-  var totalVal = plTotalValue(allDeals);
-  var maxCount = Math.max.apply(null, PL_STAGES.map(function(st) {
-    return allDeals.filter(function(d) { return d.gd === st.key; }).length;
-  }).concat([1]));
+function openNVPicker() {
+  S.nvpTemp = S.filterNVs.slice();
+  nvpSorted = false;
+  renderNVPicker();
+  document.getElementById("nvp-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeNVPicker() { document.getElementById("nvp-modal").style.display = "none"; document.body.style.overflow = ""; }
+function nvpSelectAll() { S.nvpTemp = NVS.map(nv => nv.ma); renderNVPicker(); }
+function nvpClearAll() { S.nvpTemp = []; renderNVPicker(); }
+function nvpToggle(ma) { const i = S.nvpTemp.indexOf(ma); if (i >= 0) S.nvpTemp.splice(i,1); else S.nvpTemp.push(ma); renderNVPicker(); }
+function nvpSortScore() { nvpSorted = !nvpSorted; renderNVPicker(); }
+function nvpConfirm() { S.filterNVs = S.nvpTemp.slice(); closeNVPicker(); render(); }
+function renderNVPicker() {
+  let list = NVS.slice();
+  if (nvpSorted) list = list.map(nv => ({nv, sc:nvScoreCalc(S.month,nv.ma)})).sort((a,b) => (b.sc ?? -1) - (a.sc ?? -1)).map(x => x.nv);
+  document.getElementById("nvp-sub").textContent = S.nvpTemp.length ? `${S.nvpTemp.length} nhân viên được chọn` : "Đang xem toàn phòng - chọn để lọc riêng";
+  document.getElementById("nvp-list").innerHTML = list.map(nv => {
+    const isSel = S.nvpTemp.includes(nv.ma);
+    const sc = nvScoreCalc(S.month,nv.ma);
+    return `<div class="nvp-item ${isSel ? "sel" : ""}" onclick="nvpToggle('${nv.ma}')">${av(nv.ten,nv.ma,36)}<div style="flex:1"><div style="font-weight:800;font-size:13px">${escapeHtml(nv.ten)}</div><div style="margin-top:2px;font-size:11px;color:${pc(sc)};font-weight:800">${sc != null ? `${p2s(sc)} · ${stl(sc).l}` : "Chưa có KH"}</div></div><div class="nvp-check">${isSel ? "✓" : ""}</div></div>`;
+  }).join("");
+  document.querySelector("#nvp-modal .bsave").textContent = S.nvpTemp.length ? `Xem ${S.nvpTemp.length} NV đã chọn` : `Xem toàn phòng (${NVS.length} NV)`;
+}
 
-  // Funnel
-  var funnel = PL_STAGES.map(function(st) {
-    var stDeals = allDeals.filter(function(d) { return d.gd === st.key; });
-    var cnt = stDeals.length, val = plTotalValue(stDeals);
-    var w = maxCount > 0 ? Math.max(15, cnt / maxCount * 100) : 15;
-    return '<div class="funnel-bar">'
-      + '<div style="width:70px;font-size:11px;color:#fff;font-weight:600;flex-shrink:0">' + st.icon + ' ' + st.label + '</div>'
-      + '<div class="funnel-fill" style="width:' + w + '%;background:' + st.color + '40;border:1px solid ' + st.color + '50;color:' + st.color + ';font-size:10px;font-weight:700">'
-      + cnt + ' deal</div>'
-      + '<div style="font-size:11px;font-weight:700;color:' + st.color + ';font-family:\'Space Mono\',monospace;flex-shrink:0;min-width:60px;text-align:right">' + (val > 0 ? fmt(val, 'tr') : '') + '</div>'
-      + '</div>';
-  }).join('');
+function openPinModal(cb) {
+  pinBuf = ""; pinCb = cb;
+  document.getElementById("pin-modal").style.display = "flex";
+  document.getElementById("pin-err").textContent = "";
+  rPinDots();
+}
+function closePinModal() { document.getElementById("pin-modal").style.display = "none"; pinBuf = ""; pinCb = null; }
+function rPinDots() { for (let i=0;i<4;i++) document.getElementById(`pd${i}`).className = "pin-dot" + (i < pinBuf.length ? " fill" : ""); }
+function pinAdd(n) {
+  if (pinBuf.length >= 4) return;
+  pinBuf += String(n); rPinDots();
+  if (pinBuf.length === 4) {
+    if (pinBuf === PIN) { pinAuth = true; const cb = pinCb; closePinModal(); if (cb) cb(); }
+    else { document.getElementById("pin-err").textContent = "Mã PIN không đúng. Thử lại."; setTimeout(() => { pinBuf = ""; rPinDots(); }, 650); }
+  }
+}
+function pinDel() { pinBuf = pinBuf.slice(0,-1); rPinDots(); }
 
-  // Dự báo
-  var fc = plForecast(m);
-  var kp = gKP(m);
-  var fcCards = STARS.map(function(k) {
-    var done = allDeals.filter(function(d) { return d.sp === k.key && d.gd === 'hoan_tat'; }).reduce(function(s,d){return s+(d.gt||0);},0);
-    var fcVal = fc[k.key] || 0;
-    var khVal = kp[k.key] || 0;
-    var p = pct(fcVal, khVal);
-    return '<div style="flex:1;min-width:80px;background:var(--bg1);border-radius:10px;padding:9px;text-align:center;border:1px solid ' + k.color + '25">'
-      + '<div style="font-size:13px">' + k.icon + '</div>'
-      + '<div style="font-size:14px;font-weight:900;color:' + pc(p) + ';font-family:\'Space Mono\',
+function openExpModal() { document.getElementById("exp-modal").style.display = "flex"; }
+function closeExpModal() { document.getElementById("exp-modal").style.display = "none"; }
+function buildReport(m, scope) {
+  const tuans = scope === "thang" ? ["T1","T2","T3","T4"] : [scope];
+  const data = filteredNVs().map(nv => {
+    const kh = {}, th = {};
+    KPIS.forEach(k => { kh[k.key] = tuans.reduce((s,t) => s + (gKT(m,t,nv.ma)[k.key] || 0), 0); th[k.key] = tuans.reduce((s,t) => s + (gTH(m,t,nv.ma)[k.key] || 0), 0); });
+    const wk = STARS.filter(k => kh[k.key] > 0);
+    const score = wk.length ? wk.reduce((s,k) => s + (pct(th[k.key], kh[k.key]) || 0), 0) / wk.length : null;
+    return {nv,kh,th,score};
+  }).sort((a,b) => (b.score ?? -1) - (a.score ?? -1));
+  return `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Báo cáo KPI</title><style>body{font-family:Arial,sans-serif;padding:28px;color:#172033}h1{font-size:22px;color:#1a3a6e}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#1a3a6e;color:#fff;padding:8px;font-size:12px}td{border-bottom:1px solid #e6eaf2;padding:8px;font-size:12px}.score{font-weight:800}</style></head><body><h1>Nam A Bank - Báo cáo KPI ${fmtM(m)} ${scope === "thang" ? "cả tháng" : scope}</h1><p>Xuất lúc ${new Date().toLocaleString("vi-VN")} · ${S.filterNVs.length ? S.filterNVs.length + " NV được chọn" : "Toàn phòng"}</p><table><thead><tr><th>#</th><th>Nhân viên</th>${STARS.map(k => `<th>${k.icon} ${k.label}</th>`).join("")}<th>Điểm TB</th></tr></thead><tbody>${data.map((d,i) => `<tr><td>${i+1}</td><td><b>${escapeHtml(d.nv.ten)}</b></td>${STARS.map(k => `<td>${fmt(d.th[k.key], k.unit)} / ${fmt(d.kh[k.key], k.unit)}<br><b style="color:${pc(pct(d.th[k.key], d.kh[k.key]))}">${p2s(pct(d.th[k.key], d.kh[k.key]))}</b></td>`).join("")}<td class="score" style="color:${pc(d.score)}">${p2s(d.score)}</td></tr>`).join("")}</tbody></table><p style="margin-top:20px;color:#667">Tài liệu nội bộ - KPI Banking NAB System</p></body></html>`;
+}
+function printReport(scope) {
+  closeExpModal();
+  const win = window.open("", "_blank", "width=900,height=700");
+  if (!win) return alert("Vui lòng cho phép popup để xuất báo cáo");
+  win.document.write(buildReport(S.month, scope));
+  win.document.close();
+  win.onload = () => { win.focus(); setTimeout(() => win.print(), 300); };
+}
+
+function setTab(t) {
+  if (t === "kh" && !pinAuth) { openPinModal(() => { S.tab = t; S.selNV = null; S.detailNV = null; S.plFormNV = null; render(); }); return; }
+  S.tab = t; S.selNV = null; S.detailNV = null; S.plFormNV = null; render();
+}
+function setKhTab(t) { S.khTab = t; S.selNV = null; render(); }
+function setMonth(m) { S.month = m; S.selNV = null; S.detailNV = null; loadMonth(m).then(render); }
+function setT(t) { S.selT = t; render(); }
+function setTKh(t) { S.selT = t; render(); }
+function setScope(s) { S.scope = s; render(); }
+function selNV(ma) { S.selNV = ma; render(); }
+function selNVKh(ma) { S.selNV = ma; render(); }
+function backNhap() { S.selNV = null; render(); }
+function backKhT() { S.selNV = null; render(); }
+function showDetail(ma) { S.detailNV = ma; render(); }
+function backDash() { S.detailNV = null; render(); }
+function clearNVFilter() { S.filterNVs = []; render(); }
+function setPlTab(t) { S.plTab = t; S.selNV = null; render(); }
+function plOpenNV(ma) { S.selNV = ma; S.tab = "pl"; render(); }
+function openPlForm(ma) { S.plFormNV = ma; S.plEditId = null; render(); }
+function backPl() { S.selNV = null; S.plFormNV = null; render(); }
+function closePlForm() { S.plFormNV = null; S.plEditId = null; render(); }
+
+async function init() {
+  const loading = document.getElementById("loading");
+  const app = document.getElementById("app");
+  try {
+    await loadMonth(CUR_M);
+  } catch (e) {
+    console.error(e);
+    S.loadError = e.message || "Không tải được dữ liệu";
+  } finally {
+    loading.style.display = "none";
+    app.style.display = "block";
+    render();
+  }
+  setInterval(async () => {
+    const el = document.activeElement;
+    const isTyping = el && ["INPUT","TEXTAREA","SELECT"].includes(el.tagName);
+    if (isTyping || S.selNV || S.plFormNV) return;
+    await loadMonth(S.month);
+    render();
+  }, 30000);
+}
+window.addEventListener("error", e => {
+  const loading = document.getElementById("loading");
+  const app = document.getElementById("app");
+  if (loading) loading.style.display = "none";
+  if (app) {
+    app.style.display = "block";
+    app.innerHTML = `<div class="error-box">Lỗi JavaScript:\n${escapeHtml(e.message)}\n${escapeHtml(e.filename || "")}:${e.lineno || ""}</div>`;
+  }
+});
+init();
+</script>
+</body>
+</html>

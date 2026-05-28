@@ -984,7 +984,7 @@ function closePinModal(){closePin();}
 async function init(){
   try{await loadMonth(CUR_M);}catch(e){console.warn(e);}
   hideEl('loading');
-  showEl('app');
+  var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
   render();
   setInterval(async function(){
     // Không refresh khi user đang nhập (input/select đang focus hoặc có form mở)

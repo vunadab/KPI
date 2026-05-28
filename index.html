@@ -699,7 +699,7 @@ function rPlWidget(m){
   var fc=plForecast(m),kp=gKP(m);
   var over=allDeals.filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;});
   var soon=allDeals.filter(function(d){var dl=daysLeft(d.han);return d.gd!=='hoan_tat'&&dl!==null&&dl>=0&&dl<=5;});
-  var fcBars=STARS.map(function(k){var p=pct(fc[k.key]||0,kp[k.key]||0);return'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="font-size:12px;width:18px">'+k.icon+'</span><div style="flex:1">'+bar(fc[k.key]||0,kp[k.key]||0,pc(p),6)+'</div><span style="font-size:10px;font-weight:800;color:'+pc(p)+';width:32px;text-align:right">'+p2s(p)+'</span></div>';}).join('');
+  var fcBars=STARS.map(function(k){var p=pct(fc[k.key]||0,kp[k.key]||0),fcV=fc[k.key]||0,khV=kp[k.key]||0;return'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-size:12px;width:18px">'+k.icon+'</span><div style="flex:1">'+bar(fcV,khV,pc(p),6)+'</div><div style="text-align:right;flex-shrink:0"><span style="font-size:11px;font-weight:900;color:'+pc(p)+'">'+p2s(p)+'</span><span style="font-size:9px;color:var(--dim);margin-left:4px">'+fmt(fcV,k.unit)+'</span></div></div>';}).join('');
   return'<div class="chart-wrap" style="margin-bottom:11px">'
     +'<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center">'
     +'<span>🔮 Dự báo từ Pipeline</span>'
@@ -716,7 +716,7 @@ function rDash(){
   var totalTH={};KPIS.forEach(function(k){totalTH[k.key]=fnvs.reduce(function(s,nv){return s+(thForNV(m,nv.ma)[k.key]||0);},0);});
   var nvData=fnvs.map(function(nv){var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma),wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key]||0,kh[k.key])||0);},0)/wk.length:null;return{ma:nv.ma,ten:nv.ten,kh:kh,th:th,score:score};}).sort(function(a,b){if(a.score===null&&b.score===null)return 0;if(a.score===null)return 1;if(b.score===null)return-1;return b.score-a.score;});
   var kCards=KPIS.map(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px"><div><div class="kc-lbl">'+k.label+'</div><div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div><div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div><div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)+'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'+(kh>0?bar(th,kh,k.color):'')+(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:#ff4757;margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')+'</div>';}).join('');
-  var ranks=nvData.slice(0,10).map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
+  var ranks=nvData.slice(0,12).map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
   return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div><div class="pad" style="padding-top:4px">'+rNVFilter()+'<div class="sec">Tổng hợp · '+fmtM(m)+'</div><div class="kg">'+kCards+'</div>'+(S.scope==='thang'?rBarChart(m):'')+''+rDonut(m)+''+rPlWidget(m)+'<div class="sec">🏆 Xếp hạng</div>'+ranks+'</div>';
 }
 
@@ -846,20 +846,96 @@ async function saveKhP(){var btn=document.getElementById('kp-btn');if(btn){btn.t
 
 function rKhTuanList(){
   var t=S.selT,kp=gKP();
-  function sAll(ma,kk){return['T1','T2','T3','T4'].reduce(function(s,tt){return s+(gKT(S.month,tt,ma)[kk]||0);},0);}
-  function sP(kk){return NVS.reduce(function(s,nv){return s+sAll(nv.ma,kk);},0);}
   var tuanData=(S.khTuan[S.month]||{})[t]||{};
-  var rem=KPIS.map(function(k){var con=(kp[k.key]||0)-sP(k.key);return'<div style="background:var(--bg1);border-radius:10px;padding:6px 9px;text-align:center;min-width:68px;flex-shrink:0;border:1px solid '+(con<0?'#ff475728':k.color+'18')+'"><div style="font-size:10px;color:'+k.color+';font-weight:800;margin-bottom:2px">'+k.icon+'</div><div style="font-size:11px;font-weight:900;color:'+(con<0?'#ff6b7a':'#fff')+';font-family:\'Space Mono\',monospace">'+fmt(con,k.unit)+'</div><div style="font-size:9px;color:var(--mute)">còn lại</div></div>';}).join('');
-  var rows=NVS.map(function(nv){var nvKh=tuanData[nv.ma]||{},hasKh=KPIS.some(function(k){return(nvKh[k.key]||0)>0;});return'<button class="nvi'+(hasKh?' hk':'')+'" onclick="selNVKh(\''+nv.ma+'\')" style="cursor:pointer">'+av(nv.ten,nv.ma)+'<div style="flex:1"><div class="nv-n">'+nv.ten+'</div>'+(hasKh?'<div class="chips">'+STARS.map(function(k){var kv=nvKh[k.key]||0,tv=gTH(S.month,t,nv.ma)[k.key]||0,p=kv>0?pct(tv,kv):null;return chip(k.icon+' '+fmt(kv,k.unit)+(p!==null?' '+Math.round(p)+'%':''),k.color);}).join('')+'</div>':'<div class="nv-s" style="color:var(--dim)">Chưa giao KH '+t+'</div>')+'</div><span style="color:'+(hasKh?'#ffc84a':'var(--dim)')+';font-size:14px">›</span></button>';}).join('');
-  return'<div class="pad"><div class="sec">📋 KH Tuần · '+fmtM(S.month)+'</div><div class="tt">'+['T1','T2','T3','T4'].map(function(t2){return'<button class="tb'+(S.selT===t2?' on':'')+'" onclick="setTKh(\''+t2+'\')">'+t2+'</button>';}).join('')+'</div><div style="overflow-x:auto;margin-bottom:12px"><div style="display:flex;gap:6px;width:max-content;padding-bottom:2px">'+rem+'</div></div>'+rows+'</div>';
+
+  // Tổng KH đã giao cho từng tuần (tất cả 4 tuần, tất cả NV)
+  function sumTuan(kk,tt){return NVS.reduce(function(s,nv){return s+(gKT(S.month,tt,nv.ma)[kk]||0);},0);}
+  function sumAllTuan(kk){return['T1','T2','T3','T4'].reduce(function(s,tt){return s+sumTuan(kk,tt);},0);}
+
+  // Hiện trạng: KH tháng vs tổng 4 tuần đã giao
+  var statusBar=KPIS.map(function(k){
+    var khThang=kp[k.key]||0;
+    var daGiao=sumAllTuan(k.key);
+    var conLai=khThang-daGiao;
+    var warn=conLai<0;
+    return'<div style="background:var(--bg1);border-radius:10px;padding:7px 10px;text-align:center;min-width:72px;flex-shrink:0;border:1px solid '+(warn?'#ff475728':k.color+'18')+'">'
+      +'<div style="font-size:10px;color:'+k.color+';font-weight:800;margin-bottom:2px">'+k.icon+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-bottom:1px">KH tháng</div>'
+      +'<div style="font-size:11px;font-weight:900;color:#fff;font-family:\'Space Mono\',monospace">'+fmt(khThang,k.unit)+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:2px">Đã giao 4T</div>'
+      +'<div style="font-size:11px;font-weight:900;color:'+(warn?'#ff4757':'#00c48c')+'">'+fmt(daGiao,k.unit)+'</div>'
+      +(warn?'<div style="font-size:9px;color:#ff4757;font-weight:800">⚠️ Vượt!</div>':conLai>0?'<div style="font-size:9px;color:var(--dim)">Còn: '+fmt(conLai,k.unit)+'</div>':'<div style="font-size:9px;color:#00c48c">✓ Đủ</div>')
+      +'</div>';
+  }).join('');
+
+  var rows=NVS.map(function(nv){
+    var nvKh=tuanData[nv.ma]||{};
+    var hasKh=KPIS.some(function(k){return(nvKh[k.key]||0)>0;});
+    var th=gTH(S.month,t,nv.ma);
+    return'<button class="nvi'+(hasKh?' hk':'')+'" onclick="selNVKh(\''+nv.ma+'\')" style="cursor:pointer">'
+      +av(nv.ten,nv.ma)
+      +'<div style="flex:1"><div class="nv-n">'+nv.ten+'</div>'
+      +(hasKh
+        ?'<div class="chips">'+STARS.map(function(k){var kv=nvKh[k.key]||0,tv=gTH(S.month,t,nv.ma)[k.key]||0,p=kv>0?pct(tv,kv):null;return chip(k.icon+' KH:'+fmt(kv,k.unit)+(p!==null?' TH:'+Math.round(p)+'%':''),k.color);}).join('')+'</div>'
+        :'<div class="nv-s" style="color:var(--dim)">Chưa giao KH '+t+'</div>')
+      +'</div><span style="color:'+(hasKh?'#ffc84a':'var(--dim)')+';font-size:14px">›</span>'
+      +'</button>';
+  }).join('');
+
+  return'<div class="pad"><div class="sec">📋 KH Tuần · '+fmtM(S.month)+'</div>'
+    +'<div class="tt">'+['T1','T2','T3','T4'].map(function(t2){return'<button class="tb'+(S.selT===t2?' on':'')+'" onclick="setTKh(\''+t2+'\')">'+t2+'</button>';}).join('')+'</div>'
+    +'<div class="card card-gold" style="margin-bottom:12px;padding:10px 12px">'
+    +'<div style="font-size:11px;font-weight:800;color:#ffc84a;margin-bottom:8px">📊 Tổng quan KH tháng vs 4 tuần đã giao</div>'
+    +'<div style="overflow-x:auto"><div style="display:flex;gap:7px;width:max-content;padding-bottom:2px">'+statusBar+'</div></div>'
+    +'</div>'
+    +rows+'</div>';
 }
 function rKhTuanForm(){
   var nv=NVS.filter(function(n){return n.ma===S.selNV;})[0];if(!nv)return'';
   var t=S.selT,kp=gKP(),cur=gKT(S.month,t,nv.ma);
-  function sAll(ma,kk){return['T1','T2','T3','T4'].reduce(function(s,tt){return s+(gKT(S.month,tt,ma)[kk]||0);},0);}
-  function sP(kk){return NVS.reduce(function(s,n2){return s+sAll(n2.ma,kk);},0);}
-  var fields=KPIS.map(function(k){var old=cur[k.key]||0,excP=sP(k.key)-sAll(nv.ma,k.key),excNV=sAll(nv.ma,k.key)-old,con=(kp[k.key]||0)-excP-excNV,warn=con<0;return'<div class="ff" style="border-color:'+(warn?'#ff475728':k.color+'25')+'"><div class="fh"><div class="fl"><span style="font-size:19px">'+k.icon+'</span><div><div class="fn" style="color:'+(k.star?'#ffc84a':'#fff')+'">'+k.label+'</div><div class="fk" style="color:'+(warn?'#ff6b7a':'var(--dim)')+'">Còn lại: <b>'+fmt(con,k.unit)+'</b>'+(warn?' ⚠️':'')+'</div></div></div></div><input type="number" id="kt_'+k.key+'" value="'+(old||'')+'" placeholder="KH '+t+' — '+k.label+'"></div>';}).join('');
-  return'<div class="pad"><button class="bback" onclick="backKhT()">← DS NV</button><div class="card card-hi" style="margin-bottom:13px"><div style="display:flex;align-items:center;gap:11px">'+av(nv.ten,nv.ma,44)+'<div><div style="font-weight:900;font-size:14px;color:#fff">'+nv.ten+'</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Giao KH '+t+' · '+fmtM(S.month)+'</div></div></div></div>'+fields+'<button class="bsave" id="kt-btn" onclick="saveKhT()">💾 Giao KH '+t+' — '+nv.ten.split(' ').pop()+'</button></div>';
+  function sumOtherTuanNV(kk){return['T1','T2','T3','T4'].filter(function(tt){return tt!==t;}).reduce(function(s,tt){return s+(gKT(S.month,tt,nv.ma)[kk]||0);},0);}
+  var fields=KPIS.map(function(k){
+    var old=cur[k.key]||0,khThang=kp[k.key]||0;
+    var otherNVTotal=NVS.filter(function(n2){return n2.ma!==nv.ma;}).reduce(function(s,n2){return s+['T1','T2','T3','T4'].reduce(function(s2,tt){return s2+(gKT(S.month,tt,n2.ma)[k.key]||0);},0);},0);
+    var conLai=khThang-otherNVTotal-sumOtherTuanNV(k.key)-old;
+    var warn=conLai<0;
+    var conColor=conLai<0?'#ff4757':'#00c48c';
+    var conText=conLai<0?'Vượt '+fmt(Math.abs(conLai),k.unit):fmt(conLai,k.unit);
+    return'<div class="ff" style="border-color:'+(warn?'#ff475728':k.color+'25')+'">'
+      +'<div class="fh"><div class="fl"><span style="font-size:19px">'+k.icon+'</span>'
+      +'<div><div class="fn" style="color:'+(k.star?'#ffc84a':'#fff')+'">'+k.label+'</div>'
+      +'<div class="fk">KH tháng: <b>'+fmt(khThang,k.unit)+'</b>'
+      +' · Còn giao: <b style="color:'+conColor+'">'+conText+'</b>'+(warn?' ⚠️':'')+'</div>'
+      +'</div></div></div>'
+      +'<input type="number" id="kt_'+k.key+'" value="'+(old||'')+'" placeholder="KH '+t+' ('+k.unit+')" style="border-color:'+k.color+'25" oninput="checkKhTuan()">'
+      +'</div>';
+  }).join('');
+  return'<div class="pad"><button class="bback" onclick="backKhT()">← DS NV</button>'
+    +'<div class="card card-hi" style="margin-bottom:13px"><div style="display:flex;align-items:center;gap:11px">'+av(nv.ten,nv.ma,44)
+    +'<div><div style="font-weight:900;font-size:14px;color:#fff">'+nv.ten+'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:2px">Giao KH '+t+' · '+fmtM(S.month)+'</div>'
+    +'<div style="font-size:10px;color:#ffc84a;margin-top:2px">💡 Tổng 4 tuần không vượt KH tháng</div>'
+    +'</div></div></div>'
+    +'<div id="kh-warn-box" style="display:none;background:#ff475715;border:1px solid #ff475740;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:12px;color:#ff6b7a;font-weight:700">⚠️ Tổng KH 4 tuần đang vượt KH tháng!</div>'
+    +fields
+    +'<button class="bsave" id="kt-btn" onclick="saveKhT()">💾 Giao KH '+t+' — '+nv.ten.split(' ').pop()+'</button></div>';
+}
+function checkKhTuan(){
+  var nv=NVS.filter(function(n){return n.ma===S.selNV;})[0];if(!nv)return;
+  var t=S.selT,kp=gKP();
+  var over=false;
+  KPIS.forEach(function(k){
+    var inp=document.getElementById('kt_'+k.key);if(!inp||inp.value==='')return;
+    var newVal=parseFloat(inp.value)||0;
+    var khThang=kp[k.key]||0;
+    var otherTotal=NVS.filter(function(n2){return n2.ma!==nv.ma;}).reduce(function(s,n2){
+      return s+['T1','T2','T3','T4'].reduce(function(s2,tt){return s2+(gKT(S.month,tt,n2.ma)[k.key]||0);},0);
+    },0);
+    var thisnvOther=['T1','T2','T3','T4'].filter(function(tt){return tt!==t;}).reduce(function(s,tt){return s+(gKT(S.month,tt,nv.ma)[k.key]||0);},0);
+    if(otherTotal+thisnvOther+newVal>khThang)over=true;
+  });
+  var box=document.getElementById('kh-warn-box');
+  if(box)box.style.display=over?'block':'none';
 }
 async function saveKhT(){var nv=NVS.filter(function(n){return n.ma===S.selNV;})[0];if(!nv)return;var btn=document.getElementById('kt-btn');if(btn){btn.textContent='⏳...';btn.disabled=true;}var d={};KPIS.forEach(function(k){var el=document.getElementById('kt_'+k.key);if(el&&el.value!=='')d[k.key]=parseFloat(el.value);});await fbSet('khTuan/'+S.month+'/'+S.selT+'/'+nv.ma,d);if(!S.khTuan[S.month])S.khTuan[S.month]={};if(!S.khTuan[S.month][S.selT])S.khTuan[S.month][S.selT]={};S.khTuan[S.month][S.selT][nv.ma]=d;if(btn){btn.textContent='✅ Đã giao!';btn.classList.add('ok');}setTimeout(function(){S.selNV=null;render();},1300);}
 
@@ -900,19 +976,116 @@ function openExpModal(){showEl('exp-modal');}
 function closeExpModal(){hideEl('exp-modal');}
 
 function buildReport(m,scope){
-  var kp=gKP(m),tuans=scope==='thang'?['T1','T2','T3','T4']:[scope],fnvs=filtNVs();
-  var totalTH={};KPIS.forEach(function(k){totalTH[k.key]=fnvs.reduce(function(s,nv){return s+tuans.reduce(function(s2,t){return s2+(gTH(m,t,nv.ma)[k.key]||0);},0);},0);});
-  var nvData=fnvs.map(function(nv){var kh={},th={};KPIS.forEach(function(k){kh[k.key]=tuans.reduce(function(s,t){return s+(gKT(m,t,nv.ma)[k.key]||0);},0);th[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);});var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key]||0,kh[k.key])||0);},0)/wk.length:null;return{nv:nv,kh:kh,th:th,score:score};}).sort(function(a,b){if(a.score===null&&b.score===null)return 0;if(a.score===null)return 1;if(b.score===null)return-1;return b.score-a.score;});
+  var isTuan=(scope!=='thang');
+  var tuans=isTuan?[scope]:['T1','T2','T3','T4'];
+  var fnvs=filtNVs();
+
+  // KH: tuần dùng KH tuần, tháng dùng KH phòng
+  function getKhForReport(ma){
+    var r={};
+    KPIS.forEach(function(k){
+      if(isTuan){
+        r[k.key]=gKT(m,scope,ma)[k.key]||0;
+      } else {
+        r[k.key]=['T1','T2','T3','T4'].reduce(function(s,t){return s+(gKT(m,t,ma)[k.key]||0);},0);
+      }
+    });
+    return r;
+  }
+  // KH phòng cho tổng quan
+  var kp={};
+  if(isTuan){
+    KPIS.forEach(function(k){kp[k.key]=NVS.reduce(function(s,nv){return s+(gKT(m,scope,nv.ma)[k.key]||0);},0);});
+  } else {
+    kp=gKP(m);
+  }
+
+  // TH: lũy kế các tuần trong scope
+  var totalTH={};
+  KPIS.forEach(function(k){
+    totalTH[k.key]=fnvs.reduce(function(s,nv){
+      return s+tuans.reduce(function(s2,t){return s2+(gTH(m,t,nv.ma)[k.key]||0);},0);
+    },0);
+  });
+
+  // NV data — KHÔNG filter, giữ tất cả kể cả âm
+  var nvData=fnvs.map(function(nv){
+    var kh=getKhForReport(nv.ma),th={};
+    KPIS.forEach(function(k){th[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);});
+    var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});
+    var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key],kh[k.key])||0);},0)/wk.length:null;
+    return{nv:nv,kh:kh,th:th,score:score};
+  }).sort(function(a,b){
+    // Sắp xếp: có KH trước, trong đó điểm cao → thấp (âm ở cuối)
+    if(a.score===null&&b.score===null)return 0;
+    if(a.score===null)return 1;
+    if(b.score===null)return-1;
+    return b.score-a.score;
+  });
+
   var now=new Date(),dateStr=now.getDate()+'/'+(now.getMonth()+1)+'/'+now.getFullYear()+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
   var p1=m.split('-'),monthLabel='Tháng '+(+p1[1])+'/'+p1[0];
-  var scopeLabel=scope==='thang'?'Cả tháng':scope;
+  var scopeLabel=isTuan?scope:'Cả tháng';
   var nvLabel=S.filterNVs.length>0?S.filterNVs.length+' NV được chọn':'Toàn phòng';
 
-  var kpiCards=KPIS.map(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),w=kh>0?Math.min(100,Math.max(0,th/kh*100)):0,col=p===null?'#aaa':p>=100?'#00c48c':p>=70?'#e8a020':p>=40?'#ff9f43':'#ff4757';return'<div style="flex:1;min-width:110px;background:#f8faff;border:1px solid '+(kh>0?k.color+'40':'#e0e8ff')+';border-radius:10px;padding:10px 11px"><div style="font-size:12px;margin-bottom:3px">'+k.icon+' <b style="color:#1a2e4a">'+k.label+'</b>'+(k.star?' ⭐':'')+'</div><div style="font-size:18px;font-weight:900;color:'+(kh>0?k.color:'#aaa')+';font-family:monospace">'+fmt(th,k.unit)+'</div><div style="font-size:10px;color:#888;margin-top:1px">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div><div style="margin-top:5px;background:#e8eef8;border-radius:3px;height:5px"><div style="width:'+w+'%;height:5px;background:'+col+';border-radius:3px"></div></div><div style="font-size:12px;font-weight:900;color:'+col+';margin-top:3px">'+(kh>0?p2s(p):'—')+'</div></div>';}).join('');
-  var thHead=STARS.map(function(k){return'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:center">'+k.icon+' '+k.label+'</th>';}).join('');
-  var nvRows=nvData.map(function(d,i){var rankIco=['🥇','🥈','🥉'][i]||(i+1)+'.';var st2=stl(d.score);var starCols=STARS.map(function(k){var kh=d.kh[k.key]||0,th=d.th[k.key]||0,p2=pct(th,kh),col2=p2===null?'#aaa':p2>=100?'#00c48c':p2>=70?'#e8a020':p2>=40?'#ff9f43':'#ff4757';return'<td style="padding:7px 9px;text-align:center"><div style="font-weight:800;font-family:monospace;font-size:11px;color:#1a3a6e">'+(kh>0?fmt(th,k.unit):'—')+'</div><div style="font-size:9px;font-weight:800;color:'+col2+'">'+(kh>0?p2s(p2):'')+'</div></td>';}).join('');var scoreBg=d.score===null?'#f0f0f0':d.score>=100?'#e6f9f3':d.score>=70?'#fef9ec':d.score>=40?'#fff4e6':'#fff0f1';return'<tr style="background:'+(i%2===0?'#fafbff':'#fff')+'"><td style="padding:7px 10px;text-align:center;font-size:14px">'+rankIco+'</td><td style="padding:7px 10px;font-weight:800;color:#1a1a2e;font-size:12px">'+d.nv.ten+'</td>'+starCols+'<td style="padding:7px 10px;text-align:center"><span style="background:'+scoreBg+';color:'+st2.c+';font-weight:900;padding:2px 8px;border-radius:5px;font-size:12px">'+(d.score!==null?p2s(d.score):'—')+'</span></td></tr>';}).join('');
+  var kpiCards=KPIS.map(function(k){
+    var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);
+    var w=kh>0?Math.min(100,Math.max(0,th/kh*100)):0;
+    var col=p===null?'#aaa':p>=100?'#00c48c':p>=70?'#e8a020':p>=40?'#ff9f43':'#ff4757';
+    return'<div style="flex:1;min-width:110px;background:#f8faff;border:1px solid '+(kh>0?k.color+'40':'#e0e8ff')+';border-radius:10px;padding:10px 11px">'
+      +'<div style="font-size:12px;margin-bottom:3px">'+k.icon+' <b style="color:#1a2e4a">'+k.label+'</b>'+(k.star?' ⭐':'')+'</div>'
+      +'<div style="font-size:18px;font-weight:900;color:'+(kh>0?k.color:'#aaa')+';font-family:monospace">'+fmt(th,k.unit)+'</div>'
+      +'<div style="font-size:10px;color:#888;margin-top:1px">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div>'
+      +'<div style="margin-top:5px;background:#e8eef8;border-radius:3px;height:5px"><div style="width:'+Math.min(100,Math.max(0,w))+'%;height:5px;background:'+col+';border-radius:3px"></div></div>'
+      +'<div style="font-size:12px;font-weight:900;color:'+col+';margin-top:3px">'+(kh>0?p2s(p):'—')+'</div>'
+      +'</div>';
+  }).join('');
 
-  // Pipeline section cho báo cáo
+  var thHead=STARS.map(function(k){return'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:center">'+k.icon+' '+k.label+'</th>';}).join('');
+
+  var nvRows=nvData.map(function(d,i){
+    var rankIco=['🥇','🥈','🥉'][i]||(i+1)+'.';
+    var st2=stl(d.score);
+    var rowBg=i%2===0?'#fafbff':'#fff';
+    // Nếu điểm âm → highlight đỏ nhẹ
+    if(d.score!==null&&d.score<0)rowBg='#fff5f5';
+    var starCols=STARS.map(function(k){
+      var kh=d.kh[k.key]||0,th=d.th[k.key]||0,p2=pct(th,kh);
+      var col2=p2===null?'#aaa':p2>=100?'#00c48c':p2>=70?'#e8a020':p2>=40?'#ff9f43':'#ff4757';
+      return'<td style="padding:7px 9px;text-align:center">'
+        +'<div style="font-weight:800;font-family:monospace;font-size:11px;color:#1a3a6e">'+fmt(th,k.unit)+'</div>'
+        +'<div style="font-size:9px;font-weight:800;color:'+col2+'">'+(kh>0?p2s(p2):'—')+'</div>'
+        +'</td>';
+    }).join('');
+    var scoreBg=d.score===null?'#f0f0f0':d.score>=100?'#e6f9f3':d.score>=70?'#fef9ec':d.score>=40?'#fff4e6':d.score>=0?'#fff0f1':'#ffe0e0';
+    var scoreColor=d.score!==null&&d.score<0?'#c0392b':st2.c;
+    return'<tr style="background:'+rowBg+'">'
+      +'<td style="padding:7px 10px;text-align:center;font-size:14px">'+rankIco+'</td>'
+      +'<td style="padding:7px 10px;font-weight:800;color:#1a1a2e;font-size:12px">'+d.nv.ten+'</td>'
+      +starCols
+      +'<td style="padding:7px 10px;text-align:center">'
+      +'<span style="background:'+scoreBg+';color:'+scoreColor+';font-weight:900;padding:2px 8px;border-radius:5px;font-size:12px">'+(d.score!==null?p2s(d.score):'—')+'</span>'
+      +'</td></tr>';
+  }).join('');
+
+  var chuaNhap2=NVS.filter(function(nv){
+    return tuans.some(function(t){
+      var kh=gKT(m,t,nv.ma),th=gTH(m,t,nv.ma);
+      return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});
+    });
+  });
+  var duoi50_2=NVS.filter(function(nv){
+    return STARS.some(function(k){
+      var kh=tuans.reduce(function(s,t){return s+(gKT(m,t,nv.ma)[k.key]||0);},0);
+      var th=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);
+      return kh>0&&pct(th,kh)<50;
+    });
+  });
+  var warnHtml2='';
+  if(chuaNhap2.length)warnHtml2+='<div style="background:#fff0f1;border-left:4px solid #ff4757;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#c0392b;margin-bottom:3px">🚨 '+chuaNhap2.length+' NV chưa nhập TH</div><div style="font-size:11px;color:#666">'+chuaNhap2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
+  if(duoi50_2.length)warnHtml2+='<div style="background:#fff8e6;border-left:4px solid #ff9f43;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#d35400;margin-bottom:3px">⚠️ '+duoi50_2.length+' NV dưới 50% KPI trọng điểm</div><div style="font-size:11px;color:#666">'+duoi50_2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
+  if(!warnHtml2)warnHtml2='<div style="background:#e8f9f3;border-left:4px solid #00c48c;padding:8px 12px;border-radius:0 7px 7px 0"><div style="font-weight:800;color:#00a878">✅ Phòng đang kiểm soát tốt</div></div>';
+
   var allDeals=getAllDeals(m);
   var plRows=allDeals.map(function(d){
     var kpiC=KPIS.filter(function(k){return k.key===d.sp;})[0]||KPIS[0];
@@ -930,30 +1103,59 @@ function buildReport(m,scope){
       +'</tr>';
   }).join('');
 
-  var chuaNhap2=NVS.filter(function(nv){return tuans.some(function(t){var kh=gKT(m,t,nv.ma),th=gTH(m,t,nv.ma);return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});});});
-  var duoi502=NVS.filter(function(nv){return STARS.some(function(k){var kh=tuans.reduce(function(s,t){return s+(gKT(m,t,nv.ma)[k.key]||0);},0),th=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);return kh>0&&th>0&&pct(th,kh)<50;});});
-  var warnHtml2='';
-  if(chuaNhap2.length)warnHtml2+='<div style="background:#fff0f1;border-left:4px solid #ff4757;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#c0392b;margin-bottom:3px">🚨 '+chuaNhap2.length+' NV có KH chưa nhập TH</div><div style="font-size:11px;color:#666">'+chuaNhap2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
-  if(duoi502.length)warnHtml2+='<div style="background:#fff8e6;border-left:4px solid #ff9f43;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#d35400;margin-bottom:3px">⚠️ '+duoi502.length+' NV dưới 50% KPI trọng điểm</div><div style="font-size:11px;color:#666">'+duoi502.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
-  if(!warnHtml2)warnHtml2='<div style="background:#e8f9f3;border-left:4px solid #00c48c;padding:8px 12px;border-radius:0 7px 7px 0"><div style="font-weight:800;color:#00a878">✅ Phòng đang kiểm soát tốt</div></div>';
-
-  return'<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:12px;}.page{width:794px;margin:0 auto;padding:32px 36px;}table{width:100%;border-collapse:collapse;}thead tr{background:linear-gradient(135deg,#1a3a6e,#2d5aac);}tbody tr:nth-child(even){background:#f8faff;}tbody td{border-bottom:1px solid #eef0f8;}</style></head><body><div class="page">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:3px solid #1a3a6e;margin-bottom:18px"><div style="display:flex;align-items:center;gap:11px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#e8a020,#ffc84a);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px">🏦</div><div><div style="font-size:18px;font-weight:900;color:#1a3a6e">Nam A Bank</div><div style="font-size:10px;color:#888;margin-top:1px;text-transform:uppercase;letter-spacing:.05em">Phòng Khách hàng cá nhân</div></div></div><div style="text-align:right"><div style="font-size:15px;font-weight:900;color:#1a3a6e">📊 BÁO CÁO KPI</div><div style="font-size:12px;color:#666;margin-top:2px">'+monthLabel+' · '+scopeLabel+'</div><div style="font-size:11px;color:#aaa;margin-top:1px">'+nvLabel+' · Xuất: '+dateStr+'</div><div style="margin-top:5px;display:inline-block;background:#fff8e6;border:1px solid #e8a020;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;color:#e8a020">🔒 NỘI BỘ</div></div></div>'
-    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📈 I. TỔNG QUAN KPI</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+kpiCards+'</div></div>'
-    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ NHÂN VIÊN</div><table><thead><tr><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;width:30px;text-align:center">#</th><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:left">Họ và tên</th>'+thHead+'<th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:center">Điểm TB</th></tr></thead><tbody>'+nvRows+'</tbody></table></div>'
+  return'<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><style>'
+    +'*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:12px;}'
+    +'.page{width:794px;margin:0 auto;padding:32px 36px;}table{width:100%;border-collapse:collapse;}'
+    +'thead tr{background:linear-gradient(135deg,#1a3a6e,#2d5aac);}tbody tr:nth-child(even){background:#f8faff;}tbody td{border-bottom:1px solid #eef0f8;}'
+    +'</style></head><body><div class="page">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:3px solid #1a3a6e;margin-bottom:18px">'
+    +'<div style="display:flex;align-items:center;gap:11px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#e8a020,#ffc84a);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px">🏦</div>'
+    +'<div><div style="font-size:18px;font-weight:900;color:#1a3a6e">Nam A Bank</div><div style="font-size:10px;color:#888;margin-top:1px;text-transform:uppercase;letter-spacing:.05em">Phòng Khách hàng cá nhân</div></div></div>'
+    +'<div style="text-align:right"><div style="font-size:15px;font-weight:900;color:#1a3a6e">📊 BÁO CÁO KPI</div>'
+    +'<div style="font-size:12px;color:#666;margin-top:2px">'+monthLabel+' · '+scopeLabel+'</div>'
+    +'<div style="font-size:11px;color:#aaa;margin-top:1px">'+nvLabel+' · Xuất: '+dateStr+'</div>'
+    +'<div style="margin-top:5px;display:inline-block;background:#fff8e6;border:1px solid #e8a020;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;color:#e8a020">🔒 NỘI BỘ</div></div></div>'
+    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📈 I. TỔNG QUAN KPI — '+(isTuan?scope+' (so với KH tuần)':'Cả tháng (so với KH tháng)')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+kpiCards+'</div></div>'
+    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ NHÂN VIÊN ('+nvData.length+' NV — kể cả âm)</div>'
+    +'<table><thead><tr><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;width:30px;text-align:center">#</th><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:left">Họ và tên</th>'+thHead+'<th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:center">Điểm TB</th></tr></thead><tbody>'+nvRows+'</tbody></table></div>'
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🚨 III. CẢNH BÁO</div>'+warnHtml2+'</div>'
-    +(allDeals.length?'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📋 IV. PIPELINE — '+allDeals.length+' DEALS · '+fmt(plTotalVal(allDeals),'tr đ')+'</div><table><thead><tr><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Chuyên viên</th><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Sản phẩm</th><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:center">Giai đoạn</th><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:right">Giá trị</th><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Tên KH</th><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">SĐT KH</th><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Địa chỉ (Dư nợ)</th><th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Hạn</th></tr></thead><tbody>'+plRows+'</tbody></table></div>':'')
-    +'<div style="margin-top:22px;padding-top:11px;border-top:1px solid #eee;display:flex;justify-content:space-between"><div><div style="font-weight:800;color:#1a3a6e;font-size:11px">Nam A Bank — Phòng KHCN</div><div style="font-size:10px;color:#aaa;margin-top:1px">Tài liệu nội bộ — Không phổ biến</div></div><div style="text-align:right"><div style="font-weight:800;color:#1a3a6e;font-size:11px">'+monthLabel+' · '+scopeLabel+'</div><div style="font-size:10px;color:#aaa;margin-top:1px">KPI Banking NAB System</div></div></div>'
+    +(allDeals.length?'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📋 IV. PIPELINE — '+allDeals.length+' DEALS · '+fmt(plTotalVal(allDeals),'tr đ')+'</div>'
+    +'<table><thead><tr>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Chuyên viên</th>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Sản phẩm</th>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:center">Giai đoạn</th>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:right">Giá trị</th>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Tên KH</th>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">SĐT KH</th>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Địa chỉ (Dư nợ)</th>'
+    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Hạn</th>'
+    +'</tr></thead><tbody>'+plRows+'</tbody></table></div>':'')
+    +'<div style="margin-top:22px;padding-top:11px;border-top:1px solid #eee;display:flex;justify-content:space-between">'
+    +'<div><div style="font-weight:800;color:#1a3a6e;font-size:11px">Nam A Bank — Phòng KHCN</div><div style="font-size:10px;color:#aaa;margin-top:1px">Tài liệu nội bộ — Không phổ biến</div></div>'
+    +'<div style="text-align:right"><div style="font-weight:800;color:#1a3a6e;font-size:11px">'+monthLabel+' · '+scopeLabel+'</div><div style="font-size:10px;color:#aaa;margin-top:1px">KPI Banking NAB System</div></div></div>'
     +'</div></body></html>';
 }
 
 function printReport(scope){
   closeExpModal();
   var html=buildReport(S.month,scope);
-  var win=window.open('','_blank','width=900,height=700');
-  if(!win){alert('Cho phép popup để xuất báo cáo');return;}
-  win.document.write(html);win.document.close();
-  win.onload=function(){win.focus();setTimeout(function(){win.print();},500);};
+  var guide='<div id="gpdf" style="background:#fff8e6;border:1px solid #e8a020;border-radius:8px;padding:10px 14px;margin-bottom:18px;display:flex;align-items:center;gap:12px;font-family:Arial,sans-serif">'
+    +'<span style="font-size:20px">&#128161;</span>'
+    +'<div style="flex:1"><div style="font-weight:700;color:#7a5000;font-size:13px">L&#432;u file PDF:</div>'
+    +'<div style="font-size:12px;color:#9a7000;margin-top:2px">M&#225;y t&#237;nh: Ctrl+P &#8594; Ch&#7885;n <b>Save as PDF</b> &#8594; L&#432;u</div>'
+    +'<div style="font-size:12px;color:#9a7000">&#272;i&#7879;n tho&#7841;i: B&#7845;m <b>In / Share</b> &#8594; ch&#7885;n <b>L&#432;u PDF</b></div></div>'
+    +'<button id="gpdf-btn" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:8px;padding:9px 16px;font-weight:900;font-size:13px;cursor:pointer;white-space:nowrap">&#128424; In / L&#432;u PDF</button>'
+    +'</div>';
+  html=html.replace('<div class="page">','<div class="page">'+guide);
+  var win=window.open('','_blank','width=950,height=750');
+  if(!win){alert('Vui long cho phep popup de xuat bao cao');return;}
+  win.document.write(html);
+  win.document.close();
+  win.onload=function(){
+    var btn=win.document.getElementById('gpdf-btn');
+    var box=win.document.getElementById('gpdf');
+    if(btn){btn.onclick=function(){if(box)box.style.display='none';win.print();};}
+  };
 }
 
 // ══════════════════════════════════════════

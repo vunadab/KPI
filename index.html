@@ -1075,11 +1075,16 @@ function buildReport(m,scope){
     });
   });
   var duoi50_2=NVS.filter(function(nv){
-    return STARS.some(function(k){
-      var kh=tuans.reduce(function(s,t){return s+(gKT(m,t,nv.ma)[k.key]||0);},0);
-      var th=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);
-      return kh>0&&pct(th,kh)<50;
+    var wk=STARS.filter(function(k){
+      return tuans.reduce(function(s,t){return s+(gKT(m,t,nv.ma)[k.key]||0);},0)>0;
     });
+    if(!wk.length)return false;
+    var avg=wk.reduce(function(s,k){
+      var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0);
+      var th=tuans.reduce(function(a,t){return a+(gTH(m,t,nv.ma)[k.key]||0);},0);
+      return s+(pct(th,kh)||0);
+    },0)/wk.length;
+    return avg<50;
   });
   var warnHtml2='';
   if(chuaNhap2.length)warnHtml2+='<div style="background:#fff0f1;border-left:4px solid #ff4757;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#c0392b;margin-bottom:3px">🚨 '+chuaNhap2.length+' NV chưa nhập TH</div><div style="font-size:11px;color:#666">'+chuaNhap2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';

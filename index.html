@@ -258,13 +258,20 @@ var STARS=KPIS.filter(function(k){return k.star;});
 // Dư nợ x1.5 (khó nhất) · Huy động x1.0 · Thẻ TD x0.8 (dễ hơn)
 var STAR_WEIGHTS={'huy_dong':1.0,'du_no':1.5,'the_td':0.8};
 function weightedScore(m,ma,tuans){
-  // Điểm quy đổi mỗi KPI = (%TH) x trọng_số
-  // Điểm TB = tổng điểm quy đổi / số KPI có KH
-  // Ví dụ Uyên Bình: (6x1.0 + 80x1.5 + 163x0.8) / 3 = (6+120+130.4)/3 = 85.4
-  var wk=STARS.filter(function(k){return tuans.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});});
+  // Logic: NV được giao KH tháng cho KPI nào → KPI đó tính vào điểm
+  // Điểm quy đổi = (%TH so KH tháng) × trọng_số
+  // Điểm TB = tổng / số KPI có KH tháng
+  // VD Duyên Trinh T4: HD=43%×1=43, DN=0%×1.5=0, Thẻ=100%×0.8=80 → (43+0+80)/3=41%
+  var ALL_TUANS=['T1','T2','T3','T4'];
+  // wk: KPI nào có KH tháng > 0 (dùng KH tháng, không dùng KH tuần lẻ)
+  var wk=STARS.filter(function(k){
+    return ALL_TUANS.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});
+  });
   if(!wk.length)return null;
+  // TH: lũy kế theo tuans đang xem
+  // KH: tổng KH tháng (để % so đúng với mục tiêu tháng)
   var total=wk.reduce(function(s,k){
-    var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
+    var kh=ALL_TUANS.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
     var th=tuans.reduce(function(a,t){return a+(gTH(m,t,ma)[k.key]||0);},0);
     return s+(pct(th,kh)||0)*(STAR_WEIGHTS[k.key]||1);
   },0);
@@ -464,7 +471,7 @@ function rPlList(){
     +'<button class="tb'+(S.plTab==='nv'?' on':'')+'" onclick="setPlTab(\'nv\')">👤 Nhân viên</button>'
     +'<button class="tb'+(S.plTab==='phong'?' on':'')+'" onclick="setPlTab(\'phong\')">👥 Toàn phòng</button>'
     +'</div>';
-  if(S.plTab==='phong'&&pinAuth)return rPlPhong(m,tabBar);
+  if(S.plTab==='phong')return rPlPhong(m,tabBar);
   // Danh sách NV
   var nvRows=NVS.map(function(nv){
     var deals=getDeals(m,nv.ma);
@@ -857,9 +864,16 @@ function rAlert(){
 function rStar(){
   var m=S.month,t=S.selT;
   var scored=NVS.map(function(nv){
-    var scores=STARS.map(function(k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];return{k:k,kh:kh,th:th!=null?th:null,p:kh>0?pct(th||0,kh):null};});
+    // scores dùng KH tháng để tính %, TH của tuần đang xem
+    var scores=STARS.map(function(k){
+      var khThang=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
+      var khTuan=gKT(m,t,nv.ma)[k.key]||0;
+      var th=gTH(m,t,nv.ma)[k.key];
+      // Dùng KH tháng để tính %, nếu KH tháng=0 thì không tính KPI này
+      return{k:k,kh:khThang,khTuan:khTuan,th:th!=null?th:null,p:khThang>0?pct(th||0,khThang):null};
+    });
     var wk=scores.filter(function(s){return s.kh>0;});
-    // Điểm quy đổi = %TH x trọng_số, chia số KPI có KH
+    // VD Trinh T4: HD=43%×1=43, DN=0%×1.5=0, Thẻ=100%×0.8=80 → (43+0+80)/3=41%
     var avg=wk.length?wk.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/wk.length:null;
     return{nv:nv,scores:scores,avg:avg,wk:wk};
   }).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
@@ -924,7 +938,11 @@ function rStar(){
 
   var warnHtml=warn.map(function(nv){
     var wk2=STARS.filter(function(k){return(gKT(m,t,nv.ma)[k.key]||0)>0;});
-    var avg2=wk2.length?wk2.reduce(function(s,k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];return s+(kh>0?(pct(th||0,kh)||0)*(STAR_WEIGHTS[k.key]||1):0);},0)/wk2.length:0;
+    var avg2=wk2.length?wk2.reduce(function(s,k){
+      var khThang=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
+      var th=gTH(m,t,nv.ma)[k.key];
+      return s+(khThang>0?(pct(th||0,khThang)||0)*(STAR_WEIGHTS[k.key]||1):0);
+    },0)/wk2.length:0;
     var wc=avg2<20?'#ff4757':avg2<50?'#ff9f43':'#e8a020';
     var iss=wk2.map(function(k){var th=gTH(m,t,nv.ma)[k.key],kh=gKT(m,t,nv.ma)[k.key]||0;if(th==null||th===0)return k.icon+' Chưa PH';var p=pct(th,kh);return p<50?k.icon+' '+p2s(p):'';}).filter(Boolean);
     return'<div class="wi" style="border-color:'+wc+'25">'+av(nv.ten,nv.ma,36)
@@ -1131,7 +1149,12 @@ function buildReport(m,scope){
     var kh=getKhForReport(nv.ma),th={};
     KPIS.forEach(function(k){th[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);});
     var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});
-    var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key],kh[k.key])||0)*(STAR_WEIGHTS[k.key]||1);},0)/wk.length:null;
+    // wk: KPI có KH tháng > 0 (không dùng KH tuần lẻ)
+    var wkM=STARS.filter(function(k){return(['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0))>0;});
+    var score=wkM.length?wkM.reduce(function(s,k){
+      var khM=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
+      return s+(pct(th[k.key],khM)||0)*(STAR_WEIGHTS[k.key]||1);
+    },0)/wkM.length:null;
     return{nv:nv,kh:kh,th:th,score:score};
   }).sort(function(a,b){
     // Sắp xếp: có KH trước, trong đó điểm cao → thấp (âm ở cuối)
@@ -1193,7 +1216,8 @@ function buildReport(m,scope){
     });
   });
   var duoi50_2=NVS.filter(function(nv){
-    var sc=weightedScore(m,nv.ma,tuans);
+    // Dùng weightedScore với ALL_TUANS để nhất quán với KH tháng
+    var sc=weightedScore(m,nv.ma,['T1','T2','T3','T4']);
     return sc!==null&&sc<50;
   });
   var warnHtml2='';

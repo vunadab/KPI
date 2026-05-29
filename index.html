@@ -65,8 +65,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 .ac{border-radius:13px;padding:12px;margin-bottom:10px;border-left:4px solid;background:var(--card)}.at{font-size:13px;font-weight:800;margin-bottom:6px}.ai{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #ffffff07;font-size:13px}
 #loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px}.ld{width:32px;height:32px;border:3px solid #0e2a4560;border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}.empty{text-align:center;padding:26px 15px;color:var(--mute);font-size:13px}
 </style>
-<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;KPI Banking NAB&quot;,&quot;short_name&quot;:&quot;KPI NAB&quot;,&quot;start_url&quot;:&quot;/KPI/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#01050d&quot;,&quot;theme_color&quot;:&quot;#e8a020&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23e8a020'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%F0%9F%8F%A6%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
-<meta name="theme-color" content="#e8a020">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#01050d">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="KPI NAB">
 </head>
@@ -258,15 +258,17 @@ var STARS=KPIS.filter(function(k){return k.star;});
 // Dư nợ x1.5 (khó nhất) · Huy động x1.0 · Thẻ TD x0.8 (dễ hơn)
 var STAR_WEIGHTS={'huy_dong':1.0,'du_no':1.5,'the_td':0.8};
 function weightedScore(m,ma,tuans){
+  // Điểm quy đổi mỗi KPI = (%TH) x trọng_số
+  // Điểm TB = tổng điểm quy đổi / số KPI có KH
+  // Ví dụ Uyên Bình: (6x1.0 + 80x1.5 + 163x0.8) / 3 = (6+120+130.4)/3 = 85.4
   var wk=STARS.filter(function(k){return tuans.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});});
   if(!wk.length)return null;
-  var totalW=wk.reduce(function(s,k){return s+(STAR_WEIGHTS[k.key]||1);},0);
-  return wk.reduce(function(s,k){
+  var total=wk.reduce(function(s,k){
     var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
     var th=tuans.reduce(function(a,t){return a+(gTH(m,t,ma)[k.key]||0);},0);
-    var w=STAR_WEIGHTS[k.key]||1;
-    return s+(pct(th,kh)||0)*w;
-  },0)/totalW;
+    return s+(pct(th,kh)||0)*(STAR_WEIGHTS[k.key]||1);
+  },0);
+  return total/wk.length;
 }
 var DEFAULT_KH={huy_dong:47900,du_no:31000,the_td:82,tk_hkd:80,qr_code:220,cif:415};
 
@@ -460,7 +462,7 @@ function rPlList(){
   var m=S.month;
   var tabBar='<div class="tt">'
     +'<button class="tb'+(S.plTab==='nv'?' on':'')+'" onclick="setPlTab(\'nv\')">👤 Nhân viên</button>'
-    +(pinAuth?'<button class="tb'+(S.plTab==='phong'?' on':'')+'" onclick="setPlTab(\'phong\')">👥 Toàn phòng</button>':'')
+    +'<button class="tb'+(S.plTab==='phong'?' on':'')+'" onclick="setPlTab(\'phong\')">👥 Toàn phòng</button>'
     +'</div>';
   if(S.plTab==='phong'&&pinAuth)return rPlPhong(m,tabBar);
   // Danh sách NV
@@ -857,9 +859,8 @@ function rStar(){
   var scored=NVS.map(function(nv){
     var scores=STARS.map(function(k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];return{k:k,kh:kh,th:th!=null?th:null,p:kh>0?pct(th||0,kh):null};});
     var wk=scores.filter(function(s){return s.kh>0;});
-    // Tính điểm có trọng số: Dư nợ x1.5, Huy động x1.0, Thẻ TD x0.8
-    var totalW2=wk.length?wk.reduce(function(a,s){return a+(STAR_WEIGHTS[s.k.key]||1);},0):1;
-    var avg=wk.length?wk.reduce(function(a,s){var w=STAR_WEIGHTS[s.k.key]||1;return a+(s.p||0)*w;},0)/totalW2:null;
+    // Điểm quy đổi = %TH x trọng_số, chia số KPI có KH
+    var avg=wk.length?wk.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/wk.length:null;
     return{nv:nv,scores:scores,avg:avg,wk:wk};
   }).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
 
@@ -923,8 +924,7 @@ function rStar(){
 
   var warnHtml=warn.map(function(nv){
     var wk2=STARS.filter(function(k){return(gKT(m,t,nv.ma)[k.key]||0)>0;});
-    var totalW3=wk2.length?wk2.reduce(function(s,k){return s+(STAR_WEIGHTS[k.key]||1);},0):1;
-    var avg2=wk2.length?wk2.reduce(function(s,k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];var w=STAR_WEIGHTS[k.key]||1;return s+(kh>0?(pct(th||0,kh)||0)*w:0);},0)/totalW3:0;
+    var avg2=wk2.length?wk2.reduce(function(s,k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];return s+(kh>0?(pct(th||0,kh)||0)*(STAR_WEIGHTS[k.key]||1):0);},0)/wk2.length:0;
     var wc=avg2<20?'#ff4757':avg2<50?'#ff9f43':'#e8a020';
     var iss=wk2.map(function(k){var th=gTH(m,t,nv.ma)[k.key],kh=gKT(m,t,nv.ma)[k.key]||0;if(th==null||th===0)return k.icon+' Chưa PH';var p=pct(th,kh);return p<50?k.icon+' '+p2s(p):'';}).filter(Boolean);
     return'<div class="wi" style="border-color:'+wc+'25">'+av(nv.ten,nv.ma,36)
@@ -943,9 +943,9 @@ function rStar(){
   return'<div class="pad"><div class="sec">🌟 Tuyên dương & Nhắc nhở</div>'
     +'<div class="tt">'+['T1','T2','T3','T4'].map(function(tt){return'<button class="tb'+(S.selT===tt?' on':'')+'" onclick="setT(\''+tt+'\')">'+tt+'</button>';}).join('')+'</div>'
     +starHtml+top3Html
+    +top3OtherHtml
     +(khongPhatSinh.length?'<div class="sec" style="margin-top:5px">🚨 Cảnh báo GẤP — Không phát sinh KPI trọng yếu</div>'+capBaoGap:'')
     +(warn.length?'<div class="sec" style="margin-top:5px">⚠️ Cần hỗ trợ ngay ('+t+')</div>'+warnHtml:'')
-    +top3OtherHtml
     +(!khongPhatSinh.length&&!warn.length&&scored.length?'<div class="card card-green" style="text-align:center;padding:11px;margin-top:7px"><span style="color:#00c48c;font-weight:900">🎉 Không có NV cần nhắc nhở!</span></div>':'')
     +'</div>';
 }
@@ -1131,8 +1131,7 @@ function buildReport(m,scope){
     var kh=getKhForReport(nv.ma),th={};
     KPIS.forEach(function(k){th[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);});
     var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});
-    var totalW5=wk.length?wk.reduce(function(s,k){return s+(STAR_WEIGHTS[k.key]||1);},0):1;
-    var score=wk.length?wk.reduce(function(s,k){var w=STAR_WEIGHTS[k.key]||1;return s+(pct(th[k.key],kh[k.key])||0)*w;},0)/totalW5:null;
+    var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key],kh[k.key])||0)*(STAR_WEIGHTS[k.key]||1);},0)/wk.length:null;
     return{nv:nv,kh:kh,th:th,score:score};
   }).sort(function(a,b){
     // Sắp xếp: có KH trước, trong đó điểm cao → thấp (âm ở cuối)
@@ -1232,7 +1231,7 @@ function buildReport(m,scope){
     +'<div style="font-size:11px;color:#aaa;margin-top:1px">'+nvLabel+' · Xuất: '+dateStr+'</div>'
     +'<div style="margin-top:5px;display:inline-block;background:#fff8e6;border:1px solid #e8a020;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;color:#e8a020">🔒 NỘI BỘ</div></div></div>'
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📈 I. TỔNG QUAN KPI — '+(isTuan?scope+' (so với KH tuần)':'Cả tháng (so với KH tháng)')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+kpiCards+'</div></div>'
-    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ NHÂN VIÊN ('+nvData.length+' NV · Điểm: DN×1.5 · HD×1.0 · Thẻ×0.8)</div>'
+    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ 3 KPIs TRỌNG ĐIỂM ('+nvData.length+' NV)</div>'
     +'<table><thead><tr><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;width:30px;text-align:center">#</th><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:left">Họ và tên</th>'+thHead+'<th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:center">Điểm TB</th></tr></thead><tbody>'+nvRows+'</tbody></table></div>'
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🚨 III. CẢNH BÁO</div>'+warnHtml2+'</div>'
     +(allDeals.length?'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📋 IV. PIPELINE — '+allDeals.length+' DEALS · '+fmt(plTotalVal(allDeals),'tr đ')+'</div>'
@@ -1279,7 +1278,9 @@ function printReport(scope){
 // ══════════════════════════════════════════
 function setTab(t){
   if(t==='kh'&&!pinAuth){openPin(function(){S.tab=t;S.selNV=null;render();});return;}
-  S.tab=t;S.selNV=null;S.detailNV=null;S.plFormNV=null;S.plNV=null;render();
+  S.tab=t;S.selNV=null;S.detailNV=null;S.plFormNV=null;S.plNV=null;
+  if(t!=='pl')S.plTab='nv';
+  render();
 }
 function setKhTab(t){S.khTab=t;S.selNV=null;render();}
 function setMonth(m){S.month=m;S.selNV=null;S.detailNV=null;loadMonth(m).then(function(){render();});}
@@ -1316,10 +1317,11 @@ init();
 
 // ── PWA Service Worker ──
 if('serviceWorker' in navigator){
-  var swCode='const CACHE="kpi-nab-v1";const URLS=["./"];self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS)));});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});';
-  var blob=new Blob([swCode],{type:'application/javascript'});
-  var swUrl=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(function(){});
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(reg){ console.log('SW OK', reg.scope); })
+      .catch(function(err){ console.log('SW fail', err); });
+  });
 }
 
 // ── Install Banner ──

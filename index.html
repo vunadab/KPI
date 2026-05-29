@@ -69,9 +69,22 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 <meta name="theme-color" content="#01050d">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="KPI NAB">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 </head>
 <body>
 
+<div id="phong-select-modal" style="display:none;position:fixed;inset:0;background:var(--bg0);z-index:600;align-items:center;justify-content:center;padding:24px">
+  <div style="width:100%;max-width:340px">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">🏦</div>
+      <div style="font-size:20px;font-weight:900;color:#fff">KPI <span style="background:linear-gradient(135deg,#e8a020,#ffc84a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Banking</span></div>
+      <div style="font-size:12px;color:var(--dim);margin-top:5px">Nam A Bank · Chọn phòng để tiếp tục</div>
+    </div>
+    <div id="phong-list-btns"></div>
+  </div>
+</div>
 <div id="loading">
   <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:22px">&#127974;</div>
   <div style="text-align:center">
@@ -121,6 +134,22 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
   </div>
 </div>
 
+<div id="zalo-modal" class="sheet-overlay" onclick="if(event.target===this)closeZaloShare()">
+  <div class="sheet" style="max-height:80vh">
+    <div class="handle"></div>
+    <div style="padding:13px 16px 11px;border-bottom:1px solid #0e2a4444;flex-shrink:0">
+      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:3px">📤 Chia sẻ KPI qua Zalo</div>
+      <div style="font-size:11px;color:var(--dim)">Copy tin nhắn → paste vào nhóm Zalo phòng</div>
+    </div>
+    <div style="padding:12px 15px;overflow-y:auto;flex:1">
+      <div id="zalo-content" style="background:var(--bg2);border-radius:11px;padding:13px;border:1px solid var(--border);font-size:13px;color:#fff;line-height:1.7;white-space:pre-wrap;font-family:inherit"></div>
+    </div>
+    <div style="padding:10px 15px 0;display:flex;gap:8px;flex-shrink:0">
+      <button onclick="copyZalo()" id="zalo-copy-btn" style="flex:1;background:linear-gradient(135deg,#0068ff,#00aaff);color:#fff;border:none;border-radius:11px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit">📋 Copy tin nhắn</button>
+      <button onclick="closeZaloShare()" style="background:none;border:1px solid #1a3d5c;border-radius:11px;padding:12px 14px;color:var(--dim);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">✕</button>
+    </div>
+  </div>
+</div>
 <div id="exp-modal" class="sheet-overlay" onclick="if(event.target===this)closeExpModal()">
   <div class="sheet" style="max-height:70vh">
     <div class="handle"></div>
@@ -148,8 +177,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 
 <div id="pwa-banner" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);width:calc(100% - 30px);max-width:400px;background:linear-gradient(135deg,#0a1628,#061525);border:1px solid #e8a02035;border-radius:14px;padding:12px 14px;z-index:200;align-items:center;gap:12px;box-shadow:0 8px 32px #00000060">
   <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏦</div>
-  <div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">Cài app lên điện thoại</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Dùng như app thật, không cần mạng</div></div>
-  <button onclick="installPWA()" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:9px;padding:7px 13px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">Cài</button>
+  <div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">Cài app lên điện thoại</div><div id="pwa-desc" style="font-size:11px;color:var(--dim);margin-top:2px">Dùng như app thật, không cần mạng</div></div>
+  <button id="pwa-install-btn" onclick="installPWA()" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:9px;padding:7px 13px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">Cài</button>
   <button onclick="closePWABanner()" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;flex-shrink:0;padding:4px">✕</button>
 </div>
 <div id="app" style="display:none"></div>
@@ -161,7 +190,42 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 // ═══════════════════════════════════════════
 
 // ── FIREBASE ──
-var DB='https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app',ROOT='kpi';
+var DB='https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app';
+// Multi-phòng: mỗi phòng có root riêng trong Firebase
+// Cấu trúc: /khcn/... | /sme/... | /khdn/...
+var PHONG_LIST=[
+  {id:'khcn', ten:'Phòng KHCN',  root:'kpi',    pin:'1234'},
+  // Thêm phòng khác ở đây, ví dụ:
+  // {id:'sme',  ten:'Phòng SME',   root:'kpi_sme', pin:'5678'},
+  // {id:'khdn', ten:'Phòng KHDN',  root:'kpi_kh',  pin:'9999'},
+];
+var CUR_PHONG=null; // Phòng đang dùng, load từ localStorage
+var ROOT='kpi';     // Sẽ được set theo phòng chọn
+
+function initPhong(){
+  // Đọc phòng đã chọn từ lần trước
+  try{
+    var saved=localStorage.getItem('kpi_phong');
+    if(saved){
+      var found=PHONG_LIST.filter(function(p){return p.id===saved;})[0];
+      if(found){CUR_PHONG=found;ROOT=found.root;return true;}
+    }
+  }catch(e){}
+  // Nếu chỉ có 1 phòng → dùng luôn
+  if(PHONG_LIST.length===1){CUR_PHONG=PHONG_LIST[0];ROOT=PHONG_LIST[0].root;return true;}
+  return false; // Cần chọn phòng
+}
+
+function selectPhong(id){
+  var found=PHONG_LIST.filter(function(p){return p.id===id;})[0];
+  if(!found)return;
+  CUR_PHONG=found;ROOT=found.root;
+  // Cập nhật PIN theo phòng
+  PIN=found.pin;
+  try{localStorage.setItem('kpi_phong',id);}catch(e){}
+  hideEl('phong-select-modal');
+  init();
+}
 async function fbGet(p){try{var r=await fetch(DB+'/'+ROOT+'/'+p+'.json');if(!r.ok)return null;var d=await r.json();return d===null?null:d;}catch(e){console.warn('fbGet',e.message);return null;}}
 async function fbSet(p,d){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){console.warn('fbSet',e.message);}}
 async function fbDel(p){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'DELETE'});}catch(e){console.warn('fbDel',e.message);}}
@@ -230,7 +294,7 @@ function genDays(m){
   return arr;
 }
 
-var NVS=[
+var DEFAULT_NVS=[
   {ma:'10924',ten:'TRƯƠNG ANH TOÀN'},
   {ma:'16032',ten:'DƯƠNG HỒNG PHÁP'},
   {ma:'10847',ten:'TRẦN VIẾT DUY'},
@@ -244,6 +308,7 @@ var NVS=[
   {ma:'NV011',ten:'LÊ THỊ BÍCH PHƯỢNG'},
   {ma:'NV012',ten:'NGUYỄN HỒNG PHƯƠNG THANH'},
 ];
+var NVS=DEFAULT_NVS.slice(); // Sẽ được load từ Firebase khi init
 
 var KPIS=[
   {key:'huy_dong',label:'Huy Động',icon:'💰',unit:'tr đ',star:true, color:'#e8a020'},
@@ -316,6 +381,16 @@ async function loadMonth(m){
   if(r[3])S.pipeline[m]=r[3]; else if(!S.pipeline[m])S.pipeline[m]={};
   S.online=!!(r[0]||r[1]||r[2]||r[3]);
 }
+async function loadNVS(){
+  var d=await fbGet('config/nvs');
+  if(d&&Array.isArray(d)&&d.length>0){
+    NVS=d;
+  } else {
+    NVS=DEFAULT_NVS.slice();
+    // Lưu default lên Firebase lần đầu
+    await fbSet('config/nvs',NVS);
+  }
+}
 
 // ── SCOPE ──
 function scopeTuans(){if(S.scope==='thang'||S.scope==='ngay'||S.scope==='custom')return['T1','T2','T3','T4'];return[S.scope];}
@@ -364,7 +439,8 @@ function rHdr(){
   var mOpts=MONTHS.map(function(m){return'<option value="'+m+'"'+(m===S.month?' selected':'')+'>'+fmtM(m)+'</option>';}).join('');
   var khTabs=S.tab==='kh'?'<div style="display:flex;gap:5px;margin-top:7px">'
     +'<button class="sbb'+(S.khTab==='phong'?' on':'')+'" onclick="setKhTab(\'phong\')" style="padding:4px 10px;font-size:10px">📋 Phòng</button>'
-    +'<button class="sbb'+(S.khTab==='tuan'?' on':'')+'" onclick="setKhTab(\'tuan\')" style="padding:4px 10px;font-size:10px">👤 NV</button>'
+    +'<button class="sbb'+(S.khTab==='tuan'?' on':'')+'" onclick="setKhTab(\'tuan\')" style="padding:4px 10px;font-size:10px">👤 KH NV</button>'
+    +'<button class="sbb'+(S.khTab==='dsnv'?' on':'')+'" onclick="setKhTab(\'dsnv\')" style="padding:4px 10px;font-size:10px">⚙️ DS NV</button>'
     +'</div>':'';
   return '<div class="hdr"><div class="hdr-top">'
     +'<div class="brand"><div class="logo-ic">🏦</div>'
@@ -372,6 +448,7 @@ function rHdr(){
     +'<div class="hdr-actions">'
     +'<select class="m-sel" onchange="setMonth(this.value)">'+mOpts+'</select>'
     +'<button class="gold-btn" onclick="openExpModal()">📄 PDF</button>'
+    +'<button class="gold-btn" onclick="openZaloShare()" style="background:linear-gradient(135deg,#0068ff,#00aaff)">📤 Zalo</button>'
     +badge+'</div></div>'
     +'<div class="hdr-sub">'
     +'<span class="tag tag-y">'+NOW.toLocaleDateString('vi-VN',{weekday:'short',day:'numeric',month:'numeric'})+'</span>'
@@ -398,7 +475,7 @@ function rContent(){
     case'dash':return S.detailNV?rDashDetail():rDash();
     case'alert':return rAlert();
     case'star':return rStar();
-    case'kh':  return S.khTab==='phong'?rKhPhong():(S.selNV?rKhTuanForm():rKhTuanList());
+    case'kh':  return S.khTab==='phong'?rKhPhong():S.khTab==='dsnv'?rDsNV():(S.selNV?rKhTuanForm():rKhTuanList());
     default:return'';
   }
 }
@@ -971,6 +1048,60 @@ function rStar(){
 // ══════════════════════════════════════════
 // GIAO KH
 // ══════════════════════════════════════════
+function rDsNV(){
+  var rows=NVS.map(function(nv,i){
+    return'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-radius:12px;margin-bottom:7px;border:1px solid var(--border)">'
+      +av(nv.ten,nv.ma,36)
+      +'<div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">'+nv.ten+'</div>'
+      +'<div style="font-size:11px;color:var(--dim);margin-top:1px">Mã: '+nv.ma+'</div></div>'
+      +'<button onclick="nvEdit('+i+')" style="background:#1a6fff18;border:1px solid #1a6fff35;border-radius:8px;padding:5px 10px;color:#4d9fff;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">✏️</button>'
+      +'<button onclick="nvDel('+i+')" style="background:#ff475710;border:1px solid #ff475730;border-radius:8px;padding:5px 10px;color:#ff6b7a;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">🗑</button>'
+      +'</div>';
+  }).join('');
+  return'<div class="pad"><div class="sec">⚙️ Quản lý nhân viên</div>'
+    +'<div class="card card-gold" style="margin-bottom:12px;padding:10px 12px">'
+    +'<div style="font-size:11px;font-weight:800;color:#ffc84a;margin-bottom:4px">💡 Thêm / Xóa NV — cập nhật realtime</div>'
+    +'<div style="font-size:11px;color:var(--dim)">Thay đổi áp dụng ngay cho tất cả người dùng. Dữ liệu KPI của NV cũ được giữ nguyên.</div>'
+    +'</div>'
+    +rows
+    +'<div class="ff" style="margin-top:12px">'
+    +'<div style="font-size:12px;font-weight:800;color:#fff;margin-bottom:10px">➕ Thêm nhân viên mới</div>'
+    +'<div class="fk" style="margin-bottom:5px">Mã nhân viên</div>'
+    +'<input type="text" id="nv-ma-new" placeholder="VD: 12345" style="margin-bottom:9px">'
+    +'<div class="fk" style="margin-bottom:5px">Họ và tên (VIẾT HOA)</div>'
+    +'<input type="text" id="nv-ten-new" placeholder="VD: NGUYỄN VĂN A">'
+    +'<button class="bsave" onclick="nvAdd()" style="margin-top:8px">➕ Thêm nhân viên</button>'
+    +'</div></div>';
+}
+function nvAdd(){
+  var ma=document.getElementById('nv-ma-new').value.trim();
+  var ten=document.getElementById('nv-ten-new').value.trim().toUpperCase();
+  if(!ma||!ten){alert('Vui lòng nhập đầy đủ mã và tên NV');return;}
+  if(NVS.some(function(n){return n.ma===ma;})){alert('Mã NV đã tồn tại: '+ma);return;}
+  NVS.push({ma:ma,ten:ten});
+  fbSet('config/nvs',NVS).then(function(){
+    document.getElementById('nv-ma-new').value='';
+    document.getElementById('nv-ten-new').value='';
+    S.filterNVs=[]; // Clear filter để NV mới hiện trong Dashboard
+    render();
+  });
+}
+function nvDel(i){
+  var nv=NVS[i];
+  if(!nv)return;
+  if(!confirm('Xóa '+nv.ten+' khỏi danh sách?\n\nDữ liệu KPI của NV này vẫn được giữ lại.'))return;
+  NVS.splice(i,1);
+  S.filterNVs=S.filterNVs.filter(function(ma){return ma!==nv.ma;});
+  fbSet('config/nvs',NVS).then(function(){render();});
+}
+function nvEdit(i){
+  var nv=NVS[i];
+  if(!nv)return;
+  var newTen=prompt('Sửa tên NV (VIẾT HOA):',nv.ten);
+  if(!newTen||!newTen.trim())return;
+  NVS[i].ten=newTen.trim().toUpperCase();
+  fbSet('config/nvs',NVS).then(function(){render();});
+}
 function rKhPhong(){
   var kh=gKP();
   var fields=KPIS.map(function(k){return'<div class="ff" style="border-color:'+k.color+'25"><div class="fh"><div class="fl"><span style="font-size:19px">'+k.icon+'</span><div><div class="fn" style="color:'+(k.star?'#ffc84a':'#fff')+'">'+(k.star?'⭐ ':'')+k.label+'</div><div class="fk">Hiện tại: <b style="color:'+k.color+'">'+fmt(kh[k.key],k.unit)+'</b></div></div></div></div><input type="number" id="kp_'+k.key+'" value="'+(kh[k.key]||'')+'" placeholder="KH tháng '+k.label+'"></div>';}).join('');
@@ -1324,17 +1455,97 @@ function closePinModal(){closePin();}
 // ══════════════════════════════════════════
 // INIT — Pause refresh khi nhập form
 // ══════════════════════════════════════════
+// ── Zalo Share ──
+function openZaloShare(){
+  var m=S.month,p1=m.split('-');
+  var monthLabel='T'+(+p1[1])+'/'+p1[0];
+  var kp=gKP(m);
+  var totalTH={};
+  KPIS.forEach(function(k){
+    totalTH[k.key]=NVS.reduce(function(s,nv){
+      return s+['T1','T2','T3','T4'].reduce(function(s2,t){return s2+(gTH(m,t,nv.ma)[k.key]||0);},0);
+    },0);
+  });
+  // Cảnh báo
+  var chuaNhap=NVS.filter(function(nv){
+    var kh=gKT(m,CUR_T,nv.ma),th=gTH(m,CUR_T,nv.ma);
+    return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});
+  });
+  // Top NV
+  var topNV=NVS.map(function(nv){return{ten:nv.ten,sc:weightedScore(m,nv.ma,['T1','T2','T3','T4'])};})
+    .filter(function(x){return x.sc!==null;}).sort(function(a,b){return b.sc-a.sc;})[0];
+
+  var lines=[];
+  lines.push('🏦 KPI BANKING NAB — '+monthLabel+' ('+CUR_T+')');
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  KPIS.forEach(function(k){
+    var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);
+    var icon=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
+    var star=k.star?' ⭐':'';
+    lines.push(icon+k.icon+' '+k.label+star+': '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));
+  });
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  if(topNV)lines.push('🏆 Xuất sắc: '+topNV.ten+' ('+Math.round(topNV.sc)+'%)');
+  if(chuaNhap.length){
+    lines.push('🚨 Chưa nhập TH '+CUR_T+' ('+chuaNhap.length+' NV):');
+    lines.push('   '+chuaNhap.map(function(nv){return nv.ten.split(' ').pop();}).join(', '));
+  } else {
+    lines.push('✅ Tất cả đã nhập TH '+CUR_T);
+  }
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('📱 App: vunadab.github.io/KPI');
+  var content=lines.join('\n');
+  var el=document.getElementById('zalo-content');
+  if(el)el.textContent=content;
+  showEl('zalo-modal');
+}
+function closeZaloShare(){hideEl('zalo-modal');}
+function copyZalo(){
+  var el=document.getElementById('zalo-content');
+  if(!el)return;
+  var btn=document.getElementById('zalo-copy-btn');
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(el.textContent).then(function(){
+      if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}
+    });
+  } else {
+    var ta=document.createElement('textarea');
+    ta.value=el.textContent;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}
+  }
+}
+
 async function init(){
-  try{await loadMonth(CUR_M);}catch(e){console.warn(e);}
+  // Khởi tạo phòng
+  if(!initPhong()){
+    // Nhiều phòng → hiện màn chọn
+    var btns=document.getElementById('phong-list-btns');
+    if(btns){
+      btns.innerHTML=PHONG_LIST.map(function(p){
+        var btn=document.createElement('button');
+        btn.style.cssText='width:100%;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px;text-align:left';
+        btn.innerHTML='<div style="width:40px;height:40px;border-radius:11px;background:#1a6fff20;border:1px solid #1a6fff35;display:flex;align-items:center;justify-content:center;font-size:18px">&#127962;</div><div><div>'+p.ten+'</div><div style="font-size:11px;color:#6a8aab;font-weight:600;margin-top:2px">'+p.root+'</div></div>';
+        btn.onclick=function(){selectPhong(p.id);};
+        return btn.outerHTML;
+      }).join('');
+    }
+    document.getElementById('phong-select-modal').style.display='flex';
+    hideEl('loading');
+    return;
+  }
+  try{await loadNVS();await loadMonth(CUR_M);}catch(e){console.warn(e);}
   hideEl('loading');
   var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
   render();
   setInterval(async function(){
-    // Không refresh khi user đang nhập (input/select đang focus hoặc có form mở)
     var ae=document.activeElement;
     var typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT');
     if(typing||S.selNV||S.plFormNV)return;
-    await loadMonth(S.month);render();
+    // loadNVS để đồng bộ khi TP thêm/xóa NV từ thiết bị khác
+    await loadNVS();
+    await loadMonth(S.month);
+    render();
   },20000);
 }
 init();
@@ -1350,6 +1561,24 @@ if('serviceWorker' in navigator){
 
 // ── Install Banner ──
 var deferredPrompt=null;
+// Detect iOS
+var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+var isInStandalone=window.navigator.standalone===true;
+
+// iOS: hiện hướng dẫn thủ công nếu chưa cài
+if(isIOS&&!isInStandalone){
+  setTimeout(function(){
+    var banner=document.getElementById('pwa-banner');
+    if(banner)banner.style.display='flex';
+    // Đổi nội dung banner cho iOS
+    var btnEl=document.getElementById('pwa-install-btn');
+    var descEl=document.getElementById('pwa-desc');
+    if(btnEl){btnEl.style.display='none';}
+    if(descEl){descEl.innerHTML='Trên Safari: bấm <b>⎙ Chia sẻ</b> → chọn <b>"Thêm vào MH chính"</b>';}
+  },2000);
+}
+
+// Android: dùng beforeinstallprompt
 window.addEventListener('beforeinstallprompt',function(e){
   e.preventDefault();deferredPrompt=e;
   var banner=document.getElementById('pwa-banner');
@@ -1360,7 +1589,12 @@ function installPWA(){
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(function(){deferredPrompt=null;var b=document.getElementById('pwa-banner');if(b)b.style.display='none';});
 }
-function closePWABanner(){var b=document.getElementById('pwa-banner');if(b)b.style.display='none';}
+function closePWABanner(){
+  var b=document.getElementById('pwa-banner');
+  if(b)b.style.display='none';
+  // Lưu đã xem hướng dẫn
+  try{localStorage.setItem('pwa_dismissed','1');}catch(e){}
+}
 
 </script>
 </body>

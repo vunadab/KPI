@@ -65,6 +65,10 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 .ac{border-radius:13px;padding:12px;margin-bottom:10px;border-left:4px solid;background:var(--card)}.at{font-size:13px;font-weight:800;margin-bottom:6px}.ai{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #ffffff07;font-size:13px}
 #loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px}.ld{width:32px;height:32px;border:3px solid #0e2a4560;border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}.empty{text-align:center;padding:26px 15px;color:var(--mute);font-size:13px}
 </style>
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;KPI Banking NAB&quot;,&quot;short_name&quot;:&quot;KPI NAB&quot;,&quot;start_url&quot;:&quot;/KPI/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#01050d&quot;,&quot;theme_color&quot;:&quot;#e8a020&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23e8a020'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%F0%9F%8F%A6%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
+<meta name="theme-color" content="#e8a020">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KPI NAB">
 </head>
 <body>
 
@@ -142,6 +146,12 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
   </div>
 </div>
 
+<div id="pwa-banner" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);width:calc(100% - 30px);max-width:400px;background:linear-gradient(135deg,#0a1628,#061525);border:1px solid #e8a02035;border-radius:14px;padding:12px 14px;z-index:200;align-items:center;gap:12px;box-shadow:0 8px 32px #00000060">
+  <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏦</div>
+  <div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">Cài app lên điện thoại</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Dùng như app thật, không cần mạng</div></div>
+  <button onclick="installPWA()" style="background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border:none;border-radius:9px;padding:7px 13px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">Cài</button>
+  <button onclick="closePWABanner()" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;flex-shrink:0;padding:4px">✕</button>
+</div>
 <div id="app" style="display:none"></div>
 
 <script>
@@ -244,6 +254,20 @@ var KPIS=[
   {key:'cif',     label:'CIF',    icon:'👤',unit:'CIF', star:false,color:'#ff6b9d'},
 ];
 var STARS=KPIS.filter(function(k){return k.star;});
+// Trọng số tính điểm TB (chỉ dùng cho tuyên dương/báo cáo, KHÔNG ảnh hưởng % TH thực tế)
+// Dư nợ x1.5 (khó nhất) · Huy động x1.0 · Thẻ TD x0.8 (dễ hơn)
+var STAR_WEIGHTS={'huy_dong':1.0,'du_no':1.5,'the_td':0.8};
+function weightedScore(m,ma,tuans){
+  var wk=STARS.filter(function(k){return tuans.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});});
+  if(!wk.length)return null;
+  var totalW=wk.reduce(function(s,k){return s+(STAR_WEIGHTS[k.key]||1);},0);
+  return wk.reduce(function(s,k){
+    var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
+    var th=tuans.reduce(function(a,t){return a+(gTH(m,t,ma)[k.key]||0);},0);
+    var w=STAR_WEIGHTS[k.key]||1;
+    return s+(pct(th,kh)||0)*w;
+  },0)/totalW;
+}
 var DEFAULT_KH={huy_dong:47900,du_no:31000,the_td:82,tk_hkd:80,qr_code:220,cif:415};
 
 var PL_STAGES=[
@@ -299,10 +323,7 @@ function khPS(m){
   var fnvs=filtNVs(),rr={};KPIS.forEach(function(k){rr[k.key]=fnvs.reduce(function(s,nv){return s+(gKT(m,S.scope,nv.ma)[k.key]||0);},0);});return rr;
 }
 function nvScore(m,ma){
-  var tuans=scopeTuans();
-  var wk=STARS.filter(function(k){return tuans.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});});
-  if(!wk.length)return null;
-  return wk.reduce(function(s,k){var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0),th=tuans.reduce(function(a,t){return a+(gTH(m,t,ma)[k.key]||0);},0);return s+(pct(th,kh)||0);},0)/wk.length;
+  return weightedScore(m,ma,scopeTuans());
 }
 
 // ── PIPELINE HELPERS ──
@@ -520,25 +541,90 @@ function rPlDetail(){
 
 function rPlPhong(m,tabBar){
   var allDeals=getAllDeals(m);
-  var totalV=plTotalVal(allDeals);
-  var maxCnt=Math.max.apply(null,PL_STAGES.map(function(st){return allDeals.filter(function(d){return d.gd===st.key;}).length;}).concat([1]));
+
+  // Tách deals theo từng loại sản phẩm để dễ theo dõi
+  var byProduct=KPIS.map(function(k){
+    var pDeals=allDeals.filter(function(d){return d.sp===k.key;});
+    return{k:k,deals:pDeals,total:plTotalVal(pDeals)};
+  }).filter(function(x){return x.deals.length>0;});
+
+  // Funnel theo giai đoạn (chung)
+  var maxCnt=Math.max.apply(null,PL_STAGES.map(function(st){
+    return allDeals.filter(function(d){return d.gd===st.key;}).length;
+  }).concat([1]));
   var funnel=PL_STAGES.map(function(st){
     var stD=allDeals.filter(function(d){return d.gd===st.key;});
-    var cnt=stD.length,v=plTotalVal(stD),w=Math.max(15,cnt/maxCnt*100);
+    var cnt=stD.length,v=plTotalVal(stD);
+    var w=Math.max(15,cnt/maxCnt*100);
     return'<div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">'
       +'<div style="width:72px;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">'+st.icon+' '+st.label+'</div>'
-      +'<div style="flex:1;height:26px;background:'+st.color+'35;border:1px solid '+st.color+'45;border-radius:5px;display:flex;align-items:center;padding-left:9px;min-width:0;transition:width .7s" style="width:'+w+'%">'
+      +'<div style="flex:1;height:26px;background:'+st.color+'35;border:1px solid '+st.color+'45;border-radius:5px;display:flex;align-items:center;padding-left:9px">'
       +'<span style="font-size:10px;font-weight:800;color:'+st.color+'">'+cnt+' deal</span></div>'
-      +'<div style="font-size:11px;font-weight:800;color:'+st.color+';font-family:\'Space Mono\',monospace;flex-shrink:0;min-width:56px;text-align:right">'+(v>0?fmt(v,'tr'):'')+'</div></div>';
+      +'<div style="font-size:11px;font-weight:800;color:'+st.color+';font-family:\'Space Mono\',monospace;flex-shrink:0;min-width:60px;text-align:right">'+(v>0?fmt(v,'tr'):'')+'</div>'
+      +'</div>';
   }).join('');
+
+  // Tổng hợp theo sản phẩm — mỗi sản phẩm 1 block riêng
+  var byProdHtml=byProduct.map(function(x){
+    var k=x.k, deals=x.deals;
+    var byStage=PL_STAGES.map(function(st){
+      var cnt=deals.filter(function(d){return d.gd===st.key;}).length;
+      return cnt>0?'<span class="chip" style="background:'+st.color+'18;color:'+st.color+';border-color:'+st.color+'30">'+st.icon+' '+cnt+'</span>':'';
+    }).filter(Boolean).join(' ');
+    var done=deals.filter(function(d){return d.gd==='hoan_tat';});
+    var inProg=deals.filter(function(d){return d.gd!=='hoan_tat';});
+    var over=deals.filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;});
+    return'<div style="background:var(--bg2);border-radius:12px;padding:12px;border:1px solid '+k.color+'25;margin-bottom:9px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<span style="font-size:18px">'+k.icon+'</span>'
+      +'<div><div style="font-weight:800;font-size:13px;color:#fff">'+k.label+(k.star?' ⭐':'')+'</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:1px">'+deals.length+' deals · '+inProg.length+' đang xử lý · '+done.length+' hoàn tất'+(over.length?' · <span style="color:#ff4757">⚠️ '+over.length+' quá hạn</span>':'')+'</div>'
+      +'</div></div>'
+      +'<div style="font-size:14px;font-weight:900;color:'+k.color+';font-family:\'Space Mono\',monospace">'+fmt(x.total,k.unit)+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:5px;flex-wrap:wrap">'+byStage+'</div>'
+      +'</div>';
+  }).join('');
+
+  // Dự báo
   var fc=plForecast(m),kp=gKP(m);
-  var fcCards=STARS.map(function(k){var p=pct(fc[k.key]||0,kp[k.key]||0);return'<div style="flex:1;background:var(--bg1);border-radius:10px;padding:9px;text-align:center;border:1px solid '+k.color+'22"><div style="font-size:13px">'+k.icon+'</div><div style="font-size:14px;font-weight:900;color:'+pc(p)+';font-family:\'Space Mono\',monospace">'+p2s(p)+'</div><div style="font-size:9px;color:var(--dim)">'+k.label+'</div></div>';}).join('');
-  var nvSum=NVS.map(function(nv){var nvD=getDeals(m,nv.ma),active=nvD.filter(function(d){return d.gd!=='hoan_tat';}).length,done=nvD.filter(function(d){return d.gd==='hoan_tat';}).length,over=nvD.filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;}).length;return'<button class="nvi" onclick="S.plTab=\'nv\';S.plNV=\''+nv.ma+'\';render()">'+av(nv.ten,nv.ma)+'<div style="flex:1"><div class="nv-n">'+nv.ten+'</div><div style="font-size:11px;color:var(--dim);margin-top:2px">'+(active>0?'<span style="color:#ffc84a;font-weight:700">'+active+' đang xử lý</span>':'<span style="color:var(--mute)">Chưa có deal</span>')+(done>0?' · <span style="color:#00c48c">'+done+' ✅</span>':'')+(over>0?' · <span style="color:#ff4757">⚠️ '+over+' quá hạn</span>':'')+'</div></div>'+'<button onclick="event.stopPropagation();S.plFormNV=\''+nv.ma+'\';S.plEditId=null;render()" class="gold-btn" style="flex-shrink:0">+ Deal</button></button>';}).join('');
+  var fcCards=STARS.map(function(k){
+    var p=pct(fc[k.key]||0,kp[k.key]||0);
+    return'<div style="flex:1;background:var(--bg1);border-radius:10px;padding:9px;text-align:center;border:1px solid '+k.color+'22">'
+      +'<div style="font-size:13px">'+k.icon+'</div>'
+      +'<div style="font-size:14px;font-weight:900;color:'+pc(p)+';font-family:\'Space Mono\',monospace">'+p2s(p)+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:var(--dim);margin-top:1px">'+fmt(fc[k.key]||0,k.unit)+'</div>'
+      +'<div style="font-size:9px;color:var(--mute)">'+k.label+'</div>'
+      +'</div>';
+  }).join('');
+
+  // NV summary
+  var nvSum=NVS.map(function(nv){
+    var nvD=getDeals(m,nv.ma);
+    var active=nvD.filter(function(d){return d.gd!=='hoan_tat';}).length;
+    var done=nvD.filter(function(d){return d.gd==='hoan_tat';}).length;
+    var over=nvD.filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;}).length;
+    return'<button class="nvi" onclick="S.plTab=\'nv\';S.plNV=\''+nv.ma+'\';render()">'
+      +av(nv.ten,nv.ma)
+      +'<div style="flex:1"><div class="nv-n">'+nv.ten+'</div>'
+      +'<div style="font-size:11px;color:var(--dim);margin-top:2px">'
+      +(active>0?'<span style="color:#ffc84a;font-weight:700">'+active+' đang xử lý</span>':'<span style="color:var(--mute)">Chưa có deal</span>')
+      +(done>0?' · <span style="color:#00c48c">'+done+' ✅</span>':'')
+      +(over>0?' · <span style="color:#ff4757">⚠️ '+over+' quá hạn</span>':'')
+      +'</div></div>'
+      +'<button onclick="event.stopPropagation();S.plFormNV=\''+nv.ma+'\';S.plEditId=null;render()" class="gold-btn" style="flex-shrink:0">+ Deal</button>'
+      +'</button>';
+  }).join('');
+
   return'<div class="pad"><div class="sec">📋 Pipeline Phòng · '+fmtM(m)+'</div>'+tabBar
-    +'<div class="chart-wrap" style="margin-bottom:11px"><div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:12px">Funnel · '+allDeals.length+' deals · '+fmt(totalV,'tr đ')+'</div>'+funnel+'</div>'
+    +'<div class="chart-wrap" style="margin-bottom:11px">'
+    +'<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px">Funnel tổng phòng · '+allDeals.length+' deals · '+fmt(plTotalVal(allDeals),'tr đ')+'</div>'
+    +funnel+'</div>'
+    +(byProduct.length?'<div class="chart-wrap" style="margin-bottom:11px"><div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px">📦 Tổng hợp theo sản phẩm</div>'+byProdHtml+'</div>':'')
     +'<div class="chart-wrap" style="margin-bottom:11px"><div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px">🔮 Dự báo đạt KH</div>'
     +'<div style="display:flex;gap:7px;flex-wrap:wrap">'+fcCards+'</div>'
-    +'<div style="font-size:10px;color:var(--mute);margin-top:8px">* TH hoàn tất + 60% deals ở giai đoạn đề xuất trở lên</div></div>'
+    +'<div style="font-size:10px;color:var(--mute);margin-top:8px">* TH hoàn tất + 60% deals đề xuất trở lên</div></div>'
     +'<div class="sec">Nhân viên</div>'+nvSum+'</div>';
 }
 
@@ -771,7 +857,9 @@ function rStar(){
   var scored=NVS.map(function(nv){
     var scores=STARS.map(function(k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];return{k:k,kh:kh,th:th!=null?th:null,p:kh>0?pct(th||0,kh):null};});
     var wk=scores.filter(function(s){return s.kh>0;});
-    var avg=wk.length?wk.reduce(function(a,s){return a+(s.p||0);},0)/wk.length:null;
+    // Tính điểm có trọng số: Dư nợ x1.5, Huy động x1.0, Thẻ TD x0.8
+    var totalW2=wk.length?wk.reduce(function(a,s){return a+(STAR_WEIGHTS[s.k.key]||1);},0):1;
+    var avg=wk.length?wk.reduce(function(a,s){var w=STAR_WEIGHTS[s.k.key]||1;return a+(s.p||0)*w;},0)/totalW2:null;
     return{nv:nv,scores:scores,avg:avg,wk:wk};
   }).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
 
@@ -805,9 +893,38 @@ function rStar(){
       +'<div style="font-size:12px;font-weight:900;color:#ff4757;font-family:\'Space Mono\',monospace">0%</div></div>';
   }).join('');
 
+  // Top 3 KPI phụ (HKD, QR, CIF)
+  var otherKPIS=KPIS.filter(function(k){return!k.star;});
+  var topOther=NVS.map(function(nv){
+    var wk2=otherKPIS.filter(function(k){return(gKT(m,t,nv.ma)[k.key]||0)>0;});
+    if(!wk2.length)return null;
+    var sum4=wk2.reduce(function(s,k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key]||0;return s+(kh>0?(pct(th,kh)||0):0);},0);
+    var avg4=sum4/wk2.length;
+    var details=otherKPIS.map(function(k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key]||0;return{k:k,kh:kh,th:th,p:kh>0?pct(th,kh):null};}).filter(function(d){return d.kh>0;});
+    return{nv:nv,avg:avg4,details:details};
+  }).filter(function(x){return x&&x.avg>0;}).sort(function(a,b){return b.avg-a.avg;});
+  var top3Other=topOther.slice(0,3);
+  var colOther=['#00c48c','#00d2ff','#ff6b9d'];
+  var icoOther=['🌟','⭐','✨'];
+  var top3OtherHtml='';
+  if(top3Other.length){
+    top3OtherHtml='<div class="sec" style="margin-top:5px">🌸 KPI phụ xuất sắc (HKD · QR · CIF)</div>';
+    top3Other.forEach(function(x,i){
+      var wc=colOther[i]||'var(--dim)';
+      var det=x.details.map(function(d){return chip(d.k.icon+' '+fmt(d.th,d.k.unit)+' ('+Math.round(d.p||0)+'%)',d.k.color);}).join(' ');
+      top3OtherHtml+='<div style="display:flex;align-items:center;gap:9px;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:7px;border:1px solid '+wc+'25">'
+        +icoOther[i]+av(x.nv.ten,x.nv.ma,32)
+        +'<div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">'+x.nv.ten+'</div>'
+        +'<div class="chips" style="margin-top:3px">'+det+'</div></div>'
+        +'<div style="font-size:15px;font-weight:900;color:'+wc+'">'+Math.round(x.avg)+'%</div></div>';
+    });
+  }
+
+
   var warnHtml=warn.map(function(nv){
     var wk2=STARS.filter(function(k){return(gKT(m,t,nv.ma)[k.key]||0)>0;});
-    var avg2=wk2.length?wk2.reduce(function(s,k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];return s+(kh>0?pct(th||0,kh)||0:0);},0)/wk2.length:0;
+    var totalW3=wk2.length?wk2.reduce(function(s,k){return s+(STAR_WEIGHTS[k.key]||1);},0):1;
+    var avg2=wk2.length?wk2.reduce(function(s,k){var kh=gKT(m,t,nv.ma)[k.key]||0,th=gTH(m,t,nv.ma)[k.key];var w=STAR_WEIGHTS[k.key]||1;return s+(kh>0?(pct(th||0,kh)||0)*w:0);},0)/totalW3:0;
     var wc=avg2<20?'#ff4757':avg2<50?'#ff9f43':'#e8a020';
     var iss=wk2.map(function(k){var th=gTH(m,t,nv.ma)[k.key],kh=gKT(m,t,nv.ma)[k.key]||0;if(th==null||th===0)return k.icon+' Chưa PH';var p=pct(th,kh);return p<50?k.icon+' '+p2s(p):'';}).filter(Boolean);
     return'<div class="wi" style="border-color:'+wc+'25">'+av(nv.ten,nv.ma,36)
@@ -828,6 +945,7 @@ function rStar(){
     +starHtml+top3Html
     +(khongPhatSinh.length?'<div class="sec" style="margin-top:5px">🚨 Cảnh báo GẤP — Không phát sinh KPI trọng yếu</div>'+capBaoGap:'')
     +(warn.length?'<div class="sec" style="margin-top:5px">⚠️ Cần hỗ trợ ngay ('+t+')</div>'+warnHtml:'')
+    +top3OtherHtml
     +(!khongPhatSinh.length&&!warn.length&&scored.length?'<div class="card card-green" style="text-align:center;padding:11px;margin-top:7px"><span style="color:#00c48c;font-weight:900">🎉 Không có NV cần nhắc nhở!</span></div>':'')
     +'</div>';
 }
@@ -1013,7 +1131,8 @@ function buildReport(m,scope){
     var kh=getKhForReport(nv.ma),th={};
     KPIS.forEach(function(k){th[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);});
     var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});
-    var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key],kh[k.key])||0);},0)/wk.length:null;
+    var totalW5=wk.length?wk.reduce(function(s,k){return s+(STAR_WEIGHTS[k.key]||1);},0):1;
+    var score=wk.length?wk.reduce(function(s,k){var w=STAR_WEIGHTS[k.key]||1;return s+(pct(th[k.key],kh[k.key])||0)*w;},0)/totalW5:null;
     return{nv:nv,kh:kh,th:th,score:score};
   }).sort(function(a,b){
     // Sắp xếp: có KH trước, trong đó điểm cao → thấp (âm ở cuối)
@@ -1075,16 +1194,8 @@ function buildReport(m,scope){
     });
   });
   var duoi50_2=NVS.filter(function(nv){
-    var wk=STARS.filter(function(k){
-      return tuans.reduce(function(s,t){return s+(gKT(m,t,nv.ma)[k.key]||0);},0)>0;
-    });
-    if(!wk.length)return false;
-    var avg=wk.reduce(function(s,k){
-      var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0);
-      var th=tuans.reduce(function(a,t){return a+(gTH(m,t,nv.ma)[k.key]||0);},0);
-      return s+(pct(th,kh)||0);
-    },0)/wk.length;
-    return avg<50;
+    var sc=weightedScore(m,nv.ma,tuans);
+    return sc!==null&&sc<50;
   });
   var warnHtml2='';
   if(chuaNhap2.length)warnHtml2+='<div style="background:#fff0f1;border-left:4px solid #ff4757;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#c0392b;margin-bottom:3px">🚨 '+chuaNhap2.length+' NV chưa nhập TH</div><div style="font-size:11px;color:#666">'+chuaNhap2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
@@ -1121,7 +1232,7 @@ function buildReport(m,scope){
     +'<div style="font-size:11px;color:#aaa;margin-top:1px">'+nvLabel+' · Xuất: '+dateStr+'</div>'
     +'<div style="margin-top:5px;display:inline-block;background:#fff8e6;border:1px solid #e8a020;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;color:#e8a020">🔒 NỘI BỘ</div></div></div>'
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📈 I. TỔNG QUAN KPI — '+(isTuan?scope+' (so với KH tuần)':'Cả tháng (so với KH tháng)')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+kpiCards+'</div></div>'
-    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ NHÂN VIÊN ('+nvData.length+' NV — kể cả âm)</div>'
+    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ NHÂN VIÊN ('+nvData.length+' NV · Điểm: DN×1.5 · HD×1.0 · Thẻ×0.8)</div>'
     +'<table><thead><tr><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;width:30px;text-align:center">#</th><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:left">Họ và tên</th>'+thHead+'<th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:center">Điểm TB</th></tr></thead><tbody>'+nvRows+'</tbody></table></div>'
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🚨 III. CẢNH BÁO</div>'+warnHtml2+'</div>'
     +(allDeals.length?'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📋 IV. PIPELINE — '+allDeals.length+' DEALS · '+fmt(plTotalVal(allDeals),'tr đ')+'</div>'
@@ -1202,6 +1313,28 @@ async function init(){
   },20000);
 }
 init();
+
+// ── PWA Service Worker ──
+if('serviceWorker' in navigator){
+  var swCode='const CACHE="kpi-nab-v1";const URLS=["./"];self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS)));});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});';
+  var blob=new Blob([swCode],{type:'application/javascript'});
+  var swUrl=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(function(){});
+}
+
+// ── Install Banner ──
+var deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();deferredPrompt=e;
+  var banner=document.getElementById('pwa-banner');
+  if(banner)banner.style.display='flex';
+});
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(){deferredPrompt=null;var b=document.getElementById('pwa-banner');if(b)b.style.display='none';});
+}
+function closePWABanner(){var b=document.getElementById('pwa-banner');if(b)b.style.display='none';}
 
 </script>
 </body>

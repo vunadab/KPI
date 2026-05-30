@@ -1,44 +1,40 @@
-const CACHE_NAME = 'kpi-nab-v4';
+// KPI Banking NAB - Service Worker v5
+// KHÔNG cache index.html - luôn lấy từ mạng để update code
+const CACHE = 'kpi-v5';
 
-// CHỈ cache icon và manifest — KHÔNG cache index.html
-// index.html luôn được fetch từ mạng để đảm bảo cập nhật
-const STATIC_CACHE = [
-  './icon-192.png',
-  './icon-512.png',
-  './manifest.json'
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_CACHE))
-  );
-  self.skipWaiting(); // Kích hoạt SW mới ngay, không chờ tab đóng
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(names =>
-      Promise.all(names.map(n => n !== CACHE_NAME ? caches.delete(n) : null))
-    ).then(() => self.clients.claim()) // Kiểm soát tất cả tab ngay lập tức
+self.addEventListener('install', e => {
+  // skipWaiting: kích hoạt SW mới NGAY, không chờ tab cũ đóng
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(['./icon-192.png','./icon-512.png']))
   );
 });
 
-self.addEventListener('fetch', event => {
-  const url = event.request.url;
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    // Xóa TẤT CẢ cache cũ
+    caches.keys()
+      .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => {
+        // Báo tất cả tab reload để lấy code mới
+        return self.clients.matchAll({type:'window'});
+      })
+      .then(clients => clients.forEach(c => c.navigate(c.url)))
+  );
+});
 
-  // Firebase: luôn lấy mạng thật, không cache
-  if (url.includes('firebasedatabase.app')) return;
-
-  // index.html và fonts: luôn lấy mạng thật để cập nhật code mới
-  if (url.includes('index.html') || url.endsWith('/') || url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
+self.addEventListener('fetch', e => {
+  const url = e.request.url;
+  // Firebase và index.html: LUÔN lấy từ mạng
+  if (url.includes('firebasedatabase.app') ||
+      url.includes('index.html') ||
+      url.includes('github.io/KPI') ||
+      url.endsWith('/KPI') ||
+      url.endsWith('/KPI/')) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     return;
   }
-
-  // Icons/manifest: cache first
-  event.respondWith(
-    caches.match(event.request).then(r => r || fetch(event.request))
-  );
+  // Icons: cache
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });

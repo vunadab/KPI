@@ -73,29 +73,31 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <style>
-.ls{position:fixed;inset:0;z-index:9999;background:#01050d;display:flex;align-items:center;justify-content:center;padding:24px;}
-.lb{width:100%;max-width:310px;text-align:center;}
-.lb-logo{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;}
-.lb-title{font-size:21px;font-weight:900;color:#fff;margin-bottom:5px;}
-.lb-sub{font-size:11px;color:#6a8aab;margin-bottom:26px;line-height:1.6;}
-.lb-inp{width:100%;background:#020a16;border:1px solid #1a3d5c;border-radius:11px;padding:13px 15px;color:#fff;font-size:15px;font-weight:700;outline:none;text-align:center;letter-spacing:.1em;font-family:inherit;margin-bottom:11px;-webkit-appearance:none;}
-.lb-inp:focus{border-color:#e8a02060;}
-.lb-btn{width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;font-weight:900;font-size:14px;cursor:pointer;font-family:inherit;}
-.lb-err{color:#ff6b7a;font-size:11px;font-weight:700;min-height:16px;margin-bottom:9px;}
-.lb-lock{color:#ff9f43;font-size:11px;font-weight:700;margin-top:7px;}
+#auth-screen{position:fixed;inset:0;z-index:9999;background:#01050d;display:flex;align-items:center;justify-content:center;padding:24px;}
+.ab{width:100%;max-width:320px;text-align:center;}
+.ab-logo{width:62px;height:62px;border-radius:17px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 15px;}
+.ab-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:5px;}
+.ab-sub{font-size:11px;color:#6a8aab;margin-bottom:28px;line-height:1.7;}
+.ab-inp{width:100%;background:#020a16;border:1px solid #1a3d5c;border-radius:12px;padding:13px 16px;color:#fff;font-size:15px;outline:none;font-family:inherit;margin-bottom:10px;-webkit-appearance:none;display:block;}
+.ab-inp:focus{border-color:#e8a02070;}
+.ab-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;font-weight:900;font-size:15px;cursor:pointer;font-family:inherit;margin-top:4px;}
+.ab-btn:disabled{opacity:.5;cursor:not-allowed;}
+.ab-err{color:#ff6b7a;font-size:12px;font-weight:700;min-height:18px;margin-bottom:8px;}
+.ab-spin{color:#6a8aab;font-size:12px;margin-top:10px;display:none;}
 </style>
 </head>
 <body>
-<div id="ls" class="ls">
-<div class="lb">
-  <div class="lb-logo">&#127974;</div>
-  <div class="lb-title">KPI <span style="background:linear-gradient(135deg,#e8a020,#ffc84a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Banking</span></div>
-  <div class="lb-sub">Nam A Bank &#183; Phòng KHCN<br>Hệ thống nội bộ &#8212; Yêu cầu xác thực</div>
-  <input class="lb-inp" id="lp" type="password" placeholder="Nhập mật khẩu truy cập" onkeydown="if(event.key==='Enter')doLogin()">
-  <div class="lb-err" id="le"></div>
-  <button class="lb-btn" onclick="doLogin()">&#128275; Đăng nhập</button>
-  <div class="lb-lock" id="ll"></div>
-  <div style="margin-top:18px;font-size:10px;color:#2a4060">Liên hệ Trưởng phòng để được cấp mật khẩu</div>
+<div id="auth-screen">
+<div class="ab">
+  <div class="ab-logo">&#127974;</div>
+  <div class="ab-title">KPI <span style="background:linear-gradient(135deg,#e8a020,#ffc84a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Banking</span></div>
+  <div class="ab-sub">Nam A Bank &#183; Phòng KHCN<br>Hệ thống nội bộ &#8212; Chỉ dành cho nhân viên</div>
+  <input class="ab-inp" id="au-em" type="email" placeholder="Email đăng nhập" autocomplete="email">
+  <input class="ab-inp" id="au-pw" type="password" placeholder="Mật khẩu" autocomplete="current-password" onkeydown="if(event.key==='Enter')doSignIn()">
+  <div class="ab-err" id="au-er"></div>
+  <button class="ab-btn" id="au-bt" onclick="doSignIn()">&#128275; Đăng nhập</button>
+  <div class="ab-spin" id="au-sp">Đang xác thực...</div>
+  <div style="margin-top:20px;font-size:10px;color:#1a3050">Liên hệ Trưởng phòng để được cấp tài khoản</div>
 </div>
 </div>
 
@@ -176,16 +178,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
         <button onclick="setZS('ngay')" id="zs-ngay" class="sbb" style="padding:5px 10px;font-size:11px">📆 Ngày</button>
         <button onclick="setZS('custom')" id="zs-custom" class="sbb" style="padding:5px 10px;font-size:11px">📅 Từ-Đến</button>
       </div>
-      <div id="zs-day-box" style="display:none;margin-top:7px">
-        <select id="zs-day-sel" class="dsel" style="margin:0" onchange="buildZalo()"></select>
-      </div>
-      <div id="zs-range-box" style="display:none;margin-top:7px">
-        <div style="display:flex;gap:6px;align-items:center">
-          <select id="zs-from" class="dsel" style="margin:0;flex:1" onchange="buildZalo()"><option value="">Từ ngày</option></select>
-          <span style="color:var(--dim);flex-shrink:0">→</span>
-          <select id="zs-to" class="dsel" style="margin:0;flex:1" onchange="buildZalo()"><option value="">Đến ngày</option></select>
-        </div>
-      </div>
+      <div id="zs-day-box" style="display:none;margin-top:7px"><select id="zs-day-sel" class="dsel" style="margin:0" onchange="buildZalo()"></select></div>
+      <div id="zs-range-box" style="display:none;margin-top:7px"><div style="display:flex;gap:6px;align-items:center"><select id="zs-from" class="dsel" style="margin:0;flex:1" onchange="buildZalo()"><option value="">Từ ngày</option></select><span style="color:var(--dim)">→</span><select id="zs-to" class="dsel" style="margin:0;flex:1" onchange="buildZalo()"><option value="">Đến ngày</option></select></div></div>
     </div>
     <div style="padding:11px 14px;overflow-y:auto;flex:1">
       <div id="zalo-content" style="background:var(--bg2);border-radius:11px;padding:12px;border:1px solid var(--border);font-size:12px;color:#fff;line-height:1.8;white-space:pre-wrap;font-family:inherit"></div>
@@ -272,17 +266,7 @@ function selectPhong(id){
   hideEl('phong-select-modal');
   init();
 }
-async function fbGet(p){
-  try{
-    var ctrl=new AbortController();
-    var tid=setTimeout(function(){ctrl.abort();},6000);
-    var r=await fetch(DB+'/'+ROOT+'/'+p+'.json',{signal:ctrl.signal});
-    clearTimeout(tid);
-    if(!r.ok)return null;
-    var d=await r.json();
-    return d===null?null:d;
-  }catch(e){return null;}
-}
+async function fbGet(p){try{var ctrl=new AbortController();var tid=setTimeout(function(){ctrl.abort();},6000);var r=await fetch(DB+'/'+ROOT+'/'+p+'.json',{signal:ctrl.signal});clearTimeout(tid);if(!r.ok)return null;var d=await r.json();return d===null?null:d;}catch(e){return null;}}
 async function fbSet(p,d){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){console.warn('fbSet',e.message);}}
 async function fbDel(p){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'DELETE'});}catch(e){console.warn('fbDel',e.message);}}
 
@@ -379,25 +363,24 @@ var STARS=KPIS.filter(function(k){return k.star;});
 // Dư nợ x1.5 (khó nhất) · Huy động x1.0 · Thẻ TD x0.8 (dễ hơn)
 var STAR_WEIGHTS={'huy_dong':1.0,'du_no':1.5,'the_td':0.8};
 function weightedScore(m,ma,tuans){
-  // Điểm quy đổi = (%TH_scope / KH_scope) × trọng_số
-  // KH và TH đều tính theo tuans (scope đang xem: tuần hoặc tháng)
-  // VD Sương T4: HD=17%×1=17, DN=66%×1.5=99, Thẻ=50%×0.8=40 → (17+99+40)/3=52%
-  // VD Trinh T4: HD=43%×1=43, DN=0%×1.5=0, Thẻ=100%×0.8=80 → (43+0+80)/3=41%
-  // Kiểm tra NV có ít nhất 1 KPI được giao không
-  var hasAny=STARS.some(function(k){
-    return tuans.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});
+  // Logic: NV được giao KH tháng cho KPI nào → KPI đó tính vào điểm
+  // Điểm quy đổi = (%TH so KH tháng) × trọng_số
+  // Điểm TB = tổng / số KPI có KH tháng
+  // VD Duyên Trinh T4: HD=43%×1=43, DN=0%×1.5=0, Thẻ=100%×0.8=80 → (43+0+80)/3=41%
+  var ALL_TUANS=['T1','T2','T3','T4'];
+  // wk: KPI nào có KH tháng > 0 (dùng KH tháng, không dùng KH tuần lẻ)
+  var wk=STARS.filter(function(k){
+    return ALL_TUANS.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});
   });
-  if(!hasAny)return null;
-  // Luôn chia cho STARS.length (=3) để công bằng
-  // NV không được giao KPI nào → KPI đó = 0 → điểm thấp hơn
-  // VD Trinh (không có DN): (34×1+0×1.5+40×0.8)/3 = 74/3 = 24.7%
-  // VD Bình  (đủ 3 KPI):   (45×1+30×1.5+32.8×0.8)/3 = 107.8/3 = 35.9%
-  var total=STARS.reduce(function(s,k){
-    var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
+  if(!wk.length)return null;
+  // TH: lũy kế theo tuans đang xem
+  // KH: tổng KH tháng (để % so đúng với mục tiêu tháng)
+  var total=wk.reduce(function(s,k){
+    var kh=ALL_TUANS.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
     var th=tuans.reduce(function(a,t){return a+(gTH(m,t,ma)[k.key]||0);},0);
-    var score=kh>0?(pct(th,kh)||0):0; // KH=0 → score=0
-    return s+score*(STAR_WEIGHTS[k.key]||1);
+    return s+(pct(th,kh)||0)*(STAR_WEIGHTS[k.key]||1);
   },0);
+  // Luôn chia STARS.length=3: NV không giao KPI → score=0 → điểm thấp hơn
   return total/STARS.length;
 }
 var DEFAULT_KH={huy_dong:47900,du_no:31000,the_td:82,tk_hkd:80,qr_code:220,cif:415};
@@ -953,7 +936,7 @@ function rDash(){
   var totalTH={};KPIS.forEach(function(k){totalTH[k.key]=fnvs.reduce(function(s,nv){return s+(thForNV(m,nv.ma)[k.key]||0);},0);});
   var nvData=fnvs.map(function(nv){var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma),wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key]||0,kh[k.key])||0);},0)/wk.length:null;return{ma:nv.ma,ten:nv.ten,kh:kh,th:th,score:score};}).sort(function(a,b){if(a.score===null&&b.score===null)return 0;if(a.score===null)return 1;if(b.score===null)return-1;return b.score-a.score;});
   var kCards=KPIS.map(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px"><div><div class="kc-lbl">'+k.label+'</div><div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div><div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div><div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)+'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'+(kh>0?bar(th,kh,k.color):'')+(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:#ff4757;margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')+'</div>';}).join('');
-  var ranks=nvData.map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
+  var ranks=nvData.slice(0,12).map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
   return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div><div class="pad" style="padding-top:4px">'+rNVFilter()+'<div class="sec">Tổng hợp · '+fmtM(m)+'</div><div class="kg">'+kCards+'</div>'+(S.scope==='thang'?rBarChart(m):'')+''+rDonut(m)+''+rPlWidget(m)+'<div class="sec">🏆 Xếp hạng</div>'+ranks+'</div>';
 }
 
@@ -1009,20 +992,20 @@ function rStar(){
   var t=isThang?'T4':S.selT; // t chỉ dùng cho display tuần
   var starTuans=isThang?['T1','T2','T3','T4']:[S.selT]; // tuans để tính TH
   var scored=NVS.map(function(nv){
+    // scores dùng KH tháng để tính %, TH của tuần đang xem
     var scores=STARS.map(function(k){
-      // KH và TH đều tính theo starTuans (tuần hoặc tháng tùy scope)
-      // VD scope T4: KH=KH_T4, TH=TH_T4 → đúng với từng tuần
-      // VD scope Tháng: KH=KH_tháng, TH=TH_tháng → đúng với tháng
-      var kh=starTuans.reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
+      var khThang=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
+      var khTuan=gKT(m,t,nv.ma)[k.key]||0;
+      // TH: 1 tuần hoặc cả tháng tùy scope
       var th=starTuans.reduce(function(a,tt){var v=gTH(m,tt,nv.ma)[k.key];return a+(v!=null?v:0);},0);
-      var noInput=starTuans.every(function(tt){return gTH(m,tt,nv.ma)[k.key]==null;});
-      return{k:k,kh:kh,th:noInput?null:th,p:kh>0?pct(noInput?0:th,kh):null};
+      // Với scope tháng, th là null nếu chưa nhập bất kỳ tuần nào
+      var thNull=starTuans.every(function(tt){return gTH(m,tt,nv.ma)[k.key]==null;});
+      // Dùng KH tháng để tính %, nếu KH tháng=0 thì không tính KPI này
+      return{k:k,kh:khThang,khTuan:khTuan,th:thNull?null:th,p:khThang>0?pct(thNull?0:th,khThang):null};
     });
     var wk=scores.filter(function(s){return s.kh>0;});
-    // Luôn chia STARS.length=3: NV không giao KPI → score=0 → điểm thấp
-    // VD Trinh: (34×1+0×1.5+40×0.8)/3=24.7% < Bình (45×1+30×1.5+33×0.8)/3=35.9%
-    var hasKPI=wk.length>0;
-    var avg=hasKPI?scores.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/STARS.length:null;
+    // Luôn chia STARS.length=3: Trinh không DN → (34+0+40)/3=24.7% < Bình 35.9%
+    var avg=wk.length?scores.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/STARS.length:null;
     return{nv:nv,scores:scores,avg:avg,wk:wk};
   }).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
 
@@ -1032,10 +1015,10 @@ function rStar(){
   // Nhắc nhở: NV có KH mà KHÔNG PHÁT SINH (TH=0 hoặc null) ở KPI trọng yếu
   var khongPhatSinh=NVS.filter(function(nv){
     return STARS.some(function(k){
-      var kh=starTuans.reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
+      var kh=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
       if(kh<=0)return false;
-      var noInput=starTuans.every(function(tt){return gTH(m,tt,nv.ma)[k.key]==null;});
       var th=starTuans.reduce(function(a,tt){return a+(gTH(m,tt,nv.ma)[k.key]||0);},0);
+      var noInput=starTuans.every(function(tt){return gTH(m,tt,nv.ma)[k.key]==null;});
       return noInput||th===0;
     });
   });
@@ -1087,12 +1070,11 @@ function rStar(){
 
   var warnHtml=warn.map(function(nv){
     var wk2=STARS.filter(function(k){return(gKT(m,t,nv.ma)[k.key]||0)>0;});
-    // Chia STARS.length để nhất quán
-    var avg2=wk2.length?STARS.reduce(function(s,k){
-      var kh=starTuans.reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
+    var avg2=wk2.length?wk2.reduce(function(s,k){
+      var khThang=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
       var th=starTuans.reduce(function(a,tt){return a+(gTH(m,tt,nv.ma)[k.key]||0);},0);
-      return s+(kh>0?(pct(th,kh)||0)*(STAR_WEIGHTS[k.key]||1):0);
-    },0)/STARS.length:0;
+      return s+(khThang>0?(pct(th,khThang)||0)*(STAR_WEIGHTS[k.key]||1):0);
+    },0)/wk2.length:0;
     var wc=avg2<20?'#ff4757':avg2<50?'#ff9f43':'#e8a020';
     var iss=wk2.map(function(k){var th=gTH(m,t,nv.ma)[k.key],kh=gKT(m,t,nv.ma)[k.key]||0;if(th==null||th===0)return k.icon+' Chưa PH';var p=pct(th,kh);return p<50?k.icon+' '+p2s(p):'';}).filter(Boolean);
     return'<div class="wi" style="border-color:'+wc+'25">'+av(nv.ten,nv.ma,36)
@@ -1364,11 +1346,11 @@ function buildReport(m,scope){
     var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});
     // wk: KPI có KH tháng > 0 (không dùng KH tuần lẻ)
     var wkM=STARS.filter(function(k){return(['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0))>0;});
-    var score=wkM.length?STARS.reduce(function(s,k){
+    var score=STARS.reduce(function(s,k){
       var khM=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
-      var sc=khM>0?(pct(th[k.key],khM)||0):0;
-      return s+sc*(STAR_WEIGHTS[k.key]||1);
-    },0)/STARS.length:null;
+      return s+(khM>0?(pct(th[k.key],khM)||0):0)*(STAR_WEIGHTS[k.key]||1);
+    },0)/STARS.length;
+    score=score||null;
     return{nv:nv,kh:kh,th:th,score:score};
   }).sort(function(a,b){
     // Sắp xếp: có KH trước, trong đó điểm cao → thấp (âm ở cuối)
@@ -1547,79 +1529,44 @@ function openZaloShare(){
   var el=document.getElementById('zs-day-sel');if(el)el.innerHTML=dOpts;
   var ef=document.getElementById('zs-from'),et=document.getElementById('zs-to');
   if(ef)ef.innerHTML=rOpts;if(et)et.innerHTML=rOpts;
-  setZS('thang');
-  showEl('zalo-modal');
+  setZS('thang');showEl('zalo-modal');
 }
 var _zScope='thang';
 function setZS(sc){
   _zScope=sc;
-  ['thang','T1','T2','T3','T4','ngay','custom'].forEach(function(s){
-    var b=document.getElementById('zs-'+s);
-    if(b)b.className='sbb'+(sc===s?' on':'');
-  });
-  var db=document.getElementById('zs-day-box');
-  var rb=document.getElementById('zs-range-box');
+  ['thang','T1','T2','T3','T4','ngay','custom'].forEach(function(s){var b=document.getElementById('zs-'+s);if(b)b.className='sbb'+(sc===s?' on':'');});
+  var db=document.getElementById('zs-day-box'),rb=document.getElementById('zs-range-box');
   if(db)db.style.display=sc==='ngay'?'block':'none';
   if(rb)rb.style.display=sc==='custom'?'block':'none';
   buildZalo();
 }
 function buildZalo(){
-  var m=S.month,p1=m.split('-');
-  var mLabel='T'+(+p1[1])+'/'+p1[0];
-  // Label scope
-  var scLabel=_zScope==='thang'?'Cả tháng':
-    (_zScope==='ngay')?(function(){var el=document.getElementById('zs-day-sel');var v=el?el.value:'';return v?('Ngày '+v.split('-')[2]+'/'+v.split('-')[1]):'Chọn ngày';}()):
-    (_zScope==='custom')?(function(){var f=document.getElementById('zs-from'),t=document.getElementById('zs-to');return(f&&f.value&&t&&t.value)?(f.value.split('-')[2]+'/'+f.value.split('-')[1]+' → '+t.value.split('-')[2]+'/'+t.value.split('-')[1]):'Chọn ngày';}()):
-    _zScope;
-  // Tính TH theo scope
-  var tuans=_zScope==='thang'?['T1','T2','T3','T4']:
-    (['T1','T2','T3','T4'].indexOf(_zScope)>=0)?[_zScope]:['T1','T2','T3','T4'];
-  var kp=_zScope==='thang'?gKP(m):(function(){
-    var r={};KPIS.forEach(function(k){r[k.key]=NVS.reduce(function(s,nv){return s+(tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0));},0);});return r;
-  }());
-  var totalTH={};
-  KPIS.forEach(function(k){
-    totalTH[k.key]=NVS.reduce(function(s,nv){
-      return s+tuans.reduce(function(a,t){return a+(gTH(m,t,nv.ma)[k.key]||0);},0);
-    },0);
-  });
-  // Top NV
-  var topNV=NVS.map(function(nv){return{ten:nv.ten,sc:weightedScore(m,nv.ma,tuans)};})
-    .filter(function(x){return x.sc!==null;}).sort(function(a,b){return b.sc-a.sc;})[0];
-  // Chưa nhập
+  var m=S.month,p1=m.split('-'),mLabel='T'+(+p1[1])+'/'+p1[0];
+  var scLabel=_zScope==='thang'?'Cả tháng':(_zScope==='ngay')?(function(){var el=document.getElementById('zs-day-sel');var v=el?el.value:'';return v?('Ngày '+v.split('-')[2]+'/'+v.split('-')[1]):'Chọn ngày';}()):(_zScope==='custom')?(function(){var f=document.getElementById('zs-from'),t=document.getElementById('zs-to');return(f&&f.value&&t&&t.value)?(f.value.split('-')[2]+'/'+f.value.split('-')[1]+' → '+t.value.split('-')[2]+'/'+t.value.split('-')[1]):'Chọn ngày';}()):_zScope;
+  var tuans=_zScope==='thang'?['T1','T2','T3','T4']:(['T1','T2','T3','T4'].indexOf(_zScope)>=0)?[_zScope]:['T1','T2','T3','T4'];
+  var kp=_zScope==='thang'?gKP(m):(function(){var r={};KPIS.forEach(function(k){r[k.key]=NVS.reduce(function(s,nv){return s+tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0);},0);});return r;}());
+  var totalTH={};KPIS.forEach(function(k){totalTH[k.key]=NVS.reduce(function(s,nv){return s+tuans.reduce(function(a,t){return a+(gTH(m,t,nv.ma)[k.key]||0);},0);},0);});
+  var topNV=NVS.map(function(nv){return{ten:nv.ten,sc:weightedScore(m,nv.ma,tuans)};}).filter(function(x){return x.sc!==null;}).sort(function(a,b){return b.sc-a.sc;})[0];
   var chkT=tuans[tuans.length-1];
-  var chuaNhap=NVS.filter(function(nv){
-    var kh=gKT(m,chkT,nv.ma),th=gTH(m,chkT,nv.ma);
-    return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});
-  });
+  var chuaNhap=NVS.filter(function(nv){var kh=gKT(m,chkT,nv.ma),th=gTH(m,chkT,nv.ma);return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});});
   var lines=[];
   lines.push('🏦 KPI BANKING NAB — '+mLabel+' ('+scLabel+')');
   lines.push('━━━━━━━━━━━━━━━━━━━━');
-  STARS.forEach(function(k){
-    var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);
-    var ic=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
-    lines.push(ic+k.icon+' '+k.label+' ⭐: '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));
-  });
+  STARS.forEach(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);var ic=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';lines.push(ic+k.icon+' '+k.label+' ⭐: '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));});
   lines.push('─────────────────────');
-  KPIS.filter(function(k){return!k.star;}).forEach(function(k){
-    var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);
-    var ic=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
-    lines.push(ic+k.icon+' '+k.label+': '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));
-  });
+  KPIS.filter(function(k){return!k.star;}).forEach(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);var ic=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';lines.push(ic+k.icon+' '+k.label+': '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));});
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   if(topNV)lines.push('🏆 Xuất sắc: '+topNV.ten.split(' ').pop()+' ('+Math.round(topNV.sc)+'%)');
   if(chuaNhap.length)lines.push('🚨 Chưa nhập ('+chuaNhap.length+'): '+chuaNhap.map(function(n){return n.ten.split(' ').pop();}).join(', '));
   else lines.push('✅ Đã nhập TH đầy đủ');
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   lines.push('📱 vunadab.github.io/KPI');
-  var el=document.getElementById('zalo-content');
-  if(el)el.textContent=lines.join('\n');
+  var el=document.getElementById('zalo-content');if(el)el.textContent=lines.join('\n');
 }
 function closeZaloShare(){hideEl('zalo-modal');}
 function copyZalo(){
   var el=document.getElementById('zalo-content');if(!el)return;
-  var btn=document.getElementById('zalo-copy-btn');
-  var txt=el.textContent;
+  var btn=document.getElementById('zalo-copy-btn'),txt=el.textContent;
   if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}});}
   else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}}
 }
@@ -1648,81 +1595,7 @@ function toggleTheme(){
   applyTheme();
   render();
 }
-// ══ BẢO MẬT APP ══
-var APP_PASS='220120'; // ← Anh đổi pass tại đây
-var MAX_TRIES=5, LOCK_MIN=30;
-
-function _isAuth(){
-  try{return sessionStorage.getItem('_a')==='1';}catch(e){return false;}
-}
-function _setAuth(){
-  try{sessionStorage.setItem('_a','1');}catch(e){}
-}
-function _getLock(){
-  try{return parseInt(localStorage.getItem('_lk')||'0');}catch(e){return 0;}
-}
-function _setLock(t){
-  try{localStorage.setItem('_lk',t);}catch(e){}
-}
-function _getTries(){
-  try{return parseInt(localStorage.getItem('_lt')||'0');}catch(e){return 0;}
-}
-function _setTries(n){
-  try{localStorage.setItem('_lt',n);}catch(e){}
-}
-
-function doLogin(){
-  var inp=document.getElementById('lp');
-  var err=document.getElementById('le');
-  var lck=document.getElementById('ll');
-  if(!inp)return;
-  // Kiểm tra khóa
-  var lockUntil=_getLock();
-  if(Date.now()<lockUntil){
-    var mins=Math.ceil((lockUntil-Date.now())/60000);
-    if(lck)lck.textContent='Bị khóa '+mins+' phút. Liên hệ Trưởng phòng.';
-    if(err)err.textContent='';
-    return;
-  }
-  var val=inp.value.trim();
-  if(!val){if(err)err.textContent='Vui lòng nhập mật khẩu';return;}
-  if(val===APP_PASS){
-    _setAuth();
-    try{localStorage.removeItem('_lt');localStorage.removeItem('_lk');}catch(e){}
-    var ls=document.getElementById('ls');
-    if(ls)ls.style.display='none';
-    init();
-  } else {
-    var tries=_getTries()+1;
-    _setTries(tries);
-    var left=MAX_TRIES-tries;
-    if(left<=0){
-      _setLock(Date.now()+LOCK_MIN*60000);
-      if(lck)lck.textContent='Sai '+MAX_TRIES+' lần. Khóa '+LOCK_MIN+' phút.';
-      if(err)err.textContent='';
-    } else {
-      if(err)err.textContent='Sai mật khẩu. Còn '+left+' lần.';
-    }
-    inp.value='';inp.focus();
-  }
-}
-
-// Kiểm tra khi load trang
-(function(){
-  var lck=_getLock();
-  if(Date.now()<lck){
-    var ll=document.getElementById('ll');
-    if(ll)ll.textContent='Đang bị khóa '+Math.ceil((lck-Date.now())/60000)+' phút.';
-    return;
-  }
-  if(_isAuth()){
-    var ls=document.getElementById('ls');
-    if(ls)ls.style.display='none';
-    // init() gọi sau khi DOM ready
-  }
-})();
-
-async function init(){
+window.kpiInit = async function(){
   // Khởi tạo phòng
   // Load theme đã lưu
   try{var t2=localStorage.getItem('kpi_theme');if(t2)S.darkMode=(t2==='dark');}catch(e){}
@@ -1757,11 +1630,10 @@ async function init(){
     render();
   },20000);
 }
-// Chỉ chạy app nếu đã xác thực
-if(_isAuth()){init();}
+// Firebase Auth gọi kpiInit() sau xác thực
 
 // ── PWA Service Worker ──
-if('serviceWorker' in navigator && window.location.hostname.indexOf('github.io')>=0){
+if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
     navigator.serviceWorker.register('./sw.js')
       .then(function(reg){
@@ -1819,6 +1691,43 @@ function closePWABanner(){
   try{localStorage.setItem('pwa_dismissed','1');}catch(e){}
 }
 
+</script>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,signInWithEmailAndPassword,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+const C={apiKey:"AIzaSyDUIkD_-0vh5AM5drPgxdvWOIVxXrSEvnc",authDomain:"kpi-banking-nab.firebaseapp.com",databaseURL:"https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"kpi-banking-nab",storageBucket:"kpi-banking-nab.firebasestorage.app",messagingSenderId:"943885730972",appId:"1:943885730972:web:191f7fa4d451157d3f5959"};
+const auth=getAuth(initializeApp(C));
+onAuthStateChanged(auth,u=>{
+  const sc=document.getElementById('auth-screen');
+  const ap=document.getElementById('app');
+  if(u){
+    if(sc)sc.style.display='none';
+    if(ap)ap.style.display='block';
+    if(typeof window.kpiInit==='function')window.kpiInit();
+  }else{
+    if(sc)sc.style.display='flex';
+    if(ap)ap.style.display='none';
+  }
+});
+window.doSignIn=async function(){
+  const em=(document.getElementById('au-em')||{value:''}).value.trim();
+  const pw=(document.getElementById('au-pw')||{value:''}).value;
+  const er=document.getElementById('au-er');
+  const bt=document.getElementById('au-bt');
+  const sp=document.getElementById('au-sp');
+  if(!em||!pw){if(er)er.textContent='Vui lòng nhập email và mật khẩu';return;}
+  if(bt)bt.disabled=true;
+  if(sp)sp.style.display='block';
+  if(er)er.textContent='';
+  try{
+    await signInWithEmailAndPassword(auth,em,pw);
+  }catch(e){
+    if(sp)sp.style.display='none';
+    if(bt)bt.disabled=false;
+    const c=e.code||'';
+    if(er)er.textContent=c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')?'Email hoặc mật khẩu không đúng':c.includes('too-many-requests')?'Quá nhiều lần thử. Thử lại sau.':c.includes('network')?'Lỗi mạng. Kiểm tra kết nối.':'Lỗi đăng nhập. Liên hệ Trưởng phòng.';
+  }
+};
 </script>
 </body>
 </html>

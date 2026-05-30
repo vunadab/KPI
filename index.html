@@ -490,14 +490,15 @@ function rHdr(){
   return '<div class="hdr"><div class="hdr-top">'
     +'<div class="brand"><div class="logo-ic">🏦</div>'
     +'<div><div class="logo-tx">KPI <em>Banking</em></div><div class="sub">Nam A Bank · KHCN</div></div></div>'
-    +'<div class="hdr-actions">'
-    +'<select class="m-sel" onchange="setMonth(this.value)">'+mOpts+'</select>'
-    +'<div style="display:flex;flex-direction:column;gap:4px">'
-    +'<button class="gold-btn" onclick="openExpModal()">📄 PDF</button>'
-    +'<button class="gold-btn" onclick="openZaloShare()" style="background:linear-gradient(135deg,#0068ff,#00aaff);font-size:10px">📤 Zalo</button>'
-    +'</div>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button onclick="toggleTheme()" style="background:none;border:1px solid var(--border2);border-radius:8px;padding:5px 8px;font-size:13px;cursor:pointer">'+themeIco+'</button>'
+    +'<button onclick="doSignOut()" title="Đăng xuất" style="background:none;border:1px solid var(--border2);border-radius:8px;padding:5px 8px;font-size:13px;cursor:pointer">🚪</button>'
     +badge+'</div></div>'
+    +'<div style="display:flex;align-items:center;gap:6px;margin-top:7px">'
+    +'<select class="m-sel" style="flex:1" onchange="setMonth(this.value)">'+mOpts+'</select>'
+    +'<button class="gold-btn" onclick="openExpModal()" style="padding:6px 10px;font-size:11px;white-space:nowrap">📄 PDF</button>'
+    +'<button class="gold-btn" onclick="openZaloShare()" style="background:linear-gradient(135deg,#0068ff,#00aaff);padding:6px 10px;font-size:11px;white-space:nowrap">📤 Zalo</button>'
+    +'</div>'
     +'<div class="hdr-sub">'
     +'<span class="tag tag-y">'+NOW.toLocaleDateString('vi-VN',{weekday:'short',day:'numeric',month:'numeric'})+'</span>'
     +'<span class="tag tag-b">'+fmtM(S.month)+'</span>'
@@ -1709,6 +1710,14 @@ onAuthStateChanged(auth,u=>{
     if(ap)ap.style.display='none';
   }
 });
+window.doSignOut=async function(){
+  try{
+    await auth.signOut();
+  }catch(e){
+    // Fallback: reload trang
+    window.location.reload();
+  }
+};
 window.doSignIn=async function(){
   const em=(document.getElementById('au-em')||{value:''}).value.trim();
   const pw=(document.getElementById('au-pw')||{value:''}).value;

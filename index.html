@@ -135,16 +135,38 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 </div>
 
 <div id="zalo-modal" class="sheet-overlay" onclick="if(event.target===this)closeZaloShare()">
-  <div class="sheet" style="max-height:80vh">
+  <div class="sheet" style="max-height:92vh">
     <div class="handle"></div>
-    <div style="padding:13px 16px 11px;border-bottom:1px solid #0e2a4444;flex-shrink:0">
-      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:3px">📤 Chia sẻ KPI qua Zalo</div>
-      <div style="font-size:11px;color:var(--dim)">Copy tin nhắn → paste vào nhóm Zalo phòng</div>
+    <div style="padding:13px 16px 10px;border-bottom:1px solid #0e2a4444;flex-shrink:0">
+      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:2px">📤 Chia sẻ KPI qua Zalo</div>
+      <div style="font-size:11px;color:var(--dim)">Chọn phạm vi → Copy → Paste vào nhóm Zalo</div>
     </div>
-    <div style="padding:12px 15px;overflow-y:auto;flex:1">
-      <div id="zalo-content" style="background:var(--bg2);border-radius:11px;padding:13px;border:1px solid var(--border);font-size:13px;color:#fff;line-height:1.7;white-space:pre-wrap;font-family:inherit"></div>
+    <div style="padding:10px 14px 8px;border-bottom:1px solid #0e2a4420;flex-shrink:0">
+      <div style="font-size:10px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px">📅 Phạm vi báo cáo</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button onclick="setZS('thang')" id="zs-thang" class="sbb on" style="padding:5px 10px;font-size:11px">📅 Tháng</button>
+        <button onclick="setZS('T1')" id="zs-T1" class="sbb" style="padding:5px 10px;font-size:11px">T1</button>
+        <button onclick="setZS('T2')" id="zs-T2" class="sbb" style="padding:5px 10px;font-size:11px">T2</button>
+        <button onclick="setZS('T3')" id="zs-T3" class="sbb" style="padding:5px 10px;font-size:11px">T3</button>
+        <button onclick="setZS('T4')" id="zs-T4" class="sbb" style="padding:5px 10px;font-size:11px">T4</button>
+        <button onclick="setZS('ngay')" id="zs-ngay" class="sbb" style="padding:5px 10px;font-size:11px">📆 Ngày</button>
+        <button onclick="setZS('custom')" id="zs-custom" class="sbb" style="padding:5px 10px;font-size:11px">📅 Từ-Đến</button>
+      </div>
+      <div id="zs-day-box" style="display:none;margin-top:7px">
+        <select id="zs-day-sel" class="dsel" style="margin:0" onchange="buildZalo()"></select>
+      </div>
+      <div id="zs-range-box" style="display:none;margin-top:7px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="zs-from" class="dsel" style="margin:0;flex:1" onchange="buildZalo()"><option value="">Từ ngày</option></select>
+          <span style="color:var(--dim);flex-shrink:0">→</span>
+          <select id="zs-to" class="dsel" style="margin:0;flex:1" onchange="buildZalo()"><option value="">Đến ngày</option></select>
+        </div>
+      </div>
     </div>
-    <div style="padding:10px 15px 0;display:flex;gap:8px;flex-shrink:0">
+    <div style="padding:11px 14px;overflow-y:auto;flex:1">
+      <div id="zalo-content" style="background:var(--bg2);border-radius:11px;padding:12px;border:1px solid var(--border);font-size:12px;color:#fff;line-height:1.8;white-space:pre-wrap;font-family:inherit"></div>
+    </div>
+    <div style="padding:9px 14px 0;display:flex;gap:8px;flex-shrink:0">
       <button onclick="copyZalo()" id="zalo-copy-btn" style="flex:1;background:linear-gradient(135deg,#0068ff,#00aaff);color:#fff;border:none;border-radius:11px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit">📋 Copy tin nhắn</button>
       <button onclick="closeZaloShare()" style="background:none;border:1px solid #1a3d5c;border-radius:11px;padding:12px 14px;color:var(--dim);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">✕</button>
     </div>
@@ -226,7 +248,17 @@ function selectPhong(id){
   hideEl('phong-select-modal');
   init();
 }
-async function fbGet(p){try{var r=await fetch(DB+'/'+ROOT+'/'+p+'.json');if(!r.ok)return null;var d=await r.json();return d===null?null:d;}catch(e){console.warn('fbGet',e.message);return null;}}
+async function fbGet(p){
+  try{
+    var ctrl=new AbortController();
+    var tid=setTimeout(function(){ctrl.abort();},6000);
+    var r=await fetch(DB+'/'+ROOT+'/'+p+'.json',{signal:ctrl.signal});
+    clearTimeout(tid);
+    if(!r.ok)return null;
+    var d=await r.json();
+    return d===null?null:d;
+  }catch(e){return null;}
+}
 async function fbSet(p,d){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){console.warn('fbSet',e.message);}}
 async function fbDel(p){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'DELETE'});}catch(e){console.warn('fbDel',e.message);}}
 
@@ -895,7 +927,7 @@ function rDash(){
   var totalTH={};KPIS.forEach(function(k){totalTH[k.key]=fnvs.reduce(function(s,nv){return s+(thForNV(m,nv.ma)[k.key]||0);},0);});
   var nvData=fnvs.map(function(nv){var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma),wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key]||0,kh[k.key])||0);},0)/wk.length:null;return{ma:nv.ma,ten:nv.ten,kh:kh,th:th,score:score};}).sort(function(a,b){if(a.score===null&&b.score===null)return 0;if(a.score===null)return 1;if(b.score===null)return-1;return b.score-a.score;});
   var kCards=KPIS.map(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px"><div><div class="kc-lbl">'+k.label+'</div><div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div><div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div><div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)+'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'+(kh>0?bar(th,kh,k.color):'')+(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:#ff4757;margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')+'</div>';}).join('');
-  var ranks=nvData.slice(0,12).map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
+  var ranks=nvData.map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
   return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div><div class="pad" style="padding-top:4px">'+rNVFilter()+'<div class="sec">Tổng hợp · '+fmtM(m)+'</div><div class="kg">'+kCards+'</div>'+(S.scope==='thang'?rBarChart(m):'')+''+rDonut(m)+''+rPlWidget(m)+'<div class="sec">🏆 Xếp hạng</div>'+ranks+'</div>';
 }
 
@@ -1480,63 +1512,88 @@ function closePinModal(){closePin();}
 // ══════════════════════════════════════════
 // ── Zalo Share ──
 function openZaloShare(){
+  var m=S.month;
+  var days=genDays(m);
+  var dOpts='<option value="">-- Chọn ngày --</option>'+days.map(function(d){return'<option value="'+d+'">Ngày '+d.split('-')[2]+'/'+d.split('-')[1]+'</option>';}).join('');
+  var rOpts='<option value="">Chọn</option>'+days.map(function(d){return'<option value="'+d+'">Ngày '+d.split('-')[2]+'</option>';}).join('');
+  var el=document.getElementById('zs-day-sel');if(el)el.innerHTML=dOpts;
+  var ef=document.getElementById('zs-from'),et=document.getElementById('zs-to');
+  if(ef)ef.innerHTML=rOpts;if(et)et.innerHTML=rOpts;
+  setZS('thang');
+  showEl('zalo-modal');
+}
+var _zScope='thang';
+function setZS(sc){
+  _zScope=sc;
+  ['thang','T1','T2','T3','T4','ngay','custom'].forEach(function(s){
+    var b=document.getElementById('zs-'+s);
+    if(b)b.className='sbb'+(sc===s?' on':'');
+  });
+  var db=document.getElementById('zs-day-box');
+  var rb=document.getElementById('zs-range-box');
+  if(db)db.style.display=sc==='ngay'?'block':'none';
+  if(rb)rb.style.display=sc==='custom'?'block':'none';
+  buildZalo();
+}
+function buildZalo(){
   var m=S.month,p1=m.split('-');
-  var monthLabel='T'+(+p1[1])+'/'+p1[0];
-  var kp=gKP(m);
+  var mLabel='T'+(+p1[1])+'/'+p1[0];
+  // Label scope
+  var scLabel=_zScope==='thang'?'Cả tháng':
+    (_zScope==='ngay')?(function(){var el=document.getElementById('zs-day-sel');var v=el?el.value:'';return v?('Ngày '+v.split('-')[2]+'/'+v.split('-')[1]):'Chọn ngày';}()):
+    (_zScope==='custom')?(function(){var f=document.getElementById('zs-from'),t=document.getElementById('zs-to');return(f&&f.value&&t&&t.value)?(f.value.split('-')[2]+'/'+f.value.split('-')[1]+' → '+t.value.split('-')[2]+'/'+t.value.split('-')[1]):'Chọn ngày';}()):
+    _zScope;
+  // Tính TH theo scope
+  var tuans=_zScope==='thang'?['T1','T2','T3','T4']:
+    (['T1','T2','T3','T4'].indexOf(_zScope)>=0)?[_zScope]:['T1','T2','T3','T4'];
+  var kp=_zScope==='thang'?gKP(m):(function(){
+    var r={};KPIS.forEach(function(k){r[k.key]=NVS.reduce(function(s,nv){return s+(tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0));},0);});return r;
+  }());
   var totalTH={};
   KPIS.forEach(function(k){
     totalTH[k.key]=NVS.reduce(function(s,nv){
-      return s+['T1','T2','T3','T4'].reduce(function(s2,t){return s2+(gTH(m,t,nv.ma)[k.key]||0);},0);
+      return s+tuans.reduce(function(a,t){return a+(gTH(m,t,nv.ma)[k.key]||0);},0);
     },0);
   });
-  // Cảnh báo
+  // Top NV
+  var topNV=NVS.map(function(nv){return{ten:nv.ten,sc:weightedScore(m,nv.ma,tuans)};})
+    .filter(function(x){return x.sc!==null;}).sort(function(a,b){return b.sc-a.sc;})[0];
+  // Chưa nhập
+  var chkT=tuans[tuans.length-1];
   var chuaNhap=NVS.filter(function(nv){
-    var kh=gKT(m,CUR_T,nv.ma),th=gTH(m,CUR_T,nv.ma);
+    var kh=gKT(m,chkT,nv.ma),th=gTH(m,chkT,nv.ma);
     return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});
   });
-  // Top NV
-  var topNV=NVS.map(function(nv){return{ten:nv.ten,sc:weightedScore(m,nv.ma,['T1','T2','T3','T4'])};})
-    .filter(function(x){return x.sc!==null;}).sort(function(a,b){return b.sc-a.sc;})[0];
-
   var lines=[];
-  lines.push('🏦 KPI BANKING NAB — '+monthLabel+' ('+CUR_T+')');
+  lines.push('🏦 KPI BANKING NAB — '+mLabel+' ('+scLabel+')');
   lines.push('━━━━━━━━━━━━━━━━━━━━');
-  KPIS.forEach(function(k){
+  STARS.forEach(function(k){
     var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);
-    var icon=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
-    var star=k.star?' ⭐':'';
-    lines.push(icon+k.icon+' '+k.label+star+': '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));
+    var ic=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
+    lines.push(ic+k.icon+' '+k.label+' ⭐: '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));
+  });
+  lines.push('─────────────────────');
+  KPIS.filter(function(k){return!k.star;}).forEach(function(k){
+    var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);
+    var ic=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
+    lines.push(ic+k.icon+' '+k.label+': '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));
   });
   lines.push('━━━━━━━━━━━━━━━━━━━━');
-  if(topNV)lines.push('🏆 Xuất sắc: '+topNV.ten+' ('+Math.round(topNV.sc)+'%)');
-  if(chuaNhap.length){
-    lines.push('🚨 Chưa nhập TH '+CUR_T+' ('+chuaNhap.length+' NV):');
-    lines.push('   '+chuaNhap.map(function(nv){return nv.ten.split(' ').pop();}).join(', '));
-  } else {
-    lines.push('✅ Tất cả đã nhập TH '+CUR_T);
-  }
+  if(topNV)lines.push('🏆 Xuất sắc: '+topNV.ten.split(' ').pop()+' ('+Math.round(topNV.sc)+'%)');
+  if(chuaNhap.length)lines.push('🚨 Chưa nhập ('+chuaNhap.length+'): '+chuaNhap.map(function(n){return n.ten.split(' ').pop();}).join(', '));
+  else lines.push('✅ Đã nhập TH đầy đủ');
   lines.push('━━━━━━━━━━━━━━━━━━━━');
-  lines.push('📱 App: vunadab.github.io/KPI');
-  var content=lines.join('\n');
+  lines.push('📱 vunadab.github.io/KPI');
   var el=document.getElementById('zalo-content');
-  if(el)el.textContent=content;
-  showEl('zalo-modal');
+  if(el)el.textContent=lines.join('\n');
 }
 function closeZaloShare(){hideEl('zalo-modal');}
 function copyZalo(){
-  var el=document.getElementById('zalo-content');
-  if(!el)return;
+  var el=document.getElementById('zalo-content');if(!el)return;
   var btn=document.getElementById('zalo-copy-btn');
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(el.textContent).then(function(){
-      if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}
-    });
-  } else {
-    var ta=document.createElement('textarea');
-    ta.value=el.textContent;document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');document.body.removeChild(ta);
-    if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}
-  }
+  var txt=el.textContent;
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}});}
+  else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}}
 }
 
 function applyTheme(){
@@ -1601,7 +1658,7 @@ async function init(){
 init();
 
 // ── PWA Service Worker ──
-if('serviceWorker' in navigator){
+if('serviceWorker' in navigator && window.location.hostname.indexOf('github.io')>=0){
   window.addEventListener('load', function(){
     navigator.serviceWorker.register('./sw.js')
       .then(function(reg){

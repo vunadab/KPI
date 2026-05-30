@@ -72,8 +72,32 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<style>
+.ls{position:fixed;inset:0;z-index:9999;background:#01050d;display:flex;align-items:center;justify-content:center;padding:24px;}
+.lb{width:100%;max-width:310px;text-align:center;}
+.lb-logo{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;}
+.lb-title{font-size:21px;font-weight:900;color:#fff;margin-bottom:5px;}
+.lb-sub{font-size:11px;color:#6a8aab;margin-bottom:26px;line-height:1.6;}
+.lb-inp{width:100%;background:#020a16;border:1px solid #1a3d5c;border-radius:11px;padding:13px 15px;color:#fff;font-size:15px;font-weight:700;outline:none;text-align:center;letter-spacing:.1em;font-family:inherit;margin-bottom:11px;-webkit-appearance:none;}
+.lb-inp:focus{border-color:#e8a02060;}
+.lb-btn{width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;font-weight:900;font-size:14px;cursor:pointer;font-family:inherit;}
+.lb-err{color:#ff6b7a;font-size:11px;font-weight:700;min-height:16px;margin-bottom:9px;}
+.lb-lock{color:#ff9f43;font-size:11px;font-weight:700;margin-top:7px;}
+</style>
 </head>
 <body>
+<div id="ls" class="ls">
+<div class="lb">
+  <div class="lb-logo">&#127974;</div>
+  <div class="lb-title">KPI <span style="background:linear-gradient(135deg,#e8a020,#ffc84a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Banking</span></div>
+  <div class="lb-sub">Nam A Bank &#183; Phòng KHCN<br>Hệ thống nội bộ &#8212; Yêu cầu xác thực</div>
+  <input class="lb-inp" id="lp" type="password" placeholder="Nhập mật khẩu truy cập" onkeydown="if(event.key==='Enter')doLogin()">
+  <div class="lb-err" id="le"></div>
+  <button class="lb-btn" onclick="doLogin()">&#128275; Đăng nhập</button>
+  <div class="lb-lock" id="ll"></div>
+  <div style="margin-top:18px;font-size:10px;color:#2a4060">Liên hệ Trưởng phòng để được cấp mật khẩu</div>
+</div>
+</div>
 
 <div id="phong-select-modal" style="display:none;position:fixed;inset:0;background:var(--bg0);z-index:600;align-items:center;justify-content:center;padding:24px">
   <div style="width:100%;max-width:340px">
@@ -1624,6 +1648,80 @@ function toggleTheme(){
   applyTheme();
   render();
 }
+// ══ BẢO MẬT APP ══
+var APP_PASS='220120'; // ← Anh đổi pass tại đây
+var MAX_TRIES=5, LOCK_MIN=30;
+
+function _isAuth(){
+  try{return sessionStorage.getItem('_a')==='1';}catch(e){return false;}
+}
+function _setAuth(){
+  try{sessionStorage.setItem('_a','1');}catch(e){}
+}
+function _getLock(){
+  try{return parseInt(localStorage.getItem('_lk')||'0');}catch(e){return 0;}
+}
+function _setLock(t){
+  try{localStorage.setItem('_lk',t);}catch(e){}
+}
+function _getTries(){
+  try{return parseInt(localStorage.getItem('_lt')||'0');}catch(e){return 0;}
+}
+function _setTries(n){
+  try{localStorage.setItem('_lt',n);}catch(e){}
+}
+
+function doLogin(){
+  var inp=document.getElementById('lp');
+  var err=document.getElementById('le');
+  var lck=document.getElementById('ll');
+  if(!inp)return;
+  // Kiểm tra khóa
+  var lockUntil=_getLock();
+  if(Date.now()<lockUntil){
+    var mins=Math.ceil((lockUntil-Date.now())/60000);
+    if(lck)lck.textContent='Bị khóa '+mins+' phút. Liên hệ Trưởng phòng.';
+    if(err)err.textContent='';
+    return;
+  }
+  var val=inp.value.trim();
+  if(!val){if(err)err.textContent='Vui lòng nhập mật khẩu';return;}
+  if(val===APP_PASS){
+    _setAuth();
+    try{localStorage.removeItem('_lt');localStorage.removeItem('_lk');}catch(e){}
+    var ls=document.getElementById('ls');
+    if(ls)ls.style.display='none';
+    init();
+  } else {
+    var tries=_getTries()+1;
+    _setTries(tries);
+    var left=MAX_TRIES-tries;
+    if(left<=0){
+      _setLock(Date.now()+LOCK_MIN*60000);
+      if(lck)lck.textContent='Sai '+MAX_TRIES+' lần. Khóa '+LOCK_MIN+' phút.';
+      if(err)err.textContent='';
+    } else {
+      if(err)err.textContent='Sai mật khẩu. Còn '+left+' lần.';
+    }
+    inp.value='';inp.focus();
+  }
+}
+
+// Kiểm tra khi load trang
+(function(){
+  var lck=_getLock();
+  if(Date.now()<lck){
+    var ll=document.getElementById('ll');
+    if(ll)ll.textContent='Đang bị khóa '+Math.ceil((lck-Date.now())/60000)+' phút.';
+    return;
+  }
+  if(_isAuth()){
+    var ls=document.getElementById('ls');
+    if(ls)ls.style.display='none';
+    // init() gọi sau khi DOM ready
+  }
+})();
+
 async function init(){
   // Khởi tạo phòng
   // Load theme đã lưu
@@ -1659,7 +1757,8 @@ async function init(){
     render();
   },20000);
 }
-init();
+// Chỉ chạy app nếu đã xác thực
+if(_isAuth()){init();}
 
 // ── PWA Service Worker ──
 if('serviceWorker' in navigator && window.location.hostname.indexOf('github.io')>=0){

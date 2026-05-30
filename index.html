@@ -359,16 +359,22 @@ function weightedScore(m,ma,tuans){
   // KH và TH đều tính theo tuans (scope đang xem: tuần hoặc tháng)
   // VD Sương T4: HD=17%×1=17, DN=66%×1.5=99, Thẻ=50%×0.8=40 → (17+99+40)/3=52%
   // VD Trinh T4: HD=43%×1=43, DN=0%×1.5=0, Thẻ=100%×0.8=80 → (43+0+80)/3=41%
-  var wk=STARS.filter(function(k){
+  // Kiểm tra NV có ít nhất 1 KPI được giao không
+  var hasAny=STARS.some(function(k){
     return tuans.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});
   });
-  if(!wk.length)return null;
-  var total=wk.reduce(function(s,k){
+  if(!hasAny)return null;
+  // Luôn chia cho STARS.length (=3) để công bằng
+  // NV không được giao KPI nào → KPI đó = 0 → điểm thấp hơn
+  // VD Trinh (không có DN): (34×1+0×1.5+40×0.8)/3 = 74/3 = 24.7%
+  // VD Bình  (đủ 3 KPI):   (45×1+30×1.5+32.8×0.8)/3 = 107.8/3 = 35.9%
+  var total=STARS.reduce(function(s,k){
     var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
     var th=tuans.reduce(function(a,t){return a+(gTH(m,t,ma)[k.key]||0);},0);
-    return s+(pct(th,kh)||0)*(STAR_WEIGHTS[k.key]||1);
+    var score=kh>0?(pct(th,kh)||0):0; // KH=0 → score=0
+    return s+score*(STAR_WEIGHTS[k.key]||1);
   },0);
-  return total/wk.length;
+  return total/STARS.length;
 }
 var DEFAULT_KH={huy_dong:47900,du_no:31000,the_td:82,tk_hkd:80,qr_code:220,cif:415};
 
@@ -989,9 +995,10 @@ function rStar(){
       return{k:k,kh:kh,th:noInput?null:th,p:kh>0?pct(noInput?0:th,kh):null};
     });
     var wk=scores.filter(function(s){return s.kh>0;});
-    // Điểm = (%TH × trọng_số) / số KPI có KH
-    // VD Sương T4: HD=17%×1=17, DN=66%×1.5=99, Thẻ=50%×0.8=40 → (17+99+40)/3=52%
-    var avg=wk.length?wk.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/wk.length:null;
+    // Luôn chia STARS.length=3: NV không giao KPI → score=0 → điểm thấp
+    // VD Trinh: (34×1+0×1.5+40×0.8)/3=24.7% < Bình (45×1+30×1.5+33×0.8)/3=35.9%
+    var hasKPI=wk.length>0;
+    var avg=hasKPI?scores.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/STARS.length:null;
     return{nv:nv,scores:scores,avg:avg,wk:wk};
   }).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
 
@@ -1056,11 +1063,12 @@ function rStar(){
 
   var warnHtml=warn.map(function(nv){
     var wk2=STARS.filter(function(k){return(gKT(m,t,nv.ma)[k.key]||0)>0;});
-    var avg2=wk2.length?wk2.reduce(function(s,k){
+    // Chia STARS.length để nhất quán
+    var avg2=wk2.length?STARS.reduce(function(s,k){
       var kh=starTuans.reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
       var th=starTuans.reduce(function(a,tt){return a+(gTH(m,tt,nv.ma)[k.key]||0);},0);
       return s+(kh>0?(pct(th,kh)||0)*(STAR_WEIGHTS[k.key]||1):0);
-    },0)/wk2.length:0;
+    },0)/STARS.length:0;
     var wc=avg2<20?'#ff4757':avg2<50?'#ff9f43':'#e8a020';
     var iss=wk2.map(function(k){var th=gTH(m,t,nv.ma)[k.key],kh=gKT(m,t,nv.ma)[k.key]||0;if(th==null||th===0)return k.icon+' Chưa PH';var p=pct(th,kh);return p<50?k.icon+' '+p2s(p):'';}).filter(Boolean);
     return'<div class="wi" style="border-color:'+wc+'25">'+av(nv.ten,nv.ma,36)
@@ -1332,10 +1340,11 @@ function buildReport(m,scope){
     var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});
     // wk: KPI có KH tháng > 0 (không dùng KH tuần lẻ)
     var wkM=STARS.filter(function(k){return(['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0))>0;});
-    var score=wkM.length?wkM.reduce(function(s,k){
+    var score=wkM.length?STARS.reduce(function(s,k){
       var khM=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
-      return s+(pct(th[k.key],khM)||0)*(STAR_WEIGHTS[k.key]||1);
-    },0)/wkM.length:null;
+      var sc=khM>0?(pct(th[k.key],khM)||0):0;
+      return s+sc*(STAR_WEIGHTS[k.key]||1);
+    },0)/STARS.length:null;
     return{nv:nv,kh:kh,th:th,score:score};
   }).sort(function(a,b){
     // Sắp xếp: có KH trước, trong đó điểm cao → thấp (âm ở cuối)

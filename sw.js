@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kpi-nab-v2';
+const CACHE_NAME = 'kpi-nab-v3';
 const urlsToCache = [
   './',
   './index.html',

@@ -356,10 +356,11 @@ var PL_STAGES=[
 // ── STATE ──
 var S={
   tab:'dash', khTab:'phong',
-  month:CUR_M, selT:CUR_T,
+  month:CUR_M, selT: 'thang',
   selNV:null, detailNV:null,
   scope:'thang', scopeDay:'', scopeFrom:'', scopeTo:'',
   filterNVs:[], nvpTemp:[],
+  darkMode:true,  // true=dark, false=light
   plTab:'nv',  // nv | phong
   plNV:null,   // MA đang xem pipeline
   plFormNV:null, plEditId:null,
@@ -384,10 +385,12 @@ async function loadMonth(m){
 async function loadNVS(){
   var d=await fbGet('config/nvs');
   if(d&&Array.isArray(d)&&d.length>0){
-    NVS=d;
+    // Chỉ cập nhật NVS nếu data Firebase khác với hiện tại
+    // Tránh ghi đè NV vừa thêm nhưng Firebase chưa sync kịp
+    var changed=d.length!==NVS.length||d.some(function(nv,i){return !NVS[i]||NVS[i].ma!==nv.ma||NVS[i].ten!==nv.ten;});
+    if(changed) NVS=d;
   } else {
     NVS=DEFAULT_NVS.slice();
-    // Lưu default lên Firebase lần đầu
     await fbSet('config/nvs',NVS);
   }
 }
@@ -436,6 +439,7 @@ function render(){
 
 function rHdr(){
   var badge=S.online?'<span class="tag tag-g">● Online</span>':'<span class="tag tag-m">○ Offline</span>';
+  var themeIco=S.darkMode?'☀️':'🌙';
   var mOpts=MONTHS.map(function(m){return'<option value="'+m+'"'+(m===S.month?' selected':'')+'>'+fmtM(m)+'</option>';}).join('');
   var khTabs=S.tab==='kh'?'<div style="display:flex;gap:5px;margin-top:7px">'
     +'<button class="sbb'+(S.khTab==='phong'?' on':'')+'" onclick="setKhTab(\'phong\')" style="padding:4px 10px;font-size:10px">📋 Phòng</button>'
@@ -447,8 +451,11 @@ function rHdr(){
     +'<div><div class="logo-tx">KPI <em>Banking</em></div><div class="sub">Nam A Bank · KHCN</div></div></div>'
     +'<div class="hdr-actions">'
     +'<select class="m-sel" onchange="setMonth(this.value)">'+mOpts+'</select>'
+    +'<div style="display:flex;flex-direction:column;gap:4px">'
     +'<button class="gold-btn" onclick="openExpModal()">📄 PDF</button>'
-    +'<button class="gold-btn" onclick="openZaloShare()" style="background:linear-gradient(135deg,#0068ff,#00aaff)">📤 Zalo</button>'
+    +'<button class="gold-btn" onclick="openZaloShare()" style="background:linear-gradient(135deg,#0068ff,#00aaff);font-size:10px">📤 Zalo</button>'
+    +'</div>'
+    +'<button onclick="toggleTheme()" style="background:none;border:1px solid var(--border2);border-radius:8px;padding:5px 8px;font-size:13px;cursor:pointer">'+themeIco+'</button>'
     +badge+'</div></div>'
     +'<div class="hdr-sub">'
     +'<span class="tag tag-y">'+NOW.toLocaleDateString('vi-VN',{weekday:'short',day:'numeric',month:'numeric'})+'</span>'
@@ -939,15 +946,21 @@ function rAlert(){
 // TUYÊN DƯƠNG — Logic đầy đủ
 // ══════════════════════════════════════════
 function rStar(){
-  var m=S.month,t=S.selT;
+  var m=S.month;
+  var isThang=S.selT==='thang';
+  var t=isThang?'T4':S.selT; // t chỉ dùng cho display tuần
+  var starTuans=isThang?['T1','T2','T3','T4']:[S.selT]; // tuans để tính TH
   var scored=NVS.map(function(nv){
     // scores dùng KH tháng để tính %, TH của tuần đang xem
     var scores=STARS.map(function(k){
       var khThang=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
       var khTuan=gKT(m,t,nv.ma)[k.key]||0;
-      var th=gTH(m,t,nv.ma)[k.key];
+      // TH: 1 tuần hoặc cả tháng tùy scope
+      var th=starTuans.reduce(function(a,tt){var v=gTH(m,tt,nv.ma)[k.key];return a+(v!=null?v:0);},0);
+      // Với scope tháng, th là null nếu chưa nhập bất kỳ tuần nào
+      var thNull=starTuans.every(function(tt){return gTH(m,tt,nv.ma)[k.key]==null;});
       // Dùng KH tháng để tính %, nếu KH tháng=0 thì không tính KPI này
-      return{k:k,kh:khThang,khTuan:khTuan,th:th!=null?th:null,p:khThang>0?pct(th||0,khThang):null};
+      return{k:k,kh:khThang,khTuan:khTuan,th:thNull?null:th,p:khThang>0?pct(thNull?0:th,khThang):null};
     });
     var wk=scores.filter(function(s){return s.kh>0;});
     // VD Trinh T4: HD=43%×1=43, DN=0%×1.5=0, Thẻ=100%×0.8=80 → (43+0+80)/3=41%
@@ -961,10 +974,11 @@ function rStar(){
   // Nhắc nhở: NV có KH mà KHÔNG PHÁT SINH (TH=0 hoặc null) ở KPI trọng yếu
   var khongPhatSinh=NVS.filter(function(nv){
     return STARS.some(function(k){
-      var kh=gKT(m,t,nv.ma)[k.key]||0;
+      var kh=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
       if(kh<=0)return false;
-      var th=gTH(m,t,nv.ma)[k.key];
-      return th==null||th===0;
+      var th=starTuans.reduce(function(a,tt){return a+(gTH(m,tt,nv.ma)[k.key]||0);},0);
+      var noInput=starTuans.every(function(tt){return gTH(m,tt,nv.ma)[k.key]==null;});
+      return noInput||th===0;
     });
   });
 
@@ -1017,8 +1031,8 @@ function rStar(){
     var wk2=STARS.filter(function(k){return(gKT(m,t,nv.ma)[k.key]||0)>0;});
     var avg2=wk2.length?wk2.reduce(function(s,k){
       var khThang=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
-      var th=gTH(m,t,nv.ma)[k.key];
-      return s+(khThang>0?(pct(th||0,khThang)||0)*(STAR_WEIGHTS[k.key]||1):0);
+      var th=starTuans.reduce(function(a,tt){return a+(gTH(m,tt,nv.ma)[k.key]||0);},0);
+      return s+(khThang>0?(pct(th,khThang)||0)*(STAR_WEIGHTS[k.key]||1):0);
     },0)/wk2.length:0;
     var wc=avg2<20?'#ff4757':avg2<50?'#ff9f43':'#e8a020';
     var iss=wk2.map(function(k){var th=gTH(m,t,nv.ma)[k.key],kh=gKT(m,t,nv.ma)[k.key]||0;if(th==null||th===0)return k.icon+' Chưa PH';var p=pct(th,kh);return p<50?k.icon+' '+p2s(p):'';}).filter(Boolean);
@@ -1035,8 +1049,12 @@ function rStar(){
   var top3Html=top3.length?'<div class="sec" style="margin-top:5px">🥇 Top 3 tuần '+t+'</div>'
     +top3.map(function(x,i){return'<div style="display:flex;align-items:center;gap:9px;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:7px;border:1px solid '+(i===0?'#e8a02028':'var(--border)')+'">'+'<div style="font-size:18px">'+['🥇','🥈','🥉'][i]+'</div>'+av(x.nv.ten,x.nv.ma,32)+'<div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">'+x.nv.ten+'</div></div><div style="font-size:16px;font-weight:900;color:'+pc(x.avg)+';font-family:\'Space Mono\',monospace">'+p2s(x.avg)+'</div></div>';}).join(''):'';
 
-  return'<div class="pad"><div class="sec">🌟 Tuyên dương & Nhắc nhở</div>'
-    +'<div class="tt">'+['T1','T2','T3','T4'].map(function(tt){return'<button class="tb'+(S.selT===tt?' on':'')+'" onclick="setT(\''+tt+'\')">'+tt+'</button>';}).join('')+'</div>'
+  var starScopeLabel=isThang?'📅 Cả tháng':'📋 Tuần '+S.selT;
+  return'<div class="pad"><div class="sec">🌟 Tuyên dương · '+starScopeLabel+'</div>'
+    +'<div class="tt">'
+    +(S.selT==='thang'?'<button class="tb on" onclick="setT(\'thang\')">📅 Tháng</button>':'<button class="tb" onclick="setT(\'thang\')">📅 Tháng</button>')
+    +['T1','T2','T3','T4'].map(function(tt){return(S.selT===tt?'<button class="tb on" onclick="setT(\''+tt+'\')">' :'<button class="tb" onclick="setT(\''+tt+'\')">')+tt+'</button>';}).join('')
+    +'</div>'
     +starHtml+top3Html
     +top3OtherHtml
     +(khongPhatSinh.length?'<div class="sec" style="margin-top:5px">🚨 Cảnh báo GẤP — Không phát sinh KPI trọng yếu</div>'+capBaoGap:'')
@@ -1073,18 +1091,23 @@ function rDsNV(){
     +'<button class="bsave" onclick="nvAdd()" style="margin-top:8px">➕ Thêm nhân viên</button>'
     +'</div></div>';
 }
-function nvAdd(){
+async function nvAdd(){
   var ma=document.getElementById('nv-ma-new').value.trim();
   var ten=document.getElementById('nv-ten-new').value.trim().toUpperCase();
   if(!ma||!ten){alert('Vui lòng nhập đầy đủ mã và tên NV');return;}
   if(NVS.some(function(n){return n.ma===ma;})){alert('Mã NV đã tồn tại: '+ma);return;}
+  // Push vào NVS local TRƯỚC, render ngay để hiện lên Dashboard
   NVS.push({ma:ma,ten:ten});
-  fbSet('config/nvs',NVS).then(function(){
-    document.getElementById('nv-ma-new').value='';
-    document.getElementById('nv-ten-new').value='';
-    S.filterNVs=[]; // Clear filter để NV mới hiện trong Dashboard
-    render();
-  });
+  S.filterNVs=[]; // Bắt buộc clear filter để NV mới hiện
+  // Clear input ngay
+  var maEl=document.getElementById('nv-ma-new');
+  var tenEl=document.getElementById('nv-ten-new');
+  if(maEl)maEl.value='';
+  if(tenEl)tenEl.value='';
+  // Render ngay với NVS đã có NV mới
+  render();
+  // Lưu lên Firebase sau (không chờ)
+  await fbSet('config/nvs',NVS);
 }
 function nvDel(i){
   var nv=NVS[i];
@@ -1516,8 +1539,35 @@ function copyZalo(){
   }
 }
 
+function applyTheme(){
+  var r=document.documentElement;
+  if(S.darkMode){
+    r.style.setProperty('--bg0','#01050d');r.style.setProperty('--bg1','#020a16');
+    r.style.setProperty('--bg2','#061525');r.style.setProperty('--text','#ffffff');
+    r.style.setProperty('--dim','#6a8aab');r.style.setProperty('--mute','#2a4060');
+    r.style.setProperty('--border','#0e2a45');r.style.setProperty('--border2','#1a3d5c');
+    r.style.setProperty('--card','#040e1e');r.style.setProperty('--card2','#081830');
+    document.body.style.background='#01050d';
+  } else {
+    r.style.setProperty('--bg0','#f0f4f8');r.style.setProperty('--bg1','#ffffff');
+    r.style.setProperty('--bg2','#e8eef5');r.style.setProperty('--text','#1a2e4a');
+    r.style.setProperty('--dim','#5a7a9a');r.style.setProperty('--mute','#9ab0c8');
+    r.style.setProperty('--border','#d0dce8');r.style.setProperty('--border2','#b8cfe0');
+    r.style.setProperty('--card','#ffffff');r.style.setProperty('--card2','#f0f4f8');
+    document.body.style.background='#f0f4f8';
+  }
+  try{localStorage.setItem('kpi_theme',S.darkMode?'dark':'light');}catch(e){}
+}
+function toggleTheme(){
+  S.darkMode=!S.darkMode;
+  applyTheme();
+  render();
+}
 async function init(){
   // Khởi tạo phòng
+  // Load theme đã lưu
+  try{var t2=localStorage.getItem('kpi_theme');if(t2)S.darkMode=(t2==='dark');}catch(e){}
+  applyTheme();
   if(!initPhong()){
     // Nhiều phòng → hiện màn chọn
     var btns=document.getElementById('phong-list-btns');

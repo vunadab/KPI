@@ -106,6 +106,85 @@ body.light-mode .bk-name{color:#0f1f35!important;}
 body.light-mode .tl-card{background:#fff!important;border-color:#c8d8e8!important;}
 body.light-mode .tl-cname{color:#0f1f35!important;}
 
+/* LIGHT MODE — Override inline color:#fff và color:#ffffff trong JS-rendered HTML */
+body.light-mode .pad,
+body.light-mode .chart-wrap,
+body.light-mode .kpi-card,
+body.light-mode .ff,
+body.light-mode .deal-card,
+body.light-mode .pl-form{background:#fff!important;border-color:#c8d8e8!important;}
+
+/* Text màu trắng hardcode trong JS render → override sang tối */
+body.light-mode div[style*="color:#fff"],
+body.light-mode div[style*="color: #fff"],
+body.light-mode div[style*="color:white"],
+body.light-mode span[style*="color:#fff"],
+body.light-mode span[style*="color: #fff"],
+body.light-mode td[style*="color:#fff"],
+body.light-mode th[style*="color:#fff"],
+body.light-mode p[style*="color:#fff"]{color:#0f1f35!important;}
+
+/* Card/section headings */
+body.light-mode .sec{color:#0f1f35!important;}
+body.light-mode .chart-title{color:#0f1f35!important;}
+
+/* Nút và button text */
+body.light-mode .bsave,
+body.light-mode .btn-outline{border-color:#b8cfe0!important;color:#1a3050!important;}
+
+/* Chip và tag */
+body.light-mode .chip{color:#1a3050!important;background:#e8eef5!important;border-color:#c0d4e8!important;}
+
+/* Pipeline cards */
+body.light-mode .nvi{background:#fff!important;border-color:#c8d8e8!important;}
+body.light-mode .nvi .nv-n{color:#0f1f35!important;}
+
+/* Dashboard KPI text */
+body.light-mode [style*="color:var(--text)"]{color:#0f1f35!important;}
+body.light-mode [style*="color:#fff8"]{color:#0f1f35!important;}
+
+/* Tổng quát: bất kỳ text white trực tiếp trong app */
+body.light-mode #app *:not(button):not(a):not(.gold-btn):not(.bsave):not(.lb-btn){
+  --text-override: #0f1f35;
+}
+
+/* Inline style override — quan trọng nhất */
+body.light-mode #app div[style*="color:#fff"]:not([style*="gradient"]):not([style*="ffc84a"]):not([style*="00c48c"]):not([style*="ff4757"]):not([style*="ffc84a"]),
+body.light-mode #app span[style*="color:#fff"]:not([style*="gradient"]){
+  color:#1a2e4a!important;
+}
+
+/* Background trắng/xám nhạt cho tất cả card-like */
+body.light-mode #app [style*="background:var(--card)"],
+body.light-mode #app [style*="background:var(--bg1)"],
+body.light-mode #app [style*="background:var(--bg2)"],
+body.light-mode #app [style*="background:#040e1e"],
+body.light-mode #app [style*="background:#020a16"],
+body.light-mode #app [style*="background:#061525"],
+body.light-mode #app [style*="background:#0a1628"],
+body.light-mode #app [style*="background:#01050d"],
+body.light-mode #app [style*="background:#030810"]{
+  background:#f5f8fc!important;border-color:#d0dce8!important;
+}
+
+/* Dark backgrounds trong inline style */
+body.light-mode #app [style*="background:#060e1c"],
+body.light-mode #app [style*="background:#0e1f35"],
+body.light-mode #app [style*="background:#1a3050"],
+body.light-mode #app [style*="background:#0a1628"]{
+  background:#eef2f8!important;
+}
+
+/* Đảm bảo text đọc được */
+body.light-mode #app{color:#1a2e4a;}
+body.light-mode .hdr-top .brand .logo-tx,
+body.light-mode .hdr-top .brand .sub{color:#1a2e4a!important;}
+body.light-mode .logo-tx em{color:#e8a020!important;}
+
+/* Input placeholder */
+body.light-mode input::placeholder{color:#8aa0b8!important;}
+body.light-mode select option{background:#fff!important;color:#1a2e4a!important;}
+
 #auth-screen{position:fixed;inset:0;z-index:9999;background:#01050d;display:flex;align-items:center;justify-content:center;padding:24px;}
 .ab{width:100%;max-width:320px;text-align:center;}
 .ab-logo{width:62px;height:62px;border-radius:17px;background:linear-gradient(135deg,#e8a020,#ffc84a);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 15px;}
@@ -1186,7 +1265,11 @@ function printTimeline(){
   var deals=getAllDeals(m).filter(function(d){return d.han;});
   deals.sort(function(a,b){return new Date(a.han)-new Date(b.han);});
   var byNV={};NVS.forEach(function(nv){byNV[nv.ma]=[];});
-  deals.forEach(function(d){if(byNV[d.nvMa])byNV[d.nvMa].push(d);});
+  deals.forEach(function(d){
+    // getAllDeals inject d.ma (không phải d.nvMa)
+    var key=d.ma||d.nvMa;
+    if(byNV[key])byNV[key].push(d);
+  });
   var gdL={tiep_can:'Tiếp cận',tu_van:'Tư vấn',de_xuat:'Đề xuất',xu_ly:'Xử lý',cho_duyet:'Chờ duyệt',hoan_tat:'Hoàn tất'};
   var rows='';
   NVS.forEach(function(nv){
@@ -1198,11 +1281,18 @@ function printTimeline(){
       var col=d.gd==='hoan_tat'?'#00a87a':diff<0?'#cc2222':diff<=3?'#d4860a':'#1a3a6e';
       var st=d.gd==='hoan_tat'?'Hoàn tất':diff<0?'Quá '+Math.abs(diff)+'d':diff===0?'Hôm nay':diff+'d còn';
       var spLabel=(KPIS.find(function(k){return k.key===d.sp;})||{label:d.sp||'—'}).label;
-      rows+='<tr><td>'+dObj.getDate()+'/'+(dObj.getMonth()+1)+'</td>'
-        +'<td>'+(d.kh||'—')+'</td><td>'+spLabel+'</td>'
+      var rowBg=d.gd==='hoan_tat'?'#e8fff4':diff<0?'#fff0f0':diff===0?'#fff8e6':diff<=3?'#fffaed':'';
+      var rowSt=rowBg?'background:'+rowBg+';':'';
+      rows+='<tr style="'+rowSt+'">'
+        +'<td style="font-weight:700">'+dObj.getDate()+'/'+(dObj.getMonth()+1)+'/'+dObj.getFullYear()+'</td>'
+        +'<td style="font-weight:700">'+(d.kh||'—')+'</td>'
+        +'<td>'+(d.sdt||'—')+'</td>'
+        +'<td>'+spLabel+'</td>'
         +'<td>'+(gdL[d.gd]||d.gd)+'</td>'
-        +'<td style="color:'+col+';font-weight:700">'+st+'</td>'
-        +'<td>'+(d.gt||'—')+'</td></tr>';
+        +'<td style="color:'+col+';font-weight:900;font-size:12px">'+(diff<0?'🔴 QUÁ HẠN '+Math.abs(diff)+' NGÀY':diff===0?'🟡 HÔM NAY':diff<=3?'🟠 Còn '+diff+'d':d.gd==='hoan_tat'?'✅ Hoàn tất':'🟢 Còn '+diff+'d')+'</td>'
+        +'<td style="text-align:right">'+(d.gt?d.gt.toLocaleString():'—')+'</td>'
+        +'<td style="color:#666;font-size:10px">'+(d.note||'')+'</td>'
+        +'</tr>';
     });
   });
   var html='<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Timeline '+mLabel+'</title>'
@@ -1211,10 +1301,27 @@ function printTimeline(){
     +'table{width:100%;border-collapse:collapse}th{background:#1a3a6e;color:#fff;padding:7px 9px;text-align:left;font-size:10px}'
     +'td{padding:6px 9px;border-bottom:1px solid #e0e8f0}tr:nth-child(even) td{background:#f8faff}'
     +'.foot{margin-top:14px;font-size:9px;color:#9ab0c8;border-top:1px solid #e0e8f0;padding-top:8px;display:flex;justify-content:space-between}'
-    +'@media print{body{padding:0}@page{margin:14mm}}</style></head><body>'
+    +'@media print{body{padding:0}@page{margin:14mm}tr{page-break-inside:avoid}}'
+    +'tr[style*="background:#fff0f0"]{background:#fff0f0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+    +'tr[style*="background:#fffaed"]{background:#fffaed!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+    +'</style></head><body>'
     +'<h1>📅 Timeline Cam kết Pipeline — '+mLabel+'</h1>'
+    +(function(){
+      var total=deals.length;
+      var overdue=deals.filter(function(d){return d.gd!=='hoan_tat'&&new Date(d.han)<today;}).length;
+      var today3=deals.filter(function(d){var dif=Math.ceil((new Date(d.han)-today)/86400000);return d.gd!=='hoan_tat'&&dif>=0&&dif<=3;}).length;
+      var done=deals.filter(function(d){return d.gd==='hoan_tat';}).length;
+      return '<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
+        +'<span style="background:#fff0f0;border:1px solid #ffb3b3;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:900;color:#cc2222">🔴 Quá hạn: '+overdue+'</span>'
+        +'<span style="background:#fff8e6;border:1px solid #ffc84a;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:900;color:#d4860a">🟠 Sắp hết hạn (≤3d): '+today3+'</span>'
+        +'<span style="background:#e8fff4;border:1px solid #00c48c;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;color:#00a87a">✅ Hoàn tất: '+done+'</span>'
+        +'<span style="background:#f0f4f8;border:1px solid #b8cfe0;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;color:#4a6a8a">📋 Tổng deals: '+total+'</span>'
+        +'</div>';
+    }())
     +'<h2>Nam A Bank · Phòng KHCN · Xuất '+today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear()+'</h2>'
-    +'<table><thead><tr><th>Hạn</th><th>Khách hàng</th><th>Sản phẩm</th><th>Giai đoạn</th><th>Trạng thái</th><th>GT</th></tr></thead>'
+    +'<table><thead><tr>'
+    +'<th>Hạn cam kết</th><th>Khách hàng</th><th>SĐT</th><th>Sản phẩm</th><th>Giai đoạn</th><th style="background:#b91c1c">⏰ Trạng thái</th><th>GT (tr đ)</th><th>Ghi chú</th>'
+    +'</tr></thead>'
     +'<tbody>'+rows+'</tbody></table>'
     +(deals.length===0?'<div style="text-align:center;padding:24px;color:#9ab0c8">Chưa có deal nào</div>':'')
     +'<div class="foot"><span>KPI Banking NAB — Nguyễn Anh Vũ · TP KHCN</span><span>Tài liệu nội bộ</span></div>'

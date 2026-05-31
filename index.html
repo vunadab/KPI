@@ -471,17 +471,17 @@ var STARS=KPIS.filter(function(k){return k.star;});
 var STAR_WEIGHTS={'huy_dong':1.0,'du_no':1.5,'the_td':0.8};
 function weightedScore(m,ma,tuans){
   // Công thức: (HD%×1.0 + DN%×1.5 + Thẻ%×0.8) / 3
-  // KH và TH đều theo đúng tuans (scope đang xem)
-  // Scope T4    → KH=KH_T4,    TH=TH_T4
-  // Scope Tháng → KH=KH_tháng, TH=TH_tháng
-  // Luôn chia STARS.length=3 — NV không có KH → đóng góp 0 điểm vẫn chia 3
-  var hasKPI=STARS.some(function(k){
-    return tuans.some(function(t){return(gKT(m,t,ma)[k.key]||0)>0;});
+  // LUÔN chia STARS.length=3 — không ngoại lệ
+  // KPI không có KH → 0% → vẫn chia 3 (Trinh không DN → DN=0%÷3)
+  // Scope: T4→KH_T4+TH_T4 | Tháng→SUM(T1..T4) cả KH lẫn TH
+  // Trả null chỉ khi NV chưa nhập TH bất kỳ KPI nào (chưa tham gia)
+  var anyTH=STARS.some(function(k){
+    return tuans.some(function(t){return gTH(m,t,ma)[k.key]!=null;});
   });
-  if(!hasKPI)return null;
+  if(!anyTH)return null;
   var total=STARS.reduce(function(s,k){
     var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
-    var th=tuans.reduce(function(a,t){return a+(gTH(m,t,ma)[k.key]||0);},0);
+    var th=tuans.reduce(function(a,t){var v=gTH(m,t,ma)[k.key];return a+(v!=null?v:0);},0);
     return s+(kh>0?(pct(th,kh)||0):0)*(STAR_WEIGHTS[k.key]||1);
   },0);
   return total/STARS.length;
@@ -1366,12 +1366,15 @@ function printAllKPI(){
     });
     // Điểm = (KPI1%×w1 + ... + KPI6%×w6) ÷ KPIS.length
     // Luôn chia KPIS.length — NV không có KH → KPI đó = 0
-    var sc=totLen?KPIS.reduce(function(s,k){
+    // Điểm = (HD%×1.0 + DN%×1.5 + Thẻ%×0.8) / 3 — nhất quán với tuyên dương
+    // LUÔN chia STARS.length=3, không chia KPIS.length=6
+    // Trinh không DN → DN=0%÷3, không chia 2 hay 6
+    var sc=STARS.reduce(function(s,k){
       var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0);
       var thV=th[k.key]||0;
       var w=STAR_WEIGHTS[k.key]||1.0;
       return s+(kh>0?(pct(thV,kh)||0)*w:0);
-    },0)/totLen:0;
+    },0)/STARS.length;
     return{nv:nv,th:th,sc:Math.round(sc)};
   });
   // Xếp hạng cao → thấp
@@ -1466,15 +1469,19 @@ function rStar(){
     // scores dùng KH tháng để tính %, TH của tuần đang xem
     // KH và TH đều theo starTuans (scope đang xem)
     // T4 → KH_T4, TH_T4 | Tháng → KH_tháng, TH_tháng
+    // anyTH: NV đã nhập ít nhất 1 KPI trong scope → mới tính điểm
+    var anyTH=STARS.some(function(k){
+      return starTuans.some(function(tt){return gTH(m,tt,nv.ma)[k.key]!=null;});
+    });
     var scores=STARS.map(function(k){
       var kh=starTuans.reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
       var thNull=starTuans.every(function(tt){return gTH(m,tt,nv.ma)[k.key]==null;});
       var th=thNull?0:starTuans.reduce(function(a,tt){var v=gTH(m,tt,nv.ma)[k.key];return a+(v!=null?v:0);},0);
       return{k:k,kh:kh,th:thNull?null:th,p:kh>0?pct(thNull?0:th,kh):null};
     });
-    var wk=scores.filter(function(s){return s.kh>0;});
-    // Luôn chia STARS.length=3: Trinh(không DN)=(34+0+40)/3=24.7% < Bình(đủ3)=113%
-    var avg=wk.length?scores.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/STARS.length:null;
+    // LUÔN chia STARS.length=3 — bất biến mọi trường hợp
+    // Trinh(không DN): (HD%×1.0 + 0×1.5 + Thẻ%×0.8)/3 → công bằng
+    var avg=anyTH?scores.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/STARS.length:null;
     return{nv:nv,scores:scores,avg:avg,wk:wk};
   }).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
 

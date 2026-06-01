@@ -1845,13 +1845,15 @@ function buildReport(m,scope){
   var nvData=fnvs.map(function(nv){
     var kh=getKhForReport(nv.ma),th={};
     KPIS.forEach(function(k){th[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);});
-    var wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});
-    // wk: KPI có KH tháng > 0 (không dùng KH tuần lẻ)
-    var wkM=STARS.filter(function(k){return(['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0))>0;});
-    var score=wkM.length?wkM.reduce(function(s,k){
-      var khM=['T1','T2','T3','T4'].reduce(function(a,tt){return a+(gKT(m,tt,nv.ma)[k.key]||0);},0);
-      return s+(pct(th[k.key],khM)||0)*(STAR_WEIGHTS[k.key]||1);
-    },0)/wkM.length:null;
+    // Công thức: (HD%×1.0 + DN%×1.5 + Thẻ%×0.8) ÷ 3
+    // LUÔN chia STARS.length=3 — không ngoại lệ, nhất quán toàn app
+    // KH và TH theo đúng scope (tuần hoặc tháng)
+    var anyTHnv=STARS.some(function(k){
+      return tuans.some(function(t){return gTH(m,t,nv.ma)[k.key]!=null;});
+    });
+    var score=anyTHnv?STARS.reduce(function(s,k){
+      return s+(kh[k.key]>0?(pct(th[k.key],kh[k.key])||0):0)*(STAR_WEIGHTS[k.key]||1);
+    },0)/STARS.length:null;
     return{nv:nv,kh:kh,th:th,score:score};
   }).sort(function(a,b){
     // Sắp xếp: có KH trước, trong đó điểm cao → thấp (âm ở cuối)
@@ -1913,8 +1915,7 @@ function buildReport(m,scope){
     });
   });
   var duoi50_2=NVS.filter(function(nv){
-    // Dùng weightedScore với ALL_TUANS để nhất quán với KH tháng
-    var sc=weightedScore(m,nv.ma,['T1','T2','T3','T4']);
+    var sc=weightedScore(m,nv.ma,tuans);
     return sc!==null&&sc<50;
   });
   var warnHtml2='';

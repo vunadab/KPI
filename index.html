@@ -1042,7 +1042,18 @@ function rPlWidget(m){
 function rDash(){
   var m=S.month,fnvs=filtNVs(),kp=khPS(m);
   var totalTH={};KPIS.forEach(function(k){totalTH[k.key]=fnvs.reduce(function(s,nv){return s+(thForNV(m,nv.ma)[k.key]||0);},0);});
-  var nvData=fnvs.map(function(nv){var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma),wk=STARS.filter(function(k){return(kh[k.key]||0)>0;});var score=wk.length?wk.reduce(function(s,k){return s+(pct(th[k.key]||0,kh[k.key])||0);},0)/wk.length:null;return{ma:nv.ma,ten:nv.ten,kh:kh,th:th,score:score};}).sort(function(a,b){if(a.score===null&&b.score===null)return 0;if(a.score===null)return 1;if(b.score===null)return-1;return b.score-a.score;});
+  // Dùng nvScore() = weightedScore() = (HD%×1.0+DN%×1.5+Thẻ%×0.8)/3
+// LUÔN chia STARS.length=3, nhất quán với Tab Tuyên dương & Báo cáo
+var nvData=fnvs.map(function(nv){
+  var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma);
+  var score=nvScore(m,nv.ma);
+  return{ma:nv.ma,ten:nv.ten,kh:kh,th:th,score:score};
+}).sort(function(a,b){
+  if(a.score===null&&b.score===null)return 0;
+  if(a.score===null)return 1;
+  if(b.score===null)return-1;
+  return b.score-a.score;
+});
   var kCards=KPIS.map(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px"><div><div class="kc-lbl">'+k.label+'</div><div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div><div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div><div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)+'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'+(kh>0?bar(th,kh,k.color):'')+(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:#ff4757;margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')+'</div>';}).join('');
   var ranks=nvData.slice(0,12).map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
   return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div><div class="pad" style="padding-top:4px">'+rNVFilter()+'<div class="sec">Tổng hợp · '+fmtM(m)+'</div><div class="kg">'+kCards+'</div>'+(S.scope==='thang'?rBarChart(m):'')+''+rDonut(m)+''+rPlWidget(m)+'<div class="sec">🏆 Xếp hạng</div>'+ranks+'</div>';
@@ -1369,11 +1380,14 @@ function printAllKPI(){
     // Điểm = (HD%×1.0 + DN%×1.5 + Thẻ%×0.8) / 3 — nhất quán với tuyên dương
     // LUÔN chia STARS.length=3, không chia KPIS.length=6
     // Trinh không DN → DN=0%÷3, không chia 2 hay 6
+    // Nhất quán: KH=0 → p=0 (không có KH), kh>0 mới tính %
+    // (pct||0) → thay (pct!=null?pct:0) để tránh null NaN
     var sc=STARS.reduce(function(s,k){
       var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0);
       var thV=th[k.key]||0;
       var w=STAR_WEIGHTS[k.key]||1.0;
-      return s+(kh>0?(pct(thV,kh)||0)*w:0);
+      var p=kh>0?(pct(thV,kh)!=null?pct(thV,kh):0):0;
+      return s+p*w;
     },0)/STARS.length;
     return{nv:nv,th:th,sc:Math.round(sc)};
   });
@@ -1481,8 +1495,10 @@ function rStar(){
     });
     // LUÔN chia STARS.length=3 — bất biến mọi trường hợp
     // Trinh(không DN): (HD%×1.0 + 0×1.5 + Thẻ%×0.8)/3 → công bằng
-    var avg=anyTH?scores.reduce(function(a,s){return a+(s.p||0)*(STAR_WEIGHTS[s.k.key]||1);},0)/STARS.length:null;
-    return{nv:nv,scores:scores,avg:avg,wk:wk};
+    // (s.p||0) sai khi p=0: 0||0=0 ok nhưng khi p=0.0 (falsy) mất
+// Dùng (s.p!=null?s.p:0) để null=0 nhưng p=0 giữ nguyên 0
+var avg=anyTH?scores.reduce(function(a,s){return a+(s.p!=null?s.p:0)*(STAR_WEIGHTS[s.k.key]||1);},0)/STARS.length:null;
+    return{nv:nv,scores:scores,avg:avg};
   }).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
 
   var starNV=scored.length&&scored[0].avg>=70?scored[0]:null;
@@ -1999,27 +2015,44 @@ function closePinModal(){closePin();}
 function openZaloShare(){
   var m=S.month,p1=m.split('-');
   var monthLabel='T'+(+p1[1])+'/'+p1[0];
+  // Scope đang chọn (Tháng/T1/T2/T3/T4/Ngày/Tuỳ chọn)
+  var tuans=scopeTuans();
+  var scopeLabel=S.scope==='thang'?'Tháng':
+    (S.scope==='ngay'?'Ngày '+formatDay(S.scopeDay):
+    (S.scope==='custom'?'Tuỳ chọn':S.scope));
   var kp=gKP(m);
+  // TH theo scope đang chọn
   var totalTH={};
   KPIS.forEach(function(k){
     totalTH[k.key]=NVS.reduce(function(s,nv){
-      return s+['T1','T2','T3','T4'].reduce(function(s2,t){return s2+(gTH(m,t,nv.ma)[k.key]||0);},0);
+      return s+tuans.reduce(function(s2,t){return s2+(gTH(m,t,nv.ma)[k.key]||0);},0);
     },0);
   });
-  // Cảnh báo
-  var chuaNhap=NVS.filter(function(nv){
-    var kh=gKT(m,CUR_T,nv.ma),th=gTH(m,CUR_T,nv.ma);
-    return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});
+  // KH theo scope đang chọn
+  var totalKH={};
+  KPIS.forEach(function(k){
+    totalKH[k.key]=tuans==['T1','T2','T3','T4']?
+      (kp[k.key]||0):
+      NVS.reduce(function(s,nv){return s+tuans.reduce(function(s2,t){return s2+(gKT(m,t,nv.ma)[k.key]||0);},0);},0);
   });
-  // Top NV
-  var topNV=NVS.map(function(nv){return{ten:nv.ten,sc:weightedScore(m,nv.ma,['T1','T2','T3','T4'])};})
-    .filter(function(x){return x.sc!==null;}).sort(function(a,b){return b.sc-a.sc;})[0];
-
+  // Cảnh báo NV chưa nhập (scope hiện tại)
+  var chuaNhap=NVS.filter(function(nv){
+    var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma);
+    return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&
+           !KPIS.some(function(k){return th[k.key]!=null;});
+  });
+  // Top NV theo scope — dùng nvScore() nhất quán
+  var topNV=NVS.map(function(nv){return{ten:nv.ten,sc:nvScore(m,nv.ma)};})
+    .filter(function(x){return x.sc!==null;})
+    .sort(function(a,b){return b.sc-a.sc;})[0];
+  // Build nội dung
   var lines=[];
-  lines.push('🏦 KPI BANKING NAB — '+monthLabel+' ('+CUR_T+')');
+  lines.push('🏦 KPI BANKING NAB — '+monthLabel+' ('+scopeLabel+')');
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   KPIS.forEach(function(k){
-    var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh);
+    var th=totalTH[k.key]||0;
+    var kh=S.scope==='thang'?(kp[k.key]||0):(totalKH[k.key]||0);
+    var p=kh>0?pct(th,kh):null;
     var icon=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
     var star=k.star?' ⭐':'';
     lines.push(icon+k.icon+' '+k.label+star+': '+fmt(th,k.unit)+(kh>0?' / '+fmt(kh,k.unit)+' ('+Math.round(p||0)+'%)':''));
@@ -2027,10 +2060,10 @@ function openZaloShare(){
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   if(topNV)lines.push('🏆 Xuất sắc: '+topNV.ten+' ('+Math.round(topNV.sc)+'%)');
   if(chuaNhap.length){
-    lines.push('🚨 Chưa nhập TH '+CUR_T+' ('+chuaNhap.length+' NV):');
+    lines.push('🚨 Chưa nhập TH '+scopeLabel+' ('+chuaNhap.length+' NV):');
     lines.push('   '+chuaNhap.map(function(nv){return nv.ten.split(' ').pop();}).join(', '));
   } else {
-    lines.push('✅ Tất cả đã nhập TH '+CUR_T);
+    lines.push('✅ Tất cả đã nhập TH '+scopeLabel);
   }
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   lines.push('📱 App: vunadab.github.io/KPI');

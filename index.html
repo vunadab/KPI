@@ -283,8 +283,15 @@ body.light-mode select option{background:#fff!important;color:#1a2e4a!important;
   <div class="sheet" style="max-height:80vh">
     <div class="handle"></div>
     <div style="padding:13px 16px 11px;border-bottom:1px solid #0e2a4444;flex-shrink:0">
-      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:3px">📤 Chia sẻ KPI qua Zalo</div>
-      <div style="font-size:11px;color:var(--dim)">Copy tin nhắn → paste vào nhóm Zalo phòng</div>
+      <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:6px">📤 Chia sẻ KPI qua Zalo</div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:8px">Chọn phạm vi → Copy → Paste vào nhóm Zalo</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="zalo-scope-tabs">
+        <button onclick="setZaloScope('thang')" id="ztab-thang" class="tb on" style="font-size:11px;padding:4px 10px">📅 Tháng</button>
+        <button onclick="setZaloScope('T1')" id="ztab-T1" class="tb" style="font-size:11px;padding:4px 10px">T1</button>
+        <button onclick="setZaloScope('T2')" id="ztab-T2" class="tb" style="font-size:11px;padding:4px 10px">T2</button>
+        <button onclick="setZaloScope('T3')" id="ztab-T3" class="tb" style="font-size:11px;padding:4px 10px">T3</button>
+        <button onclick="setZaloScope('T4')" id="ztab-T4" class="tb" style="font-size:11px;padding:4px 10px">T4</button>
+      </div>
     </div>
     <div style="padding:12px 15px;overflow-y:auto;flex:1">
       <div id="zalo-content" style="background:var(--bg2);border-radius:11px;padding:13px;border:1px solid var(--border);font-size:13px;color:#fff;line-height:1.7;white-space:pre-wrap;font-family:inherit"></div>
@@ -1355,13 +1362,15 @@ function printTimeline(){
 // Xếp hạng: cao → thấp
 // ══════════════════════════════════════════════════
 function printAllKPI(){
-  var m=S.month;var p=m.split('-');var mLabel='T'+(+p[1])+'/'+p[0];
+  var m=S.month;var p=m.split('-');
+  // scope đang chọn — nhất quán với Dashboard/Tuyên dương/Zalo
+  var tuans=scopeTuans();
+  var scopeLabel=S.scope==='thang'?'Cả tháng':S.scope==='ngay'?'Ngày':S.scope==='custom'?'Tuỳ chọn':S.scope;
+  var mLabel='T'+(+p[1])+'/'+p[0]+' · '+scopeLabel;
   var today=new Date();
-  var tuans=['T1','T2','T3','T4'];
   var kp=gKP(m);
-  var totLen=KPIS.length;
 
-  // Tổng TH phòng
+  // Tổng TH phòng theo scope
   var totTH={};
   KPIS.forEach(function(k){
     totTH[k.key]=NVS.reduce(function(s,nv){
@@ -1382,17 +1391,18 @@ function printAllKPI(){
     // Trinh không DN → DN=0%÷3, không chia 2 hay 6
     // Nhất quán: KH=0 → p=0 (không có KH), kh>0 mới tính %
     // (pct||0) → thay (pct!=null?pct:0) để tránh null NaN
-    var sc=STARS.reduce(function(s,k){
-      var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0);
-      var thV=th[k.key]||0;
-      var w=STAR_WEIGHTS[k.key]||1.0;
-      var p=kh>0?(pct(thV,kh)!=null?pct(thV,kh):0):0;
-      return s+p*w;
-    },0)/STARS.length;
-    return{nv:nv,th:th,sc:Math.round(sc)};
+    // nvScore() = weightedScore(m,ma,scopeTuans()) = (HD×1.0+DN×1.5+Thẻ×0.8)/3
+    // LUÔN chia STARS.length=3, nhất quán toàn app
+    var scRaw=nvScore(m,nv.ma);
+    return{nv:nv,th:th,sc:scRaw!=null?Math.round(scRaw):0,hasScore:scRaw!=null};
   });
-  // Xếp hạng cao → thấp
-  nvData.sort(function(a,b){return b.sc-a.sc;});
+  // Xếp hạng: có điểm trước (cao→thấp), chưa nhập xuống dưới
+  nvData.sort(function(a,b){
+    if(!a.hasScore&&!b.hasScore)return 0;
+    if(!a.hasScore)return 1;
+    if(!b.hasScore)return-1;
+    return b.sc-a.sc;
+  });
 
   // HTML header
   var thCols=KPIS.map(function(k){
@@ -2012,14 +2022,25 @@ function closePinModal(){closePin();}
 // INIT — Pause refresh khi nhập form
 // ══════════════════════════════════════════
 // ── Zalo Share ──
+function setZaloScope(zsc){
+  // Cập nhật active tab
+  ['thang','T1','T2','T3','T4'].forEach(function(t){
+    var btn=document.getElementById('ztab-'+t);
+    if(btn){btn.className=btn.className.replace(/\bon\b/g,'').trim();if(t===zsc)btn.className+=' on';}
+  });
+  buildZaloContent(zsc);
+}
+
 function openZaloShare(){
-  var m=S.month,p1=m.split('-');
-  var monthLabel='T'+(+p1[1])+'/'+p1[0];
-  // Scope đang chọn (Tháng/T1/T2/T3/T4/Ngày/Tuỳ chọn)
-  var tuans=scopeTuans();
-  var scopeLabel=S.scope==='thang'?'Tháng':
-    (S.scope==='ngay'?'Ngày '+formatDay(S.scopeDay):
-    (S.scope==='custom'?'Tuỳ chọn':S.scope));
+  var initScope=(S.scope==='T1'||S.scope==='T2'||S.scope==='T3'||S.scope==='T4')?S.scope:'thang';
+  setTimeout(function(){setZaloScope(initScope);},60);
+  showEl('zalo-modal');
+}
+
+function buildZaloContent(zScope){
+  var m=S.month,p1=m.split('-');var monthLabel='T'+(+p1[1])+'/'+p1[0];
+  var tuans=(zScope==='thang')?['T1','T2','T3','T4']:[zScope];
+  var scopeLabel=zScope==='thang'?'Tháng':zScope;
   var kp=gKP(m);
   // TH theo scope đang chọn
   var totalTH={};
@@ -2070,7 +2091,6 @@ function openZaloShare(){
   var content=lines.join('\n');
   var el=document.getElementById('zalo-content');
   if(el)el.textContent=content;
-  showEl('zalo-modal');
 }
 function closeZaloShare(){hideEl('zalo-modal');}
 function copyZalo(){

@@ -1125,6 +1125,37 @@ function rebuildStars(){
   KPIS.forEach(function(k){if(k.star)STARS.push(k);});
 }
 
+// Lưu KPIS + STAR_WEIGHTS lên Firebase config
+// → mọi tab (Nhập TH, Giao KH, Dashboard, Tuyên dương, PDF) tự nhận KPI mới
+function saveKPIS(){
+  var data={kpis:KPIS,weights:STAR_WEIGHTS};
+  fbSet('config/kpis_config',data).catch(function(e){
+    console.warn('saveKPIS error:',e);
+  });
+}
+
+// Load KPIS từ Firebase khi init — merge với DEFAULT nếu chưa có
+async function loadKPIS(){
+  try{
+    var d=await fbGet('config/kpis_config');
+    if(d&&d.kpis&&Array.isArray(d.kpis)&&d.kpis.length>0){
+      // Merge: giữ KPI gốc nếu không có trong Firebase
+      KPIS.length=0;
+      d.kpis.forEach(function(k){KPIS.push(k);});
+      if(d.weights){
+        Object.keys(d.weights).forEach(function(key){
+          STAR_WEIGHTS[key]=d.weights[key];
+        });
+      }
+      rebuildStars();
+      return true;
+    }
+  }catch(e){
+    console.warn('loadKPIS error:',e);
+  }
+  return false; // Dùng KPIS mặc định
+}
+
 function rBokpi(){
   var mainRows=KPIS.filter(function(k){return k.star;}).map(function(k){return bkRow(k,'main');}).join('')
     ||'<div style="padding:16px;text-align:center;font-size:12px;color:var(--dim)">Chưa có KPI trọng yếu</div>';
@@ -1204,6 +1235,7 @@ function bkAdd(){
   KPIS.push({key:key,label:name,icon:icon,unit:unit,star:isStar,color:color});
   STAR_WEIGHTS[key]=w;
   rebuildStars();
+  saveKPIS();
   var el=document.getElementById('bk-name');if(el)el.value='';
   var el2=document.getElementById('bk-unit');if(el2)el2.value='';
   render();
@@ -1214,6 +1246,7 @@ function bkToggle(key){
   if(!k)return;
   k.star=!k.star;
   rebuildStars();
+  saveKPIS();
   render();
 }
 
@@ -1225,6 +1258,7 @@ function bkEdit(key){
   var ws=prompt('Trọng số × (Báo cáo tổng quan):',(STAR_WEIGHTS[k.key]||1.0));
   if(ws!==null){var wn=parseFloat(ws);if(!isNaN(wn)&&wn>0)STAR_WEIGHTS[k.key]=wn;}
   rebuildStars();
+  saveKPIS();
   render();
 }
 
@@ -1235,6 +1269,7 @@ function bkDel(key){
   KPIS.splice(KPIS.findIndex(function(x){return x.key===key;}),1);
   delete STAR_WEIGHTS[key];
   rebuildStars();
+  saveKPIS();
   render();
 }
 
@@ -2155,7 +2190,7 @@ window.kpiInit = async function(){
     hideEl('loading');
     return;
   }
-  try{await loadNVS();await loadMonth(CUR_M);}catch(e){console.warn(e);}
+  try{await loadKPIS();await loadNVS();await loadMonth(CUR_M);}catch(e){console.warn(e);}
   hideEl('loading');
   var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
   render();

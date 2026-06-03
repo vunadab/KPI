@@ -1369,7 +1369,7 @@ function printTimeline(){
         +'<td>'+(d.sdt||'—')+'</td>'
         +'<td>'+spLabel+'</td>'
         +'<td>'+(gdL[d.gd]||d.gd)+'</td>'
-        +'<td style="color:'+col+';font-weight:900;font-size:12px">'+(diff<0?'🔴 QUÁ HẠN '+Math.abs(diff)+' NGÀY':diff===0?'🟡 HÔM NAY':diff<=3?'🟠 Còn '+diff+'d':d.gd==='hoan_tat'?'✅ Hoàn tất':'🟢 Còn '+diff+'d')+'</td>'
+        +'<td style="color:'+col+';font-weight:900;font-size:12px">'+(d.gd==='hoan_tat'?'✅ Hoàn tất':diff<0?'🔴 QUÁ HẠN '+Math.abs(diff)+' NGÀY':diff===0?'🟡 HÔM NAY':diff<=3?'🟠 Còn '+diff+'d':'🟢 Còn '+diff+'d')+'</td>'
         +'<td style="text-align:right">'+(d.gt?fmtDealGt(d):'—')+'</td>'
         +'<td style="color:#666;font-size:10px">'+(d.note||'')+'</td>'
         +'</tr>';

@@ -284,13 +284,30 @@ body.light-mode select option{background:#fff!important;color:#1a2e4a!important;
     <div class="handle"></div>
     <div style="padding:13px 16px 11px;border-bottom:1px solid #0e2a4444;flex-shrink:0">
       <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:6px">📤 Chia sẻ KPI qua Zalo</div>
-      <div style="font-size:11px;color:var(--dim);margin-bottom:8px">Chọn phạm vi → Copy → Paste vào nhóm Zalo</div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:8px">Chọn phạm vi → Copy → Paste vào nhóm hoặc gửi cho từng CV</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="zalo-mode-tabs">
+        <button onclick="setZaloMode('phong')" id="zmt-phong" class="tb on" style="font-size:11px;padding:4px 10px">🏢 Toàn phòng</button>
+        <button onclick="setZaloMode('canhan')" id="zmt-canhan" class="tb" style="font-size:11px;padding:4px 10px">👤 Cá nhân</button>
+      </div>
+      <div id="zalo-phong-opts">
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="zalo-scope-tabs">
         <button onclick="setZaloScope('thang')" id="ztab-thang" class="tb on" style="font-size:11px;padding:4px 10px">📅 Tháng</button>
         <button onclick="setZaloScope('T1')" id="ztab-T1" class="tb" style="font-size:11px;padding:4px 10px">T1</button>
         <button onclick="setZaloScope('T2')" id="ztab-T2" class="tb" style="font-size:11px;padding:4px 10px">T2</button>
         <button onclick="setZaloScope('T3')" id="ztab-T3" class="tb" style="font-size:11px;padding:4px 10px">T3</button>
         <button onclick="setZaloScope('T4')" id="ztab-T4" class="tb" style="font-size:11px;padding:4px 10px">T4</button>
+      </div>
+      </div><!-- end zalo-phong-opts -->
+      <div id="zalo-canhan-opts" style="display:none">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:6px">Chọn chuyên viên:</div>
+        <select id="zalo-nv-sel" onchange="buildZaloCanhan(this.value)" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-size:13px;font-weight:700;outline:none;margin-bottom:8px"></select>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="setZaloCanhanScope('thang')" id="ztab-cn-thang" class="tb on" style="font-size:11px;padding:4px 10px">📅 Tháng</button>
+          <button onclick="setZaloCanhanScope('T1')" id="ztab-cn-T1" class="tb" style="font-size:11px;padding:4px 10px">T1</button>
+          <button onclick="setZaloCanhanScope('T2')" id="ztab-cn-T2" class="tb" style="font-size:11px;padding:4px 10px">T2</button>
+          <button onclick="setZaloCanhanScope('T3')" id="ztab-cn-T3" class="tb" style="font-size:11px;padding:4px 10px">T3</button>
+          <button onclick="setZaloCanhanScope('T4')" id="ztab-cn-T4" class="tb" style="font-size:11px;padding:4px 10px">T4</button>
+        </div>
       </div>
     </div>
     <div style="padding:12px 15px;overflow-y:auto;flex:1">
@@ -618,6 +635,8 @@ function rHdr(){
     +'<span class="tag tag-b">'+CUR_T+'</span>'
     +'</div>'+khTabs+'</div>';
 }
+
+
 
 function rNav(){
   var alertCnt=NVS.filter(function(nv){var kh=gKT(S.month,CUR_T,nv.ma),th=gTH(S.month,CUR_T,nv.ma);return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});}).length;
@@ -2058,6 +2077,185 @@ function closePinModal(){closePin();}
 // INIT — Pause refresh khi nhập form
 // ══════════════════════════════════════════
 // ── Zalo Share ──
+// ── ZALO MODE: Toàn phòng vs Cá nhân ──
+function setZaloMode(mode){
+  // Active tab mode
+  document.querySelectorAll('#zalo-mode-tabs .tb').forEach(function(b){
+    b.className=b.className.replace(' on','').replace('on','');
+  });
+  var mBtn=document.getElementById('zmt-'+mode);
+  if(mBtn)mBtn.className+=' on';
+  // Show/hide options
+  var phong=document.getElementById('zalo-phong-opts');
+  var canhan=document.getElementById('zalo-canhan-opts');
+  if(phong)phong.style.display=mode==='phong'?'':'none';
+  if(canhan)canhan.style.display=mode==='canhan'?'':'none';
+  if(mode==='canhan'){
+    // Populate NV select
+    var sel=document.getElementById('zalo-nv-sel');
+    if(sel){
+      sel.innerHTML='<option value="">-- Chọn chuyên viên --</option>'+
+        NVS.map(function(nv){
+          return '<option value="'+nv.ma+'">'+nv.ten+'</option>';
+        }).join('');
+    }
+    // Nếu đang đăng nhập → tự chọn NV của mình
+    var curNV=NVS.find(function(nv){return nv.ma===S.selNV;});
+    if(curNV&&sel){
+      sel.value=curNV.ma;
+      buildZaloCanhan(curNV.ma);
+    } else {
+      var el=document.getElementById('zalo-content');
+      if(el)el.textContent='← Chọn chuyên viên để xem nội dung';
+    }
+  } else {
+    // Mode phòng: giữ scope hiện tại
+    var initScope=(S.scope==='T1'||S.scope==='T2'||S.scope==='T3'||S.scope==='T4')?S.scope:'thang';
+    setZaloScope(initScope);
+  }
+}
+
+var _zaloCanhanScope='thang';
+function setZaloCanhanScope(sc){
+  _zaloCanhanScope=sc;
+  ['thang','T1','T2','T3','T4'].forEach(function(t){
+    var btn=document.getElementById('ztab-cn-'+t);
+    if(btn){btn.className=btn.className.replace(' on','').replace('on','');if(t===sc)btn.className+=' on';}
+  });
+  var ma=document.getElementById('zalo-nv-sel').value;
+  if(ma)buildZaloCanhan(ma);
+}
+
+function buildZaloCanhan(ma){
+  if(!ma){
+    var el=document.getElementById('zalo-content');
+    if(el)el.textContent='← Chọn chuyên viên để xem nội dung';
+    return;
+  }
+  var nv=NVS.find(function(n){return n.ma===ma;});
+  if(!nv)return;
+  var m=S.month,p1=m.split('-');
+  var monthLabel='T'+(+p1[1])+'/'+p1[0];
+  var sc=_zaloCanhanScope;
+  var isThang=sc==='thang';
+  var tuans=isThang?['T1','T2','T3','T4']:[sc];
+  var scopeLabel=isThang?'Cả tháng':sc;
+  var today=new Date();
+  var dateStr=today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
+  var curTuan=CUR_T||'T1';
+  var lines=[];
+
+  // ── TIÊU ĐỀ ──
+  lines.push('📋 BÁO CÁO CÔNG VIỆC');
+  lines.push('👤 '+nv.ten);
+  lines.push('🏦 NAB · KHCN · '+monthLabel+' ('+scopeLabel+')');
+  lines.push('📅 Ngày: '+dateStr);
+  lines.push('══════════════════════');
+
+  // ── I. KẾT QUẢ CHỈ TIÊU ──
+  lines.push('I. KẾT QUẢ CHỈ TIÊU');
+  lines.push('──────────────────────');
+
+  var hasAnyKPI=false;
+  KPIS.forEach(function(k){
+    var khThang=['T1','T2','T3','T4'].reduce(function(a,t){
+      return a+(gKT(m,t,ma)[k.key]||0);},0);
+    var khTuan=gKT(m,curTuan,ma)[k.key]||0;
+    var khScope=tuans.reduce(function(a,t){return a+(gKT(m,t,ma)[k.key]||0);},0);
+    if(khThang===0&&khTuan===0)return;
+    hasAnyKPI=true;
+    var th=tuans.reduce(function(a,t){var v=gTH(m,t,ma)[k.key];return a+(v!=null?v:0);},0);
+    var hasAnyTH=tuans.some(function(t){return gTH(m,t,ma)[k.key]!=null;});
+    var pThang=khThang>0?Math.round(pct(th,khThang)):null;
+    var pScope=khScope>0?Math.round(pct(th,khScope)):null;
+    // Icon dựa trên % tháng (scope tháng) hoặc % tuần (scope tuần)
+    var baseP=isThang?pThang:pScope;
+    var dot=!hasAnyTH?'⬜':baseP===null?'⬜':baseP>=100?'🟢':baseP>=80?'🟡':baseP>=50?'🟠':'🔴';
+    var star=k.star?' ★':'';
+
+    // Dòng 1: icon + tên KPI
+    lines.push(dot+' '+k.label+star);
+
+    // Dòng 2: TH / KH tuần / KH tháng (gọn 1 dòng)
+    var thStr='   TH: '+fmt(th,k.unit);
+    if(isThang){
+      // Xem tháng: TH / KH tuần hiện tại / KH tháng
+      if(khTuan>0) thStr+=' / KH '+curTuan+': '+fmt(khTuan,k.unit);
+      if(khThang>0) thStr+=' / KH tháng: '+fmt(khThang,k.unit);
+    } else {
+      // Xem tuần: TH / KH tuần / KH tháng
+      if(khScope>0) thStr+=' / KH '+sc+': '+fmt(khScope,k.unit);
+      if(khThang>0) thStr+=' / KH tháng: '+fmt(khThang,k.unit);
+    }
+    lines.push(thStr);
+
+    // Dòng 3: % đạt tuần / % đạt tháng
+    var datStr='   Đạt: ';
+    if(!hasAnyTH){
+      datStr+='chưa nhập';
+    } else if(isThang){
+      var pTuan=(khTuan>0)?Math.round(pct(gTH(m,curTuan,ma)[k.key]||0,khTuan)):null;
+      datStr+=(pTuan!==null?pTuan+'% KH '+curTuan:'-')
+             +(pThang!==null?' / '+pThang+'% KH tháng':'');
+    } else {
+      datStr+=(pScope!==null?pScope+'% KH '+sc:'-')
+             +(pThang!==null?' / '+pThang+'% KH tháng':'');
+    }
+    lines.push(datStr);
+  });
+
+  if(!hasAnyKPI)lines.push('(Chưa có chỉ tiêu trong kỳ này)');
+
+  // Điểm tổng
+  lines.push('──────────────────────');
+  var score=weightedScore(m,ma,tuans);
+  if(score!==null){
+    var si=score>=100?'⚡ Xuất sắc':score>=80?'✅ Tốt':score>=50?'⚠️ Trung bình':'🚨 Cần cải thiện';
+    lines.push('→ Điểm KPI: '+Math.round(score)+'% — '+si);
+  }
+
+  // ── II. PIPELINE ──
+  lines.push('══════════════════════');
+  lines.push('II. PIPELINE KH');
+  lines.push('──────────────────────');
+  var stageMap={
+    'tiep_can':'Tiếp cận','tu_van':'Tư vấn',
+    'de_xuat':'Đề xuất','xu_ly':'Xử lý',
+    'cho_duyet':'Chờ duyệt','hoan_tat':'Hoàn tất'
+  };
+  var deals=getAllDeals(m).filter(function(d){return d.ma===ma;});
+  var active=deals.filter(function(d){return d.gd!=='hoan_tat';});
+  var done=deals.filter(function(d){return d.gd==='hoan_tat';});
+  if(deals.length===0){
+    lines.push('(Chưa có deal trong kỳ)');
+  } else {
+    lines.push('Tổng: '+deals.length+' deal | HT: '+done.length+' | Đang xử lý: '+active.length);
+    if(active.length>0){
+      lines.push('· Đang xử lý:');
+      active.forEach(function(d){
+        var han=d.han?new Date(d.han):null;
+        var diff=han?Math.ceil((han-today)/86400000):null;
+        var tgThai=!han?'':diff<0?'🔴 Quá hạn':diff===0?'🟡 Hôm nay':diff<=3?'🟠 Còn '+diff+'d':'🟢 Còn '+diff+'d';
+        lines.push('  '+(tgThai?tgThai+' ':'')+d.kh+(d.gt?' ('+d.gt.toLocaleString()+'tr)':'')
+          +' — '+(stageMap[d.gd]||d.gd));
+      });
+    }
+    if(done.length>0){
+      lines.push('· Hoàn tất:');
+      done.forEach(function(d){
+        // Deal hoàn tất: chỉ hiện ✅ Hoàn tất, không tính ngày
+        lines.push('  ✅ '+d.kh+(d.gt?' ('+d.gt.toLocaleString()+'tr)':''));
+      });
+    }
+  }
+  lines.push('══════════════════════');
+  lines.push('Báo cáo từ KPI Banking NAB');
+
+  var content=lines.join('\n');
+  var el=document.getElementById('zalo-content');
+  if(el)el.textContent=content;
+}
+
 function setZaloScope(zsc){
   // Cập nhật active tab
   ['thang','T1','T2','T3','T4'].forEach(function(t){
@@ -2071,6 +2269,8 @@ function openZaloShare(){
   var initScope=(S.scope==='T1'||S.scope==='T2'||S.scope==='T3'||S.scope==='T4')?S.scope:'thang';
   setTimeout(function(){setZaloScope(initScope);},60);
   showEl('zalo-modal');
+  // Reset về mode phòng mỗi lần mở
+  setTimeout(function(){setZaloMode('phong');},60);
 }
 
 function buildZaloContent(zScope){

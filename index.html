@@ -1297,7 +1297,7 @@ function bkDel(key){
 // ══════════════════════════════════════════════════
 function rTimeline(){
   var m=S.month;
-  var deals=getAllDeals(m).filter(function(d){return d.gd!=='hoan_tat'&&d.han;});
+  var deals=getAllDeals(m).filter(function(d){return d.han||d.gd==='hoan_tat';});
   deals.sort(function(a,b){return new Date(a.han)-new Date(b.han);});
   if(!deals.length)return '<div style="padding:14px;text-align:center;font-size:12px;color:var(--dim)">Pipeline chưa có deal nào có hạn</div>';
   var today=new Date();today.setHours(0,0,0,0);
@@ -1310,8 +1310,9 @@ function rTimeline(){
     var dObj=new Date(d.han);
     var ds=dObj.getDate()+'/'+(dObj.getMonth()+1);
     var diff=Math.ceil((dObj-today)/86400000);
-    var uc=diff<0?'#ff4757':diff<=3?'#ff9f43':diff<=7?'#ffc84a':'#00c48c';
-    var urgTxt=diff<0?'Quá '+Math.abs(diff)+'d':diff===0?'Hôm nay':diff<=3?diff+'d còn':'';
+    var isDone=d.gd==='hoan_tat';
+    var uc=isDone?'#00c48c':diff<0?'#ff4757':diff<=3?'#ff9f43':diff<=7?'#ffc84a':'#00c48c';
+    var urgTxt=isDone?'✅ Done':diff<0?'Quá '+Math.abs(diff)+'d':diff===0?'Hôm nay':diff<=3?diff+'d còn':'';
     var spLabel=(KPIS.find(function(k){return k.key===d.sp;})||{label:d.sp||'—'}).label;
     if(ds!==lastDate){
       if(lastDate)html+='</div>';
@@ -2009,20 +2010,6 @@ function buildReport(m,scope){
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📈 I. TỔNG QUAN KPI — '+(isTuan?scope+' (so với KH tuần)':'Cả tháng (so với KH tháng)')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+kpiCards+'</div></div>'
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ 3 KPIs TRỌNG ĐIỂM ('+nvData.length+' NV)</div>'
     +'<table><thead><tr><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;width:30px;text-align:center">#</th><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:left">Họ và tên</th>'+thHead+'<th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:center">Điểm TB</th></tr></thead><tbody>'+nvRows+'</tbody></table></div>'
-    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🚨 III. CẢNH BÁO</div>'+warnHtml2+'</div>'
-    +(allDeals.length?'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📋 IV. PIPELINE — '+allDeals.length+' DEALS · '+fmt(plTotalVal(allDeals),'tr đ')+'</div>'
-    +'<table><thead><tr>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Chuyên viên</th>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Sản phẩm</th>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:center">Giai đoạn</th>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800;text-align:right">Giá trị</th>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Tên KH</th>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">SĐT KH</th>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Địa chỉ (Dư nợ)</th>'
-    +'<th style="padding:7px 9px;color:#fff;font-size:10px;font-weight:800">Hạn</th>'
-    +'</tr></thead><tbody>'+plRows+'</tbody></table></div>':'')
-    +'<div style="margin-top:22px;padding-top:11px;border-top:1px solid #eee;display:flex;justify-content:space-between">'
-    +'<div><div style="font-weight:800;color:#1a3a6e;font-size:11px">Nam A Bank — Phòng KHCN</div><div style="font-size:10px;color:#aaa;margin-top:1px">Tài liệu nội bộ — Không phổ biến</div></div>'
     +'<div style="text-align:right"><div style="font-weight:800;color:#1a3a6e;font-size:11px">'+monthLabel+' · '+scopeLabel+'</div><div style="font-size:10px;color:#aaa;margin-top:1px">KPI Banking NAB System</div></div></div>'
     +'</div></body></html>';
 }
@@ -2308,7 +2295,8 @@ function buildZaloContent(zScope){
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   KPIS.forEach(function(k){
     var th=totalTH[k.key]||0;
-    var kh=S.scope==='thang'?(kp[k.key]||0):(totalKH[k.key]||0);
+    // Xem Tháng → KH tháng | Xem Tuần → KH tuần đúng scope
+    var kh=zScope==='thang'?(kp[k.key]||0):(totalKH[k.key]||0);
     var p=kh>0?pct(th,kh):null;
     var icon=p===null?'⬜':p>=100?'🟢':p>=70?'🟡':p>=40?'🟠':'🔴';
     var star=k.star?' ⭐':'';

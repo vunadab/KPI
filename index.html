@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>KPI Banking - NAB</title>
@@ -222,40 +222,6 @@ body.light-mode select option{background:#fff!important;color:#1a2e4a!important;
 .ai-inp:focus{border-color:var(--purple)}
 .ai-inp::placeholder{color:var(--dim)}
 .ai-sbtn{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-button,input,select,textarea{min-height:36px}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--blue2);outline-offset:2px}
-.nvi,.ri,.wi,.card,.ff,.chart-wrap,.pl-deal,.bk-row{box-shadow:0 10px 30px rgba(0,0,0,.12)}
-.gold-btn,.bsave,.ab-btn,.ai-sbtn,.tb,.sbb,.nb,.pl-btn,.bk-btn{transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease,background .15s ease}
-.gold-btn:hover,.bsave:hover,.ab-btn:hover{box-shadow:0 8px 24px rgba(232,160,32,.18)}
-@media (hover:hover){
-  .nvi:hover,.ri:hover,.wi:hover,.pl-deal:hover,.bk-row:hover{border-color:var(--border2);transform:translateY(-1px)}
-  .tb:hover,.sbb:hover,.pl-btn:hover,.bk-btn:hover{border-color:var(--blue2)}
-}
-@media (min-width:860px){
-  body{background:linear-gradient(180deg,var(--bg0),var(--bg1))}
-  #app{max-width:1120px;padding-bottom:96px}
-  .hdr,.nav{max-width:1120px}
-  .pad{padding:18px 22px}
-  .kg{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-  .card,.ff,.chart-wrap{padding:16px;margin-bottom:12px}
-  .nav{border-radius:18px 18px 0 0;box-shadow:0 -14px 36px rgba(0,0,0,.22)}
-  .ai-wrap{height:calc(100vh - 210px)}
-}
-@media (min-width:1180px){
-  .kg{grid-template-columns:repeat(6,minmax(0,1fr))}
-  .kc-val{font-size:16px}
-}
-@media (max-width:360px){
-  .hdr{padding-left:11px;padding-right:11px}
-  .logo-tx{font-size:15px}
-  .nb{font-size:7.5px}
-  .nb-ic{font-size:15px}
-  .kg{gap:7px}
-  .kc{padding:10px}
-}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}
-}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#01050d">
@@ -445,11 +411,11 @@ function initPhong(){
     }
   }catch(e){}
   // Nếu chỉ có 1 phòng → dùng luôn
-  if(PHONG_LIST.length===1){CUR_PHONG=PHONG_LIST[0];ROOT=PHONG_LIST[0].root;PIN=CUR_PHONG.pin||PIN;return true;}
+  if(PHONG_LIST.length===1){CUR_PHONG=PHONG_LIST[0];ROOT=PHONG_LIST[0].root;return true;}
   return false;
 }
 
-async function selectPhong(id){
+function selectPhong(id){
   var found=PHONG_LIST.filter(function(p){return p.id===id;})[0];
   if(!found)return;
   CUR_PHONG=found;ROOT=found.root;
@@ -457,8 +423,7 @@ async function selectPhong(id){
   PIN=found.pin;
   try{localStorage.setItem('kpi_phong',id);}catch(e){}
   hideEl('phong-select-modal');
-  showEl('loading');
-  await startKpiApp();
+  init();
 }
 async function fbGet(p){try{var r=await fetch(DB+'/'+ROOT+'/'+p+'.json');if(!r.ok)return null;var d=await r.json();return d===null?null:d;}catch(e){console.warn('fbGet',e.message);return null;}}
 async function fbSet(p,d){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){console.warn('fbSet',e.message);}}
@@ -466,7 +431,7 @@ async function fbDel(p){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'DELET
 
 // ── PIN ──
 var PIN='1234',pinBuf='',pinAuth=false,pinCb=null;
-function openPin(cb){pinBuf='';pinCb=cb;setText('pin-err','');showEl('pin-modal');rPinDots();}
+function openPin(cb){pinBuf='';pinCb=cb;showEl('pin-modal');rPinDots();}
 function closePin(){hideEl('pin-modal');pinBuf='';pinCb=null;}
 function rPinDots(){for(var i=0;i<4;i++){var d=document.getElementById('pd'+i);if(d)d.className='pin-dot'+(i<pinBuf.length?' fill':'');}}
 function pinAdd(n){
@@ -484,8 +449,6 @@ function hideEl(id){var e=document.getElementById(id);if(e)e.style.display='none
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setHTML(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;}
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
-function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});}
-function renderAiText(text){return esc(text).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');}
 function fmt(v,u){if(v==null)return'—';var n=+v;return isNaN(n)?'—':n.toLocaleString('vi-VN')+(u?' '+u:'');}
 function pct(th,kh){return(kh&&kh>0&&th!=null)?th/kh*100:null;}
 function fmtDealGt(d){
@@ -499,8 +462,8 @@ function p2s(p){return p===null?'—':Math.round(p)+'%';}
 function pc(p){if(p===null)return'#2a4060';if(p>=100)return'#00c48c';if(p>=70)return'#e8a020';if(p>=40)return'#ff9f43';return'#ff4757';}
 function stl(p){if(p===null)return{l:'Chưa KH',c:'#2a4060'};if(p>=100)return{l:'✅ Đạt',c:'#00c48c'};if(p>=70)return{l:'⚡ Tốt',c:'#e8a020'};if(p>=40)return{l:'⚠️ TB',c:'#ff9f43'};return{l:'🚨 Yếu',c:'#ff4757'};}
 function acC(ma){var c=['#e8a020','#1a6fff','#7c4dff','#00c48c','#ff6b9d','#00d2ff','#ff9f43','#a855f7'];var h=0;for(var i=0;i<ma.length;i++)h=(h*31+ma.charCodeAt(i))%c.length;return c[h];}
-function av(name,ma,sz){sz=sz||36;var c=acC(ma),i=String(name||'?').split(' ').pop()[0]||'?';return '<div class="av" style="width:'+sz+'px;height:'+sz+'px;background:'+c+'18;border:1.5px solid '+c+'42;color:'+c+';font-size:'+Math.round(sz*.38)+'px">'+esc(i)+'</div>';}
-function chip(l,c){return '<span class="chip" style="background:'+c+'18;color:'+c+';border-color:'+c+'30">'+esc(l)+'</span>';}
+function av(name,ma,sz){sz=sz||36;var c=acC(ma),i=name.split(' ').pop()[0]||'?';return '<div class="av" style="width:'+sz+'px;height:'+sz+'px;background:'+c+'18;border:1.5px solid '+c+'42;color:'+c+';font-size:'+Math.round(sz*.38)+'px">'+i+'</div>';}
+function chip(l,c){return '<span class="chip" style="background:'+c+'18;color:'+c+';border-color:'+c+'30">'+l+'</span>';}
 function fmtTs(ts){if(!ts)return'';var d=new Date(ts);return d.getDate()+'/'+(d.getMonth()+1)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
 function fmtM(m){var p=m.split('-');return 'T'+(+p[1])+'/'+p[0];}
 function genDealId(){return 'd'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
@@ -804,7 +767,7 @@ function aiAddMsg(role,text){
   d.className='ai-msg'+(role==='usr'?' usr':'');
   d.innerHTML='<div class="ai-av '+(role==='usr'?'me':'bot')+'">'+(role==='usr'?'V':'🤖')+'</div>'
     +'<div class="ai-bbl '+(role==='usr'?'usr':'bot')+'">'
-    +renderAiText(text)
+    +text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
     +'</div>';
   msgs.appendChild(d);
   msgs.scrollTop=msgs.scrollHeight;
@@ -844,7 +807,7 @@ function rAI(){
     return '<div class="ai-msg'+(msg.role==='usr'?' usr':'')+'">'
       +'<div class="ai-av '+(msg.role==='usr'?'me':'bot')+'">'+(msg.role==='usr'?'V':'🤖')+'</div>'
       +'<div class="ai-bbl '+(msg.role==='usr'?'usr':'bot')+'">'
-      +renderAiText(msg.text)
+      +msg.text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
       +'</div></div>';
   }).join('');
 
@@ -1322,7 +1285,9 @@ var nvData=fnvs.map(function(nv){
 });
   var kCards=KPIS.map(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px"><div><div class="kc-lbl">'+k.label+'</div><div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div><div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div><div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)+'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'+(kh>0?bar(th,kh,k.color):'')+(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:#ff4757;margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')+'</div>';}).join('');
   var ranks=nvData.slice(0,12).map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
-  return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div><div class="pad" style="padding-top:4px">'+rNVFilter()+'<div class="sec">Tổng hợp · '+fmtM(m)+'</div><div class="kg">'+kCards+'</div>'+(S.scope==='thang'?rBarChart(m):'')+''+rDonut(m)+''+rPlWidget(m)+'<div class="sec">🏆 Xếp hạng</div>'+ranks+'<div class="sec">📅 Timeline cam kết Pipeline</div><div style="margin-bottom:8px">'+rTimeline()+'</div></div>';
+  return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div><div class="pad" style="padding-top:4px">'+rNVFilter()+'<div class="sec">Tổng hợp · '+fmtM(m)+'</div><div class="kg">'+kCards+'</div>'+(S.scope==='thang'?rBarChart(m):'')+''+rDonut(m)+''+rPlWidget(m)+'<div class="sec">🏆 Xếp hạng</div>'+ranks+'</div>';
+    +'<div class="sec">📅 Timeline cam kết Pipeline</div>'
+    +'<div style="margin-bottom:8px">'+rTimeline()+'</div>'
 }
 
 function rDashDetail(){
@@ -1542,10 +1507,9 @@ function rTimeline(){
   var gdL={tiep_can:'Tiếp cận',tu_van:'Tư vấn',de_xuat:'Đề xuất',xu_ly:'Xử lý',cho_duyet:'Chờ duyệt',hoan_tat:'Hoàn tất'};
   var html='';var lastDate='';
   deals.forEach(function(d){
-    var dealMa=d.ma||d.nvMa;
-    var nv=NVS.find(function(n){return n.ma===dealMa;});
-    var nvName=nv?nv.ten.split(' ').pop():(d.ten?d.ten.split(' ').pop():'?');
-    var nvColor=dealMa?('hsl('+((dealMa.charCodeAt(0)*37)%360)+',50%,60%)'):'#7a96b8';
+    var nv=NVS.find(function(n){return n.ma===d.nvMa;});
+    var nvName=nv?nv.ten.split(' ').pop():'?';
+    var nvColor=nv?('hsl('+((nv.ma.charCodeAt(0)*37)%360)+',50%,60%)'):'#7a96b8';
     var dObj=new Date(d.han);
     var ds=dObj.getDate()+'/'+(dObj.getMonth()+1);
     var diff=Math.ceil((dObj-today)/86400000);
@@ -2518,7 +2482,7 @@ function buildZaloContent(zScope){
   // KH theo scope đang chọn
   var totalKH={};
   KPIS.forEach(function(k){
-    totalKH[k.key]=zScope==='thang'?
+    totalKH[k.key]=tuans==['T1','T2','T3','T4']?
       (kp[k.key]||0):
       NVS.reduce(function(s,nv){return s+tuans.reduce(function(s2,t){return s2+(gKT(m,t,nv.ma)[k.key]||0);},0);},0);
   });
@@ -2560,25 +2524,19 @@ function buildZaloContent(zScope){
   if(el)el.textContent=content;
 }
 function closeZaloShare(){hideEl('zalo-modal');}
-function copyTextFallback(text){
-  var ta=document.createElement('textarea');
-  ta.value=text;ta.setAttribute('readonly','');
-  ta.style.position='fixed';ta.style.left='-9999px';
-  document.body.appendChild(ta);ta.select();
-  try{document.execCommand('copy');}catch(e){}
-  document.body.removeChild(ta);
-}
 function copyZalo(){
   var el=document.getElementById('zalo-content');
   if(!el)return;
   var btn=document.getElementById('zalo-copy-btn');
-  function copied(){if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}}
   if(navigator.clipboard){
     navigator.clipboard.writeText(el.textContent).then(function(){
-      copied();
-    }).catch(function(){copyTextFallback(el.textContent);copied();});
+      if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}
+    });
   } else {
-    copyTextFallback(el.textContent);copied();
+    var ta=document.createElement('textarea');
+    ta.value=el.textContent;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    if(btn){btn.textContent='✅ Đã copy!';setTimeout(function(){btn.textContent='📋 Copy tin nhắn';},2000);}
   }
 }
 
@@ -2606,25 +2564,6 @@ function toggleTheme(){
   applyTheme();
   render();
 }
-var kpiRefreshTimer=null;
-async function startKpiApp(){
-  try{await loadKPIS();await loadNVS();await loadMonth(CUR_M);}catch(e){console.warn(e);}
-  hideEl('loading');
-  var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
-  render();
-  ensureRefreshTimer();
-}
-function ensureRefreshTimer(){
-  if(kpiRefreshTimer)return;
-  kpiRefreshTimer=setInterval(async function(){
-    var ae=document.activeElement;
-    var typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT');
-    if(typing||S.selNV||S.plFormNV)return;
-    await loadNVS();
-    await loadMonth(S.month);
-    render();
-  },20000);
-}
 window.kpiInit = async function(){
   // Khởi tạo phòng
   // Load theme đã lưu
@@ -2635,16 +2574,30 @@ window.kpiInit = async function(){
     var btns=document.getElementById('phong-list-btns');
     if(btns){
       btns.innerHTML=PHONG_LIST.map(function(p){
-        return '<button onclick="selectPhong(\''+p.id+'\')" style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px;text-align:left">'
-          +'<div style="width:40px;height:40px;border-radius:11px;background:#1a6fff20;border:1px solid #1a6fff35;display:flex;align-items:center;justify-content:center;font-size:18px">&#127962;</div>'
-          +'<div><div>'+esc(p.ten)+'</div><div style="font-size:11px;color:#6a8aab;font-weight:600;margin-top:2px">'+esc(p.root)+'</div></div></button>';
+        var btn=document.createElement('button');
+        btn.style.cssText='width:100%;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px;text-align:left';
+        btn.innerHTML='<div style="width:40px;height:40px;border-radius:11px;background:#1a6fff20;border:1px solid #1a6fff35;display:flex;align-items:center;justify-content:center;font-size:18px">&#127962;</div><div><div>'+p.ten+'</div><div style="font-size:11px;color:#6a8aab;font-weight:600;margin-top:2px">'+p.root+'</div></div>';
+        btn.onclick=function(){selectPhong(p.id);};
+        return btn.outerHTML;
       }).join('');
     }
     document.getElementById('phong-select-modal').style.display='flex';
     hideEl('loading');
     return;
   }
-  await startKpiApp();
+  try{await loadKPIS();await loadNVS();await loadMonth(CUR_M);}catch(e){console.warn(e);}
+  hideEl('loading');
+  var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
+  render();
+  setInterval(async function(){
+    var ae=document.activeElement;
+    var typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT');
+    if(typing||S.selNV||S.plFormNV)return;
+    // loadNVS để đồng bộ khi TP thêm/xóa NV từ thiết bị khác
+    await loadNVS();
+    await loadMonth(S.month);
+    render();
+  },20000);
 }
 // Firebase Auth gọi kpiInit() sau xác thực
 
@@ -2656,7 +2609,6 @@ if('serviceWorker' in navigator){
         // Khi có SW mới → tự động reload để lấy code mới nhất
         reg.addEventListener('updatefound', function(){
           var newSW=reg.installing;
-          if(!newSW)return;
           newSW.addEventListener('statechange', function(){
             if(newSW.state==='installed'&&navigator.serviceWorker.controller){
               // SW mới đã sẵn sàng - reload để áp dụng
@@ -2680,7 +2632,6 @@ var isInStandalone=window.navigator.standalone===true;
 // iOS: hiện hướng dẫn thủ công nếu chưa cài
 if(isIOS&&!isInStandalone){
   setTimeout(function(){
-    try{if(localStorage.getItem('pwa_dismissed')==='1')return;}catch(e){}
     var banner=document.getElementById('pwa-banner');
     if(banner)banner.style.display='flex';
     // Đổi nội dung banner cho iOS
@@ -2694,7 +2645,6 @@ if(isIOS&&!isInStandalone){
 // Android: dùng beforeinstallprompt
 window.addEventListener('beforeinstallprompt',function(e){
   e.preventDefault();deferredPrompt=e;
-  try{if(localStorage.getItem('pwa_dismissed')==='1')return;}catch(err){}
   var banner=document.getElementById('pwa-banner');
   if(banner)banner.style.display='flex';
 });
@@ -2713,7 +2663,7 @@ function closePWABanner(){
 </script>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getAuth,signInWithEmailAndPassword,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 const C={apiKey:"AIzaSyDUIkD_-0vh5AM5drPgxdvWOIVxXrSEvnc",authDomain:"kpi-banking-nab.firebaseapp.com",databaseURL:"https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"kpi-banking-nab",storageBucket:"kpi-banking-nab.firebasestorage.app",messagingSenderId:"943885730972",appId:"1:943885730972:web:191f7fa4d451157d3f5959"};
 const auth=getAuth(initializeApp(C));
 onAuthStateChanged(auth,u=>{
@@ -2748,7 +2698,7 @@ window.doSignIn=async function(){
   }
 };
 window.doSignOut=async function(){
-  try{await signOut(auth);}catch(e){window.location.reload();}
+  try{await auth.signOut();}catch(e){window.location.reload();}
 };
 </script>
 </body>

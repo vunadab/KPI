@@ -196,6 +196,32 @@ body.light-mode select option{background:#fff!important;color:#1a2e4a!important;
 .ab-btn:disabled{opacity:.5;cursor:not-allowed;}
 .ab-err{color:#ff6b7a;font-size:12px;font-weight:700;min-height:18px;margin-bottom:8px;}
 .ab-spin{color:#6a8aab;font-size:12px;margin-top:10px;display:none;}
+
+/* ── AI COACH ── */
+.ai-wrap{display:flex;flex-direction:column;height:calc(100vh - 190px)}
+.ai-chat{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{display:flex;gap:8px;align-items:flex-end;animation:aifu .2s}
+.ai-msg.usr{flex-direction:row-reverse}
+@keyframes aifu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ai-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.ai-av.bot{background:linear-gradient(135deg,var(--purple),var(--blue))}
+.ai-av.me{background:var(--gold);color:#030810;font-weight:800;font-size:11px}
+.ai-bbl{padding:9px 12px;border-radius:12px;font-size:12px;line-height:1.65;max-width:84%}
+.ai-bbl.bot{background:var(--card2);border:1px solid var(--border);border-radius:4px 12px 12px 12px}
+.ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52ee);border-radius:12px 4px 12px 12px}
+.ai-typing{display:flex;gap:4px;align-items:center;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:4px 12px 12px 12px;width:56px}
+.ai-typing span{width:6px;height:6px;border-radius:50%;background:var(--dim);animation:aidot 1s infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes aidot{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.ai-qbtns{padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border);background:var(--bg1)}
+.ai-qb{padding:6px 11px;background:var(--card);border:1px solid var(--border2);border-radius:20px;font-size:11px;font-weight:700;color:var(--dim);cursor:pointer;white-space:nowrap;transition:.15s}
+.ai-qb:active{border-color:var(--purple);color:#c49dff}
+.ai-inrow{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg1)}
+.ai-inp{flex:1;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:20px;padding:8px 14px;font-size:13px;outline:none;font-family:inherit}
+.ai-inp:focus{border-color:var(--purple)}
+.ai-inp::placeholder{color:var(--dim)}
+.ai-sbtn{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#01050d">
@@ -647,11 +673,178 @@ function rHdr(){
 
 
 
+
+// ══════════════════════════════════════════
+// AI COACH — Gemini 2.5 Flash
+// ══════════════════════════════════════════
+
+function buildAIContext(){
+  var m=S.month,p=m.split('-');
+  var scope=S.scope==='thang'?'Cả tháng':S.scope;
+  var tuans=scopeTuans();
+  var today=new Date();
+  var ctx='PHÒNG KHCN NAB | T'+(+p[1])+'/'+p[0]+' | '+scope+'\n';
+
+  // KH và TH phòng
+  ctx+='KH: ';
+  KPIS.forEach(function(k){var kh=gKP(m)[k.key]||0;if(kh>0)ctx+=k.label+'='+fmt(kh,k.unit)+' ';});
+  ctx+='\nTH: ';
+  KPIS.forEach(function(k){
+    var th=NVS.reduce(function(s,nv){return s+tuans.reduce(function(a,t){return a+(gTH(m,t,nv.ma)[k.key]||0);},0);},0);
+    var kh=gKP(m)[k.key]||0;
+    if(kh>0)ctx+=k.label+'='+fmt(th,k.unit)+'('+Math.round(th/kh*100)+'%) ';
+  });
+  ctx+='\n\nKẾT QUẢ TỪNG NV:\n';
+
+  NVS.forEach(function(nv){
+    var sc=nvScore(m,nv.ma);
+    var hasAny=KPIS.some(function(k){return tuans.some(function(t){return gTH(m,t,nv.ma)[k.key]!=null;});});
+    if(!hasAny){ctx+=nv.ten+': chưa nhập TH\n';return;}
+    ctx+=nv.ten+' ['+( sc!==null?Math.round(sc)+'%':'chưa đủ')+']\n';
+    KPIS.forEach(function(k){
+      var kh=tuans.reduce(function(a,t){return a+(gKT(m,t,nv.ma)[k.key]||0);},0);
+      if(kh===0)return;
+      var th=tuans.reduce(function(a,t){var v=gTH(m,t,nv.ma)[k.key];return a+(v!=null?v:0);},0);
+      var pc=Math.round(th/kh*100);
+      var gap=th-kh;
+      ctx+='  '+k.label+': TH='+fmt(th,k.unit)+'/KH='+fmt(kh,k.unit)
+        +' ('+pc+'%) GAP='+(gap>=0?'+':'')+fmt(gap,k.unit)+'\n';
+    });
+    var nvDeals=getAllDeals(m).filter(function(d){return d.ma===nv.ma&&d.gd!=='hoan_tat';});
+    if(nvDeals.length>0){
+      ctx+='  Pipeline: ';
+      nvDeals.forEach(function(d){
+        var han=d.han?new Date(d.han):null;
+        var diff=han?Math.ceil((han-today)/86400000):null;
+        var spN=(KPIS.find(function(k){return k.key===d.sp;})||{label:'?'}).label;
+        ctx+=spN+(d.gt?' '+d.gt+'tr':'')+' ['+(diff===null?'?':diff<0?'QH '+Math.abs(diff)+'d':'còn '+diff+'d')+'] ';
+      });
+      ctx+='\n';
+    }
+  });
+
+  var allDeals=getAllDeals(m);
+  var active=allDeals.filter(function(d){return d.gd!=='hoan_tat';});
+  var over=active.filter(function(d){return d.han&&new Date(d.han)<today;}).length;
+  ctx+='\nPIPELINE: '+allDeals.length+' deals | Đang xử lý: '+active.length
+    +' ('+active.reduce(function(a,d){return a+(d.gt||0);},0)+'tr) | Quá hạn: '+over;
+  return ctx;
+}
+
+async function callGemini(userMsg){
+  var key=null;
+  try{key=await fbGet('config/ai_key');}catch(e){}
+  if(!key)return '⚙️ Chưa có API Key.\n\nAnh vào Firebase → kpi/config/ai_key → thêm Gemini key.\nLấy miễn phí tại: aistudio.google.com';
+  var SYS='Bạn là trợ lý thực chiến của Trưởng phòng KHCN Nam A Bank.'
+    +'\nVai trò: phân tích KPI, chẩn đoán nguyên nhân, gợi ý hành động cụ thể.'
+    +'\nQuy tắc:'
+    +'\n- Trả lời tiếng Việt, ngắn gọn, đi thẳng vào vấn đề'
+    +'\n- Dùng đúng số trong DATA, KHÔNG bịa'
+    +'\n- Gợi ý = tên NV cụ thể + số cụ thể + việc cần làm ngay'
+    +'\n- Khi yêu cầu viết tin nhắn/email/báo cáo → viết luôn, không hỏi lại'
+    +'\n- Phân tích nguyên nhân sâu hơn số (vd: DN âm → tất toán cũ chưa có mới bù)'
+    +'\n- Công thức điểm: (HD×1.0+DN×1.5+Thẻ×0.8)÷3';
+  try{
+    var res=await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,
+      {method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({contents:[{role:'user',parts:[{text:
+         SYS+'\n\n---DATA---\n'+buildAIContext()+'\n---CÂU HỎI---\n'+userMsg
+       }]}]})}
+    );
+    var d=await res.json();
+    if(d.candidates&&d.candidates[0])return d.candidates[0].content.parts[0].text;
+    return '⚠️ Lỗi: '+(d.error?d.error.message:'Unknown');
+  }catch(e){return '⚠️ Lỗi kết nối: '+e.message;}
+}
+
+function aiAddMsg(role,text){
+  if(!S.aiHistory)S.aiHistory=[];
+  S.aiHistory.push({role:role,text:text});
+  var msgs=document.getElementById('ai-msgs');
+  if(!msgs)return;
+  var d=document.createElement('div');
+  d.className='ai-msg'+(role==='usr'?' usr':'');
+  d.innerHTML='<div class="ai-av '+(role==='usr'?'me':'bot')+'">'+(role==='usr'?'V':'🤖')+'</div>'
+    +'<div class="ai-bbl '+(role==='usr'?'usr':'bot')+'">'
+    +text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    +'</div>';
+  msgs.appendChild(d);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function aiShowTyping(){
+  var msgs=document.getElementById('ai-msgs');
+  if(!msgs)return;
+  var d=document.createElement('div');
+  d.className='ai-msg';d.id='ai-typing';
+  d.innerHTML='<div class="ai-av bot">🤖</div>'
+    +'<div class="ai-typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(d);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function aiAsk(q){
+  aiAddMsg('usr',q);
+  aiShowTyping();
+  var ans=await callGemini(q);
+  var t=document.getElementById('ai-typing');if(t)t.remove();
+  aiAddMsg('bot',ans);
+}
+
+function aiSend(){
+  var el=document.getElementById('ai-inp');
+  var q=(el?el.value:'').trim();
+  if(!q)return;
+  el.value='';
+  aiAsk(q);
+}
+
+// FIX: Quick buttons LUÔN hiện — không ẩn sau khi chọn
+function rAI(){
+  if(!S.aiHistory)S.aiHistory=[];
+  var histHtml=S.aiHistory.map(function(msg){
+    return '<div class="ai-msg'+(msg.role==='usr'?' usr':'')+'">'
+      +'<div class="ai-av '+(msg.role==='usr'?'me':'bot')+'">'+(msg.role==='usr'?'V':'🤖')+'</div>'
+      +'<div class="ai-bbl '+(msg.role==='usr'?'usr':'bot')+'">'
+      +msg.text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      +'</div></div>';
+  }).join('');
+
+  if(!histHtml){
+    var sc=NVS.filter(function(nv){return nvScore(S.month,nv.ma)!==null;}).length;
+    histHtml='<div class="ai-msg"><div class="ai-av bot">🤖</div>'
+      +'<div class="ai-bbl bot">'
+      +'Xin chào anh Vũ! Tôi là <strong>AI Coach</strong> phòng KHCN.<br><br>'
+      +'Đã đọc data <strong>'+S.month+'</strong> · '+NVS.length+' NV'
+      +(sc?' ('+sc+' đã nhập TH)':'')+'.<br>'
+      +'Anh cần tôi hỗ trợ gì? Chọn nhanh hoặc gõ câu hỏi bất kỳ.'
+      +'</div></div>';
+  }
+
+  // FIX: Quick buttons LUÔN hiện dù đã chat rồi
+  return '<div class="ai-wrap">'
+    +'<div class="ai-chat" id="ai-msgs">'+histHtml+'</div>'
+    +'<div class="ai-qbtns">'
+    +'<div class="ai-qb" onclick="aiAsk(&quot;Phân tích kết quả tuần này&quot;)">📊 Phân tích</div>'
+    +'<div class="ai-qb" onclick="aiAsk(&quot;Ai cần hỗ trợ nhất?&quot;)">🚨 Cần hỗ trợ</div>'
+    +'<div class="ai-qb" onclick="aiAsk(&quot;Viết nội dung họp giao ban thứ 2&quot;)">📝 Họp giao ban</div>'
+    +'<div class="ai-qb" onclick="aiAsk(&quot;Gợi ý KH tuần tới từng NV&quot;)">🎯 Target T2</div>'
+    +'<div class="ai-qb" onclick="aiAsk(&quot;Dự báo kết quả cuối tháng&quot;)">📈 Dự báo</div>'
+    +'<div class="ai-qb" onclick="aiAsk(&quot;Viết báo cáo tuần gửi BGĐ&quot;)">📋 Báo cáo BGĐ</div>'
+    +'</div>'
+    +'<div class="ai-inrow">'
+    +'<input class="ai-inp" id="ai-inp" placeholder="Hỏi AI Coach..." '
+    +'onkeydown="if(event.key===&quot;Enter&quot;)aiSend()">'
+    +'<button class="ai-sbtn" onclick="aiSend()">➤</button>'
+    +'</div></div>';
+}
+
 function rNav(){
   var alertCnt=NVS.filter(function(nv){var kh=gKT(S.month,CUR_T,nv.ma),th=gTH(S.month,CUR_T,nv.ma);return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});}).length;
   var plOver=getAllDeals(S.month).filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;}).length;
   var tot=alertCnt+plOver;
-  var tabs=[{id:'nhap',ic:'✏️',lb:'Nhập TH'},{id:'pl',ic:'📋',lb:'Pipeline'},{id:'dash',ic:'📊',lb:'Dashboard'},{id:'alert',ic:'🚨',lb:'Cảnh báo'},{id:'star',ic:'🌟',lb:'Tuyên dương'},{id:'kh',ic:'🎯',lb:'Giao KH'},{id:'bokpi',ic:'⚙️',lb:'Bộ KPIs'}];
+  var tabs=[{id:'nhap',ic:'✏️',lb:'Nhập TH'},{id:'pl',ic:'📋',lb:'Pipeline'},{id:'dash',ic:'📊',lb:'Dashboard'},{id:'alert',ic:'🚨',lb:'Cảnh báo'},{id:'star',ic:'🌟',lb:'Tuyên dương'},{id:'kh',ic:'🎯',lb:'Giao KH'},{id:'bokpi',ic:'⚙️',lb:'Bộ KPIs'},{id:'ai',ic:'🤖',lb:'AI'}];
   return '<div class="nav">'+tabs.map(function(t){
     var bdg=(t.id==='alert'&&tot>0)?'<span class="nb-bdg">'+tot+'</span>':'';
     return '<button class="nb'+(S.tab===t.id?' on':'')+'" onclick="setTab(\''+t.id+'\')">'+'<span class="nb-ic">'+t.ic+'</span>'+t.lb+bdg+'</button>';
@@ -667,6 +860,7 @@ function rContent(){
     case'star':return rStar();
     case'kh':  return S.khTab==='phong'?rKhPhong():S.khTab==='dsnv'?rDsNV():(S.selNV?rKhTuanForm():rKhTuanList());
     case'bokpi': return rBokpi();
+    case'ai': return rAI();
     default:return'';
   }
 }

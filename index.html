@@ -247,6 +247,11 @@ body.light-mode select option{background:#fff!important;color:#1a2e4a!important;
   .hdr,.nav{max-width:1120px}
   .pad{padding:18px 22px}
   .kg{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .kc{padding:16px}
+  .kc-val{font-size:22px!important}
+  .kc-lbl{font-size:11px!important}
+  .kc-kh{font-size:10px!important}
+  .kc-bg{font-size:54px!important}
   .card,.ff,.chart-wrap{padding:16px;margin-bottom:12px}
   .nav{border-radius:18px 18px 0 0;box-shadow:0 -14px 36px rgba(0,0,0,.22)}
   .ai-wrap{height:calc(100vh - 210px)}
@@ -264,8 +269,29 @@ body.light-mode select option{background:#fff!important;color:#1a2e4a!important;
   .pad{padding:10px 11px}
   .kg{gap:6px}
 }
+
+/* ── LIGHT MODE CHUẨN (Be Vietnam Pro + Codex design) ── */
+body.light-mode{background:#f2f6fa!important;color:#0f1f35!important;font-family:'Be Vietnam Pro',system-ui,sans-serif!important;}
+body.light-mode .kc{background:#fff!important;border-color:#d1dde8!important;box-shadow:0 2px 8px rgba(27,94,155,.08)!important;}
+body.light-mode .kc-lbl{color:#3a5068!important;}
+body.light-mode .kc-kh{color:#6b8299!important;}
+body.light-mode .kc-bg{opacity:.06!important;}
+body.light-mode .chart-wrap{background:#fff!important;border-color:#d1dde8!important;box-shadow:0 2px 8px rgba(27,94,155,.08)!important;}
+body.light-mode .chart-wrap div[style*="color:var(--dim)"]{color:#6b8299!important;}
+body.light-mode .ri{background:#fff!important;border-color:#d1dde8!important;box-shadow:0 1px 4px rgba(27,94,155,.06)!important;}
+body.light-mode .ri:hover{border-color:#a0bcd8!important;transform:translateY(-1px);}
+body.light-mode .ri div[style*="font-size:12px;font-weight:800;color:#fff"]{color:#0f1f35!important;}
+body.light-mode .sec-hdr,.light-mode .sec{color:#3a5068!important;}
+body.light-mode .pad{color:#0f1f35!important;}
+
+/* ── RANK ITEMS ── */
+.ri{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:7px;cursor:pointer;transition:border-color .15s,transform .15s;width:100%;text-align:left;}
+.av{border-radius:9px!important;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0;}
 </style>
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#01050d">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="KPI NAB">
@@ -504,7 +530,7 @@ function p2s(p){return p===null?'—':Math.round(p)+'%';}
 function pc(p){if(p===null)return'#2a4060';if(p>=100)return'#00c48c';if(p>=70)return'#e8a020';if(p>=40)return'#ff9f43';return'#ff4757';}
 function stl(p){if(p===null)return{l:'Chưa KH',c:'#2a4060'};if(p>=100)return{l:'✅ Đạt',c:'#00c48c'};if(p>=70)return{l:'⚡ Tốt',c:'#e8a020'};if(p>=40)return{l:'⚠️ TB',c:'#ff9f43'};return{l:'🚨 Yếu',c:'#ff4757'};}
 function acC(ma){var c=['#e8a020','#1a6fff','#7c4dff','#00c48c','#ff6b9d','#00d2ff','#ff9f43','#a855f7'];var h=0;for(var i=0;i<ma.length;i++)h=(h*31+ma.charCodeAt(i))%c.length;return c[h];}
-function av(name,ma,sz){sz=sz||36;var c=acC(ma),i=name.split(' ').pop()[0]||'?';return '<div class="av" style="width:'+sz+'px;height:'+sz+'px;background:'+c+'18;border:1.5px solid '+c+'42;color:'+c+';font-size:'+Math.round(sz*.38)+'px">'+i+'</div>';}
+function av(name,ma,sz){sz=sz||36;var c=acC(ma),i=name.split(' ').pop()[0]||'?';return '<div class="av" style="width:'+sz+'px;height:'+sz+'px;background:'+c+'18;border:1.5px solid '+c+'42;color:'+c+';font-size:'+Math.round(sz*.38)+'px;border-radius:9px">'+i+'</div>';}
 function chip(l,c){return '<span class="chip" style="background:'+c+'18;color:'+c+';border-color:'+c+'30">'+l+'</span>';}
 function fmtTs(ts){if(!ts)return'';var d=new Date(ts);return d.getDate()+'/'+(d.getMonth()+1)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
 function fmtM(m){var p=m.split('-');return 'T'+(+p[1])+'/'+p[0];}
@@ -941,7 +967,7 @@ function rBarChart(m){
     var data=['T1','T2','T3','T4'].map(function(t){var th=fnvs.reduce(function(s,nv){return s+(gTH(m,t,nv.ma)[k.key]||0);},0),kh=fnvs.reduce(function(s,nv){return s+(gKT(m,t,nv.ma)[k.key]||0);},0);return{t:t,p:pct(th,kh),kh:kh};});
     var mx=Math.max.apply(null,data.map(function(d){return d.p||0;}).concat([100]));
     return'<div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="font-size:13px">'+k.icon+'</span><span style="font-size:11px;font-weight:800;color:#fff">'+k.label+'</span></div>'
-      +'<div style="display:flex;gap:5px;align-items:flex-end;height:64px">'+data.map(function(d){var h=d.p!==null?Math.max(4,d.p/mx*56):4,c=d.kh>0?pc(d.p):'var(--mute)';return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="font-size:8px;font-weight:800;color:'+c+'">'+(d.p!==null?Math.round(d.p)+'%':'')+'</div><div style="width:100%;height:'+h+'px;background:'+c+';border-radius:3px 3px 0 0;opacity:'+(d.kh>0?1:.2)+';transition:height .6s"></div><div style="font-size:8px;color:var(--dim);font-weight:700">'+d.t+'</div></div>';}).join('')+'</div></div>';
+      +'<div style="display:flex;gap:5px;align-items:flex-end;height:64px">'+data.map(function(d){var h=d.p!==null?Math.max(6,d.p/mx*72):6,c=d.kh>0?pc(d.p):'var(--mute)';return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="font-size:8px;font-weight:800;color:'+c+'">'+(d.p!==null?Math.round(d.p)+'%':'')+'</div><div style="width:100%;height:'+h+'px;background:'+c+';border-radius:3px 3px 0 0;opacity:'+(d.kh>0?1:.2)+';transition:height .6s"></div><div style="font-size:8px;color:var(--dim);font-weight:700">'+d.t+'</div></div>';}).join('')+'</div></div>';
   }).join('');
   return'<div class="chart-wrap"><div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px">📊 Tiến độ theo tuần</div>'+rows+'</div>';
 }
@@ -1433,13 +1459,13 @@ function rDash(){
     var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';
     var tags=STARS.map(function(k){
       var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;
-      return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';
+      return'<span style="font-size:10px;font-weight:700;color:'+pc(p)+';background:'+pc(p)+'12;border-radius:5px;padding:2px 6px;border:1px solid '+pc(p)+'30">'+k.icon+' '+(kh>0?Math.round(p||0)+'%':'—')+'</span>';
     }).join('');
     return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'
       +av(nv.ten,nv.ma,32)
       +'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div>'
       +'<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div>'
-      +'<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div>'
+      +'<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-size:18px;font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div>'
       +'<div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';
   }).join('');
   return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div>'

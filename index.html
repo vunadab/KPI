@@ -222,6 +222,48 @@ body.light-mode select option{background:#fff!important;color:#1a2e4a!important;
 .ai-inp:focus{border-color:var(--purple)}
 .ai-inp::placeholder{color:var(--dim)}
 .ai-sbtn{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+
+/* ── KPI CARD (Desktop-ready) ── */
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+.kc{background:var(--card);border-radius:14px;padding:12px;border:1px solid var(--border);position:relative;overflow:hidden}
+.kc-bg{position:absolute;bottom:-8px;right:-4px;font-size:42px;opacity:.05;line-height:1}
+.kc-lbl{font-size:10px;color:var(--dim);margin-bottom:3px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.kc-val{font-size:18px;font-weight:900;line-height:1.1;font-family:"Space Mono",monospace}
+.kc-kh{font-size:9px;color:var(--mute);margin-top:2px}
+
+/* ── CHART ── */
+.chart-wrap{background:var(--card);border-radius:14px;padding:13px;border:1px solid var(--border);margin-bottom:10px}
+
+/* ── DESKTOP HOVER (chỉ trên thiết bị có chuột) ── */
+@media (hover:hover){
+  .nvi:hover,.ri:hover,.wi:hover,.pl-deal:hover,.bk-row:hover{border-color:var(--border2);transform:translateY(-1px)}
+  .tb:hover,.sbb:hover,.pl-btn:hover,.bk-btn:hover{border-color:var(--blue2)}
+}
+
+/* ── TABLET 860px: Layout rộng ── */
+@media (min-width:860px){
+  body{background:linear-gradient(180deg,var(--bg0),var(--bg1))}
+  #app{max-width:1120px;padding-bottom:96px}
+  .hdr,.nav{max-width:1120px}
+  .pad{padding:18px 22px}
+  .kg{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .card,.ff,.chart-wrap{padding:16px;margin-bottom:12px}
+  .nav{border-radius:18px 18px 0 0;box-shadow:0 -14px 36px rgba(0,0,0,.22)}
+  .ai-wrap{height:calc(100vh - 210px)}
+}
+
+/* ── DESKTOP 1180px: KPI 6 cột ── */
+@media (min-width:1180px){
+  .kg{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .kc-val{font-size:16px}
+}
+
+/* ── SMALL PHONE ── */
+@media (max-width:360px){
+  .hdr{padding-left:11px;padding-right:11px}
+  .pad{padding:10px 11px}
+  .kg{gap:6px}
+}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#01050d">
@@ -767,7 +809,7 @@ function aiAddMsg(role,text){
   d.className='ai-msg'+(role==='usr'?' usr':'');
   d.innerHTML='<div class="ai-av '+(role==='usr'?'me':'bot')+'">'+(role==='usr'?'V':'🤖')+'</div>'
     +'<div class="ai-bbl '+(role==='usr'?'usr':'bot')+'">'
-    +text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    +renderAiText(text)
     +'</div>';
   msgs.appendChild(d);
   msgs.scrollTop=msgs.scrollHeight;
@@ -840,6 +882,98 @@ function rAI(){
     +'</div></div>';
 }
 
+
+// ══════════════════════════════════════════
+// HELPER FUNCTIONS (từ Codex)
+// ══════════════════════════════════════════
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});}
+function renderAiText(text){return esc(text).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');}
+function daysLeft(s){if(!s)return null;return Math.ceil((new Date(s).getTime()-Date.now())/86400000);}
+function fmtM(m){var p=m.split('-');return 'T'+(+p[1])+'/'+p[0];}
+function filtNVs(){return S.filterNVs.length>0?NVS.filter(function(nv){return S.filterNVs.indexOf(nv.ma)>=0;}):NVS;}
+function khPS(m){
+  if(S.scope==='thang'||S.scope==='ngay'||S.scope==='custom')return gKP(m);
+  var fnvs=filtNVs(),rr={};KPIS.forEach(function(k){rr[k.key]=fnvs.reduce(function(s,nv){return s+(gKT(m,S.scope,nv.ma)[k.key]||0);},0);});return rr;
+}
+function bar(v,mx,col,h){h=h||5;var w=mx>0?Math.min(100,Math.max(0,(v||0)/mx*100)):0;return '<div class="bw" style="height:'+h+'px"><div class="bf" style="width:'+w+'%;background:'+col+';height:'+h+'px"></div></div>';}
+function pc(p){if(p===null)return'#2a4060';if(p>=100)return'#00c48c';if(p>=70)return'#e8a020';if(p>=40)return'#ff9f43';return'#ff4757';}
+function p2s(p){return p===null?'—':Math.round(p)+'%';}
+function ring(p,sz,sw){
+  sz=sz||42;sw=sw||5;
+  var r=(sz-sw*2)/2,c=2*Math.PI*r,v=Math.min(Math.max(p||0,0),100);
+  return '<svg width="'+sz+'" height="'+sz+'" style="transform:rotate(-90deg)">'
+    +'<circle cx="'+(sz/2)+'" cy="'+(sz/2)+'" r="'+r+'" fill="none" stroke="#060e1a" stroke-width="'+sw+'"/>'
+    +'<circle cx="'+(sz/2)+'" cy="'+(sz/2)+'" r="'+r+'" fill="none" stroke="'+pc(p)+'" stroke-width="'+sw+'" stroke-dasharray="'+(v/100*c)+' '+c+'" stroke-linecap="round"/>'
+    +'</svg>';
+}
+
+// ══════════════════════════════════════════
+// CHART FUNCTIONS (GĐ2)
+// ══════════════════════════════════════════
+function plForecast(m){
+  var deals=getAllDeals(m),fc={};
+  KPIS.forEach(function(k){
+    var done=deals.filter(function(d){return d.sp===k.key&&d.gd==='hoan_tat';}).reduce(function(s,d){return s+(d.gt||0);},0);
+    var pipe=deals.filter(function(d){return d.sp===k.key&&['de_xuat','xu_ly','cho_duyet'].indexOf(d.gd)>=0;}).reduce(function(s,d){return s+(d.gt||0);},0);
+    fc[k.key]=done+Math.round(pipe*0.6);
+  });
+  return fc;
+}
+function rPlWidget(m){
+  var allDeals=getAllDeals(m);
+  var fc=plForecast(m),kp=gKP(m);
+  var over=allDeals.filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;});
+  var soon=allDeals.filter(function(d){var dl=daysLeft(d.han);return d.gd!=='hoan_tat'&&dl!==null&&dl>=0&&dl<=5;});
+  var fcBars=STARS.map(function(k){var p=pct(fc[k.key]||0,kp[k.key]||0),fcV=fc[k.key]||0,khV=kp[k.key]||0;return'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-size:12px;width:18px">'+k.icon+'</span><div style="flex:1">'+bar(fcV,khV,pc(p),6)+'</div><div style="text-align:right;flex-shrink:0"><span style="font-size:11px;font-weight:900;color:'+pc(p)+'">'+p2s(p)+'</span><span style="font-size:9px;color:var(--dim);margin-left:4px">'+fmt(fcV,k.unit)+'</span></div></div>';}).join('');
+  return'<div class="chart-wrap" style="margin-bottom:11px">'
+    +'<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center">'
+    +'<span>🔮 Dự báo từ Pipeline</span>'
+    +'<button onclick="setTab(\'pl\')" style="font-size:10px;color:#4d9fff;background:none;border:none;font-weight:800;cursor:pointer">Xem Pipeline ›</button>'
+    +'</div>'+fcBars
+    +(over.length?'<div style="background:#ff475710;border:1px solid #ff475730;border-radius:7px;padding:7px 9px;margin-top:8px;font-size:11px;color:#ff6b7a;font-weight:800">⚠️ '+over.length+' deal quá hạn</div>':'')
+    +(soon.length?'<div style="background:#e8a02010;border:1px solid #e8a02030;border-radius:7px;padding:7px 9px;margin-top:5px;font-size:11px;color:#ffc84a;font-weight:800">⏰ '+soon.length+' deal sắp đến hạn (≤5 ngày)</div>':'')
+    +(allDeals.length===0?'<div style="text-align:center;padding:12px 0;color:var(--dim);font-size:12px">Chưa có deals · <button onclick="setTab(\'pl\')" style="color:#4d9fff;background:none;border:none;font-weight:800;cursor:pointer;font-size:12px">Thêm ngay ›</button></div>':'')
+    +'</div>';
+}
+function rBarChart(m){
+  var fnvs=filtNVs();
+  var rows=STARS.map(function(k){
+    var data=['T1','T2','T3','T4'].map(function(t){var th=fnvs.reduce(function(s,nv){return s+(gTH(m,t,nv.ma)[k.key]||0);},0),kh=fnvs.reduce(function(s,nv){return s+(gKT(m,t,nv.ma)[k.key]||0);},0);return{t:t,p:pct(th,kh),kh:kh};});
+    var mx=Math.max.apply(null,data.map(function(d){return d.p||0;}).concat([100]));
+    return'<div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="font-size:13px">'+k.icon+'</span><span style="font-size:11px;font-weight:800;color:#fff">'+k.label+'</span></div>'
+      +'<div style="display:flex;gap:5px;align-items:flex-end;height:64px">'+data.map(function(d){var h=d.p!==null?Math.max(4,d.p/mx*56):4,c=d.kh>0?pc(d.p):'var(--mute)';return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="font-size:8px;font-weight:800;color:'+c+'">'+(d.p!==null?Math.round(d.p)+'%':'')+'</div><div style="width:100%;height:'+h+'px;background:'+c+';border-radius:3px 3px 0 0;opacity:'+(d.kh>0?1:.2)+';transition:height .6s"></div><div style="font-size:8px;color:var(--dim);font-weight:700">'+d.t+'</div></div>';}).join('')+'</div></div>';
+  }).join('');
+  return'<div class="chart-wrap"><div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px">📊 Tiến độ theo tuần</div>'+rows+'</div>';
+}
+function rDonut(m){
+  var fnvs=filtNVs(),tuans=scopeTuans();
+  var contribs=fnvs.map(function(nv){var th=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)['huy_dong']||0);},0);return{nv:nv,th:th};}).filter(function(x){return x.th>0;}).sort(function(a,b){return b.th-a.th;});
+  if(!contribs.length)return'';
+  var total=contribs.reduce(function(s,x){return s+x.th;},0);
+  var sz=90,r=33,cx=45,cy=45,circ=2*Math.PI*r,offset=0;
+  var slices=contribs.map(function(x){var ratio=x.th/total,sweep=ratio*circ,col=acC(x.nv.ma);var s='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="11" stroke-dasharray="'+sweep+' '+circ+'" stroke-dashoffset="'+(-offset)+'" style="transform:rotate(-90deg);transform-origin:50% 50%"/>';offset+=sweep;return{s:s,col:col,ratio:ratio,nv:x.nv,th:x.th};});
+  var legend=slices.slice(0,4).map(function(s){return'<div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;background:'+s.col+';flex-shrink:0"></div><div style="font-size:10px;color:#c8daf0;font-weight:700;flex:1">'+s.nv.ten.split(' ').pop()+'</div><div style="font-size:10px;font-weight:800;color:'+s.col+'">'+Math.round(s.ratio*100)+'%</div></div>';}).join('');
+  if(slices.length>4)legend+='<div style="font-size:10px;color:var(--mute)">+'+(slices.length-4)+' NV khác</div>';
+  return'<div class="chart-wrap"><div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px">💰 Đóng góp Huy Động</div>'
+    +'<div style="display:flex;gap:11px;align-items:center">'
+    +'<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'" style="flex-shrink:0">'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#060e1a" stroke-width="11"/>'
+    +slices.map(function(s){return s.s;}).join('')
+    +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" font-size="7" fill="#6a8aab" font-family="Plus Jakarta Sans" font-weight="700">TỔNG</text>'
+    +'<text x="'+cx+'" y="'+(cy+8)+'" text-anchor="middle" font-size="8" fill="#fff" font-weight="800" font-family="Space Mono">'+fmt(total,'tr')+'</text>'
+    +'</svg>'
+    +'<div style="flex:1;display:flex;flex-direction:column;gap:6px">'+legend+'</div></div></div>';
+}
+
+function khForNV(m,ma){var rr={};KPIS.forEach(function(k){rr[k.key]=scopeTuans().reduce(function(s,t){return s+(gKT(m,t,ma)[k.key]||0);},0);});return rr;}
+function thForNV(m,ma){
+  var tuans=scopeTuans();
+  if(S.scope==='ngay'&&S.scopeDay){var d0=new Date(S.scopeDay).setHours(0,0,0,0),d1=d0+86400000;var rv={};KPIS.forEach(function(k){rv[k.key]=0;});tuans.forEach(function(t){var th=gTH(m,t,ma);if(th.updatedAt&&th.updatedAt>=d0&&th.updatedAt<d1)KPIS.forEach(function(k){if(th[k.key]!=null)rv[k.key]+=th[k.key];});});return rv;}
+  if(S.scope==='custom'&&S.scopeFrom&&S.scopeTo){var f=new Date(S.scopeFrom).setHours(0,0,0,0),t2=new Date(S.scopeTo).setHours(23,59,59,999);var rc={};KPIS.forEach(function(k){rc[k.key]=0;});tuans.forEach(function(t){var th=gTH(m,t,ma);if(th.updatedAt&&th.updatedAt>=f&&th.updatedAt<=t2)KPIS.forEach(function(k){if(th[k.key]!=null)rc[k.key]=Math.max(rc[k.key]||0,th[k.key]||0);});});return rc;}
+  var rr={};KPIS.forEach(function(k){rr[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,ma)[k.key]||0);},0);});return rr;
+}
+function stl(p){if(p===null)return{l:'Chưa KH',c:'#2a4060'};if(p>=100)return{l:'✅ Đạt',c:'#00c48c'};if(p>=70)return{l:'⚡ Tốt',c:'#e8a020'};if(p>=40)return{l:'⚠️ TB',c:'#ff9f43'};return{l:'🚨 Yếu',c:'#ff4757'};}
+function av(name,ma,sz){sz=sz||36;var c=acC(ma),i=String(name||'?').split(' ').pop()[0]||'?';return '<div class="av" style="width:'+sz+'px;height:'+sz+'px;background:'+c+'18;border:1.5px solid '+c+'42;color:'+c+';font-size:'+Math.round(sz*.38)+'px">'+esc(i)+'</div>';}
 function rNav(){
   var alertCnt=NVS.filter(function(nv){var kh=gKT(S.month,CUR_T,nv.ma),th=gTH(S.month,CUR_T,nv.ma);return KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;});}).length;
   var plOver=getAllDeals(S.month).filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;}).length;
@@ -1271,23 +1405,56 @@ function rPlWidget(m){
 function rDash(){
   var m=S.month,fnvs=filtNVs(),kp=khPS(m);
   var totalTH={};KPIS.forEach(function(k){totalTH[k.key]=fnvs.reduce(function(s,nv){return s+(thForNV(m,nv.ma)[k.key]||0);},0);});
-  // Dùng nvScore() = weightedScore() = (HD%×1.0+DN%×1.5+Thẻ%×0.8)/3
-// LUÔN chia STARS.length=3, nhất quán với Tab Tuyên dương & Báo cáo
-var nvData=fnvs.map(function(nv){
-  var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma);
-  var score=nvScore(m,nv.ma);
-  return{ma:nv.ma,ten:nv.ten,kh:kh,th:th,score:score};
-}).sort(function(a,b){
-  if(a.score===null&&b.score===null)return 0;
-  if(a.score===null)return 1;
-  if(b.score===null)return-1;
-  return b.score-a.score;
-});
-  var kCards=KPIS.map(function(k){var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px"><div><div class="kc-lbl">'+k.label+'</div><div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div><div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div><div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)+'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'+(kh>0?bar(th,kh,k.color):'')+(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:#ff4757;margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')+'</div>';}).join('');
-  var ranks=nvData.slice(0,12).map(function(nv,i){var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';var tags=STARS.map(function(k){var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';}).join('');return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')" style="cursor:pointer"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'+av(nv.ten,nv.ma,32)+'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div><div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';}).join('');
-  return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div><div class="pad" style="padding-top:4px">'+rNVFilter()+'<div class="sec">Tổng hợp · '+fmtM(m)+'</div><div class="kg">'+kCards+'</div>'+(S.scope==='thang'?rBarChart(m):'')+''+rDonut(m)+''+rPlWidget(m)+'<div class="sec">🏆 Xếp hạng</div>'+ranks+'</div>';
+  var nvData=fnvs.map(function(nv){
+    var kh=khForNV(m,nv.ma),th=thForNV(m,nv.ma);
+    var score=nvScore(m,nv.ma);
+    return{ma:nv.ma,ten:nv.ten,kh:kh,th:th,score:score};
+  }).sort(function(a,b){
+    if(a.score===null&&b.score===null)return 0;
+    if(a.score===null)return 1;
+    if(b.score===null)return-1;
+    return b.score-a.score;
+  });
+  var kCards=KPIS.map(function(k){
+    var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;
+    return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">'
+      +'<div><div class="kc-lbl">'+k.label+'</div>'
+      +'<div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div>'
+      +'<div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div>'
+      +'<div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)
+      +'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'
+      +(kh>0?bar(th,kh,k.color):'')
+      +(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:#ff4757;margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')
+      +'</div>';
+  }).join('');
+  var ranks=nvData.slice(0,12).map(function(nv,i){
+    var hasKh=STARS.some(function(k){return(nv.kh[k.key]||0)>0;}),st=stl(hasKh?nv.score:null);
+    var rb=['#e8a02018','#94a3b812','#d9770612'][i]||'var(--card)',rc=['#ffc84a','#94a3b8','#d97706'][i]||'var(--dim)';
+    var tags=STARS.map(function(k){
+      var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;
+      return'<span style="font-size:9px;color:'+pc(p)+';background:var(--bg1);border-radius:3px;padding:1px 4px;border:1px solid '+pc(p)+'18">'+k.icon+' '+(kh>0?fmt(th,k.unit)+' ('+Math.round(p||0)+'%)':'—')+'</span>';
+    }).join('');
+    return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'
+      +av(nv.ten,nv.ma,32)
+      +'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div>'
+      +'<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div>'
+      +'<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div>'
+      +'<div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';
+  }).join('');
+  return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div>'
+    +'<div class="pad" style="padding-top:4px">'
+    +rNVFilter()
+    +'<div class="sec">Tổng hợp · '+fmtM(m)+'</div>'
+    +'<div class="kg">'+kCards+'</div>'
+    +(S.scope==='thang'?rBarChart(m):'')
+    +rDonut(m)
+    +rPlWidget(m)
+    +'<div class="sec">🏆 Xếp hạng</div>'
+    +ranks
     +'<div class="sec">📅 Timeline cam kết Pipeline</div>'
     +'<div style="margin-bottom:8px">'+rTimeline()+'</div>'
+    +'</div>';
 }
 
 function rDashDetail(){

@@ -664,6 +664,7 @@ var S={
   filterNVs:[], nvpTemp:[],
   darkMode:true,  // true=dark, false=light
   plTab:'nv',  // nv | phong
+  donutKPI:'huy_dong', // KPI hiện trong donut chart
   plNV:null,   // MA đang xem pipeline
   plFormNV:null, plEditId:null,
   plTuan:CUR_T, // tuần lọc pipeline
@@ -1014,8 +1015,7 @@ function rDonut(m){
   if(slices.length>4)legend+='<div style="font-size:10px;color:var(--mute)">+'+(slices.length-4)+' NV khác</div>';
   return'<div class="chart-wrap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">'
     +'<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800">🍩 Đóng góp</div>'
-    +'<select onchange="S.donutKPI=this.value;render()" style="background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:3px 7px;font-size:10px;font-family:inherit">'
-    +buildDonutSel()
+        +buildDonutSel()
     +'<div style="display:flex;gap:11px;align-items:center">'
     +'<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'" style="flex-shrink:0">'
     +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#060e1a" stroke-width="11"/>'

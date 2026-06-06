@@ -1013,9 +1013,11 @@ function rDonut(m){
   var slices=contribs.map(function(x){var ratio=x.th/total,sweep=ratio*circ,col=acC(x.nv.ma);var s='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="11" stroke-dasharray="'+sweep+' '+circ+'" stroke-dashoffset="'+(-offset)+'" style="transform:rotate(-90deg);transform-origin:50% 50%;cursor:pointer" onclick="showDetail(\''+x.nv.ma+'\')" title="'+esc(x.nv.ten)+'"/>';offset+=sweep;return{s:s,col:col,ratio:ratio,nv:x.nv,th:x.th};});
   var legend=slices.slice(0,4).map(function(s){return'<div onclick="showDetail(\''+s.nv.ma+'\')" style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:2px 4px;border-radius:5px;transition:background .12s" onmouseover="this.style.background=\'rgba(255,255,255,.06)\'" onmouseout="this.style.background=\'\'"><div style="width:7px;height:7px;border-radius:50%;background:'+s.col+';flex-shrink:0"></div><div style="font-size:10px;color:#c8daf0;font-weight:700;flex:1">'+s.nv.ten.split(' ').pop()+'</div><div style="font-size:10px;font-weight:800;color:'+s.col+'">'+Math.round(s.ratio*100)+'%</div></div>';}).join('');
   if(slices.length>4)legend+='<div style="font-size:10px;color:var(--mute)">+'+(slices.length-4)+' NV khác</div>';
+  var kpiName=(STARS.find(function(k){return k.key===(S.donutKPI||'huy_dong');})||STARS[0]||{label:'HD'}).label;
+  var selHtml=buildDonutSel();
   return'<div class="chart-wrap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">'
-    +'<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800">🍩 Đóng góp</div>'
-        +buildDonutSel()
+    +'<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800">🍩 '+kpiName+'</div>'
+    +selHtml
     +'<div style="display:flex;gap:11px;align-items:center">'
     +'<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'" style="flex-shrink:0">'
     +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#060e1a" stroke-width="11"/>'

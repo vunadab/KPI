@@ -748,6 +748,8 @@ function nvScore(m,ma){
 // ── PIPELINE HELPERS ──
 function getDeals(m,ma){var pl=gPL(m,ma),deals=[];Object.keys(pl).forEach(function(id){deals.push(Object.assign({id:id},pl[id]));});return deals.sort(function(a,b){return(b.ts||0)-(a.ts||0);});}
 var _dealCache={};
+var _kpiInitialized=false; // Guard: kpiInit chỉ chạy 1 lần dù onAuthStateChanged fire nhiều lần
+var _intervalId=null;      // Ref đến setInterval để có thể clearInterval khi cần
 // S.isSaving — guard chống race condition loadMonth vs save operations
 // Set true trước fbSet, false sau khi local state đã sync
 function getAllDeals(m){if(_dealCache[m])return _dealCache[m];var all=[];NVS.forEach(function(nv){getDeals(m,nv.ma).forEach(function(d){all.push(Object.assign({ma:nv.ma,ten:nv.ten},d));});});_dealCache[m]=all;return all;}
@@ -2263,18 +2265,24 @@ async function nvAdd(){
   var ten=document.getElementById('nv-ten-new').value.trim().toUpperCase();
   if(!ma||!ten){alert('Vui lòng nhập đầy đủ mã và tên NV');return;}
   if(NVS.some(function(n){return n.ma===ma;})){alert('Mã NV đã tồn tại: '+ma);return;}
-  // Push vào NVS local TRƯỚC, render ngay để hiện lên Dashboard
+  // Optimistic update: thêm local trước để UI phản hồi ngay
   NVS.push({ma:ma,ten:ten});
-  S.filterNVs=[]; // Bắt buộc clear filter để NV mới hiện
-  // Clear input ngay
+  S.filterNVs=[];
   var maEl=document.getElementById('nv-ma-new');
   var tenEl=document.getElementById('nv-ten-new');
   if(maEl)maEl.value='';
   if(tenEl)tenEl.value='';
-  // Render ngay với NVS đã có NV mới
   render();
-  // Lưu lên Firebase sau (không chờ)
-  await fbSet('config/nvs',NVS);
+  try{
+    await fbSet('config/nvs',NVS);
+  }catch(e){
+    // Firebase fail → rollback: xóa NV vừa thêm khỏi local
+    console.error('nvAdd failed:',e.message);
+    var idx=NVS.findIndex(function(n){return n.ma===ma;});
+    if(idx>=0)NVS.splice(idx,1);
+    render();
+    showToast('❌ Thêm NV thất bại — kiểm tra mạng và thử lại','err',4000);
+  }
 }
 function nvDel(i){
   var nv=NVS[i];
@@ -2302,7 +2310,22 @@ function rKhPhong(){
     +'<div class="card card-gold" style="margin-bottom:12px"><div style="display:flex;align-items:center;gap:9px"><span style="font-size:18px">🔐</span><div><div style="font-weight:800;font-size:13px;color:#fff">Chế độ Trưởng phòng</div><div style="font-size:11px;color:var(--dim);margin-top:1px">KH phân bổ NV không vượt mức phòng</div></div></div></div>'
     +fields+'<button class="bsave" id="kp-btn" onclick="saveKhP()">💾 Lưu KH Phòng '+fmtM(S.month)+'</button></div>';
 }
-async function saveKhP(){var btn=document.getElementById('kp-btn');if(btn){btn.textContent='⏳...';btn.disabled=true;}var d={};KPIS.forEach(function(k){var el=document.getElementById('kp_'+k.key);if(el&&el.value!=='')d[k.key]=parseFloat(el.value);});await fbSet('khPhong/'+S.month,d);S.khPhong[S.month]=d;if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}setTimeout(function(){render();},1300);}
+async function saveKhP(){
+  var btn=document.getElementById('kp-btn');
+  if(btn){btn.textContent='⏳...';btn.disabled=true;}
+  var d={};
+  KPIS.forEach(function(k){var el=document.getElementById('kp_'+k.key);if(el&&el.value!=='')d[k.key]=parseFloat(el.value);});
+  try{
+    await fbSet('khPhong/'+S.month,d);
+    S.khPhong[S.month]=d;
+    if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}
+    setTimeout(function(){render();},1300);
+  }catch(e){
+    console.error('saveKhP failed:',e.message);
+    if(btn){btn.textContent='❌ Lỗi lưu!';btn.disabled=false;}
+    showToast('❌ Lưu KH Phòng thất bại — kiểm tra mạng','err',4000);
+  }
+}
 
 function rKhTuanList(){
   var t=S.selT,kp=gKP();
@@ -2397,7 +2420,25 @@ function checkKhTuan(){
   var box=document.getElementById('kh-warn-box');
   if(box)box.style.display=over?'block':'none';
 }
-async function saveKhT(){var nv=NVS.filter(function(n){return n.ma===S.selNV;})[0];if(!nv)return;var btn=document.getElementById('kt-btn');if(btn){btn.textContent='⏳...';btn.disabled=true;}var d={};KPIS.forEach(function(k){var el=document.getElementById('kt_'+k.key);if(el&&el.value!=='')d[k.key]=parseFloat(el.value);});await fbSet('khTuan/'+S.month+'/'+S.selT+'/'+nv.ma,d);if(!S.khTuan[S.month])S.khTuan[S.month]={};if(!S.khTuan[S.month][S.selT])S.khTuan[S.month][S.selT]={};S.khTuan[S.month][S.selT][nv.ma]=d;if(btn){btn.textContent='✅ Đã giao!';btn.classList.add('ok');}setTimeout(function(){S.selNV=null;render();},1300);}
+async function saveKhT(){
+  var nv=NVS.filter(function(n){return n.ma===S.selNV;})[0];if(!nv)return;
+  var btn=document.getElementById('kt-btn');
+  if(btn){btn.textContent='⏳...';btn.disabled=true;}
+  var d={};
+  KPIS.forEach(function(k){var el=document.getElementById('kt_'+k.key);if(el&&el.value!=='')d[k.key]=parseFloat(el.value);});
+  try{
+    await fbSet('khTuan/'+S.month+'/'+S.selT+'/'+nv.ma,d);
+    if(!S.khTuan[S.month])S.khTuan[S.month]={};
+    if(!S.khTuan[S.month][S.selT])S.khTuan[S.month][S.selT]={};
+    S.khTuan[S.month][S.selT][nv.ma]=d;
+    if(btn){btn.textContent='✅ Đã giao!';btn.classList.add('ok');}
+    setTimeout(function(){S.selNV=null;render();},1300);
+  }catch(e){
+    console.error('saveKhT failed:',e.message);
+    if(btn){btn.textContent='❌ Lỗi lưu!';btn.disabled=false;}
+    showToast('❌ Lưu KH tuần thất bại — kiểm tra mạng','err',4000);
+  }
+}
 
 // ══════════════════════════════════════════
 // NV PICKER
@@ -2918,12 +2959,14 @@ function toggleTheme(){
   render();
 }
 window.kpiInit = async function(){
-  // Khởi tạo phòng
-  // Load theme đã lưu
+  // Guard: onAuthStateChanged có thể fire nhiều lần (token refresh ~mỗi 1h)
+  // Không có guard → mỗi lần tạo thêm 1 setInterval chồng chất
+  if(_kpiInitialized){return;}
+  _kpiInitialized=true;
+
   try{var t2=localStorage.getItem('kpi_theme');if(t2)S.darkMode=(t2==='dark');}catch(e){}
   applyTheme();
   if(!initPhong()){
-    // Nhiều phòng → hiện màn chọn
     var btns=document.getElementById('phong-list-btns');
     if(btns){
       btns.innerHTML=PHONG_LIST.map(function(p){
@@ -2942,11 +2985,12 @@ window.kpiInit = async function(){
   hideEl('loading');
   var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
   render();
-  setInterval(async function(){
+  // Dùng _intervalId để tránh tạo interval trùng lặp
+  if(_intervalId)clearInterval(_intervalId);
+  _intervalId=setInterval(async function(){
     var ae=document.activeElement;
     var typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT');
-    if(typing||S.selNV||S.plFormNV)return;
-    // loadNVS để đồng bộ khi TP thêm/xóa NV từ thiết bị khác
+    if(typing||S.selNV||S.plFormNV||document.hidden)return;
     await loadNVS();
     await loadMonth(S.month);
     render();
@@ -3023,8 +3067,8 @@ function closePWABanner(){
     var cur=S.tab;
     var idx=tabs_order.indexOf(cur);
     if(idx<0)return;
-    if(dx<0&&idx<tabs_order.length-1)goTab(tabs_order[idx+1]); // swipe trái → tab sau
-    else if(dx>0&&idx>0)goTab(tabs_order[idx-1]); // swipe phải → tab trước
+    if(dx<0&&idx<tabs_order.length-1)setTab(tabs_order[idx+1]); // swipe trái → tab sau
+    else if(dx>0&&idx>0)setTab(tabs_order[idx-1]); // swipe phải → tab trước
   },{passive:true});
 })();
 

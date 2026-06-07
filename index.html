@@ -541,7 +541,23 @@ function selectPhong(id){
   hideEl('phong-select-modal');
   init();
 }
-async function fbGet(p){try{var r=await fetch(DB+'/'+ROOT+'/'+p+'.json');if(!r.ok)return null;var d=await r.json();return d===null?null:d;}catch(e){console.warn('fbGet',e.message);return null;}}
+async function fbGet(p){
+  // H-06: Timeout 8s — tránh Promise.all trong loadMonth treo vô hạn trên 3G yếu
+  var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
+  var timer=ctrl?setTimeout(function(){ctrl.abort();},8000):null;
+  try{
+    var r=await fetch(DB+'/'+ROOT+'/'+p+'.json',ctrl?{signal:ctrl.signal}:{});
+    if(timer)clearTimeout(timer);
+    if(!r.ok)return null;
+    var d=await r.json();
+    return d===null?null:d;
+  }catch(e){
+    if(timer)clearTimeout(timer);
+    if(e.name==='AbortError')console.warn('fbGet timeout:',p);
+    else console.warn('fbGet',e.message);
+    return null;
+  }
+}
 async function fbSet(p,d){
   var r=await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
   if(!r.ok)throw new Error('fbSet HTTP '+r.status+' ('+p+')');
@@ -691,6 +707,7 @@ var S={
   plTuan:CUR_T,
   online:false,
   isSaving:false,  // true khi đang có write operation — block loadMonth ghi đè local state
+  aiHistory:[],    // H-02: khai báo tường minh, giới hạn 20 entries trong aiAddMsg
   khPhong:{}, khTuan:{}, thTuan:{}, pipeline:{},
 };
 
@@ -748,6 +765,7 @@ function nvScore(m,ma){
 // ── PIPELINE HELPERS ──
 function getDeals(m,ma){var pl=gPL(m,ma),deals=[];Object.keys(pl).forEach(function(id){deals.push(Object.assign({id:id},pl[id]));});return deals.sort(function(a,b){return(b.ts||0)-(a.ts||0);});}
 var _dealCache={};
+var _aiKey=null;           // Cache Gemini API key — chỉ đọc Firebase 1 lần, không đọc lại mỗi message
 var _kpiInitialized=false; // Guard: kpiInit chỉ chạy 1 lần dù onAuthStateChanged fire nhiều lần
 var _intervalId=null;      // Ref đến setInterval để có thể clearInterval khi cần
 // S.isSaving — guard chống race condition loadMonth vs save operations
@@ -760,10 +778,18 @@ function plTotalVal(deals){return deals.reduce(function(s,d){return s+(d.gt||0);
 // ══════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════
+var _renderPending=false;
 function render(){
-  var a=document.getElementById('app');
-  if(!a)return;
-  a.innerHTML=rHdr()+rContent()+rNav();
+  // H-04: Debounce 16ms — nếu nhiều thao tác liên tiếp (filter + sort + click)
+  // chỉ rebuild DOM 1 lần duy nhất ở cuối frame, không rebuild N lần
+  if(_renderPending)return;
+  _renderPending=true;
+  setTimeout(function(){
+    _renderPending=false;
+    var a=document.getElementById('app');
+    if(!a)return;
+    a.innerHTML=rHdr()+rContent()+rNav();
+  },16);
 }
 
 function rHdr(){
@@ -855,9 +881,17 @@ function buildAIContext(){
 }
 
 async function callGemini(userMsg){
-  var key=null;
-  try{key=await fbGet('config/ai_key');}catch(e){}
-  if(!key)return '⚙️ Chưa có API Key.\n\nAnh vào Firebase → kpi/config/ai_key → thêm Gemini key.\nLấy miễn phí tại: aistudio.google.com';
+  // H-01: Cache ai_key — chỉ đọc Firebase 1 lần thay vì mỗi message gọi 1 lần
+  if(!_aiKey){
+    try{_aiKey=await fbGet('config/ai_key');}catch(e){}
+  }
+  if(!_aiKey)return '⚙️ Chưa có API Key.\n\nAnh vào Firebase → kpi/config/ai_key → thêm Gemini key.\nLấy miễn phí tại: aistudio.google.com';
+
+  // M-04: Dynamic system prompt — tự cập nhật khi anh thêm/bớt KPI trọng yếu
+  var starFormula=STARS.map(function(k){
+    return k.label+'×'+(STAR_WEIGHTS[k.key]||1.0);
+  }).join('+')+' ÷ '+STARS.length;
+
   var SYS='Bạn là trợ lý thực chiến của Trưởng phòng KHCN Nam A Bank.'
     +'\nVai trò: phân tích KPI, chẩn đoán nguyên nhân, gợi ý hành động cụ thể.'
     +'\nQuy tắc:'
@@ -866,15 +900,17 @@ async function callGemini(userMsg){
     +'\n- Gợi ý = tên NV cụ thể + số cụ thể + việc cần làm ngay'
     +'\n- Khi yêu cầu viết tin nhắn/email/báo cáo → viết luôn, không hỏi lại'
     +'\n- Phân tích nguyên nhân sâu hơn số (vd: DN âm → tất toán cũ chưa có mới bù)'
-    +'\n- Công thức điểm: (HD×1.0+DN×1.5+Thẻ×0.8)÷3';
+    +'\n- Công thức điểm Tuyên dương: '+starFormula;
   try{
     var res=await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+_aiKey,
       {method:'POST',headers:{'Content-Type':'application/json'},
        body:JSON.stringify({contents:[{role:'user',parts:[{text:
          SYS+'\n\n---DATA---\n'+buildAIContext()+'\n---CÂU HỎI---\n'+userMsg
        }]}]})}
     );
+    // Key sai/hết hạn → xóa cache để lần sau tự đọc lại từ Firebase
+    if(res.status===401||res.status===403){_aiKey=null;}
     var d=await res.json();
     if(d.candidates&&d.candidates[0])return d.candidates[0].content.parts[0].text;
     return '⚠️ Lỗi: '+(d.error?d.error.message:'Unknown');
@@ -882,7 +918,8 @@ async function callGemini(userMsg){
 }
 
 function aiAddMsg(role,text){
-  if(!S.aiHistory)S.aiHistory=[];
+  // H-02: Giới hạn 20 entries (~10 cặp hỏi/đáp) tránh memory tăng vô hạn
+  if(S.aiHistory.length>=20)S.aiHistory=S.aiHistory.slice(-18);
   S.aiHistory.push({role:role,text:text});
   var msgs=document.getElementById('ai-msgs');
   if(!msgs)return;
@@ -925,7 +962,6 @@ function aiSend(){
 
 // FIX: Quick buttons LUÔN hiện — không ẩn sau khi chọn
 function rAI(){
-  if(!S.aiHistory)S.aiHistory=[];
   var histHtml=S.aiHistory.map(function(msg){
     return '<div class="ai-msg'+(msg.role==='usr'?' usr':'')+'">'
       +'<div class="ai-av '+(msg.role==='usr'?'me':'bot')+'">'+(msg.role==='usr'?'V':'🤖')+'</div>'
@@ -2985,16 +3021,22 @@ window.kpiInit = async function(){
   hideEl('loading');
   var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
   render();
-  // Dùng _intervalId để tránh tạo interval trùng lặp
+  // H-05: Tách thành 2 intervals độc lập:
+  // - Data interval (20s): thTuan + pipeline — thay đổi thường xuyên khi NV nhập TH
+  // - NVS interval (5 phút): danh sách NV — chỉ TP mới thêm/xóa, rất ít thay đổi
   if(_intervalId)clearInterval(_intervalId);
   _intervalId=setInterval(async function(){
     var ae=document.activeElement;
     var typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT');
     if(typing||S.selNV||S.plFormNV||document.hidden)return;
-    await loadNVS();
     await loadMonth(S.month);
     render();
   },20000);
+  // Interval NVS riêng — 5 phút (300000ms)
+  setInterval(async function(){
+    if(document.hidden)return;
+    await loadNVS();
+  },300000);
 }
 // Firebase Auth gọi kpiInit() sau xác thực
 

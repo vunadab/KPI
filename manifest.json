@@ -1,36 +1,21 @@
 {
-  "name": "KPI Banking - NAB",
+  "name": "KPI Banking - Nam A Bank",
   "short_name": "KPI NAB",
-  "description": "Quản lý KPI và Pipeline Phòng KHCN - Nam A Bank",
+  "description": "Quản lý KPI và Pipeline Phòng KHCN",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#01050d",
-  "theme_color": "#e8a020",
-  "orientation": "portrait-primary",
-  "id": "kpi-banking-nab-khcn",
-  "categories": ["business", "finance", "productivity"],
+  "theme_color": "#01050d",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "KPI Dashboard"
+      "type": "image/png"
     }
   ]
 }

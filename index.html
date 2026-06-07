@@ -482,6 +482,26 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
 // Node-checked, no template literals in HTML
 // ═══════════════════════════════════════════
 
+// ══════════════════════════════════════════
+// KPIApp NAMESPACE — Phase 2
+// Dependency order (không có circular dependency):
+//   Config → Firebase → State → Data → KPI → Utils → UI → Report → AI → Auth → Events
+// Global bridge ở cuối file giữ nguyên onclick/window.* compatibility
+// ══════════════════════════════════════════
+var KPIApp = {};
+KPIApp.Firebase = {};
+KPIApp.Config   = {};
+KPIApp.State    = {};
+KPIApp.Data     = {};
+KPIApp.KPI      = {};
+KPIApp.Utils    = {};
+KPIApp.UI       = {};
+KPIApp.Report   = {};
+KPIApp.AI       = {};
+KPIApp.Auth     = {};
+KPIApp.Events   = {};
+
+
 // ── FIREBASE ──
 var DB='https://kpi-banking-nab-default-rtdb.asia-southeast1.firebasedatabase.app';
 // Multi-phòng: mỗi phòng có root riêng trong Firebase
@@ -655,13 +675,14 @@ var S={
   selNV:null, detailNV:null,
   scope:'thang', scopeDay:'', plFilterNV:'', plFilterStage:'', plFilterSort:'', scopeFrom:'', scopeTo:'',
   filterNVs:[], nvpTemp:[],
-  darkMode:true,  // true=dark, false=light
-  plTab:'nv',  // nv | phong
-  donutKPI:'huy_dong', // KPI hiện trong donut chart
-  plNV:null,   // MA đang xem pipeline
+  darkMode:true,
+  plTab:'nv',
+  donutKPI:'huy_dong',
+  plNV:null,
   plFormNV:null, plEditId:null,
-  plTuan:CUR_T, // tuần lọc pipeline
+  plTuan:CUR_T,
   online:false,
+  isSaving:false,  // true khi đang có write operation — block loadMonth ghi đè local state
   khPhong:{}, khTuan:{}, thTuan:{}, pipeline:{},
 };
 
@@ -671,12 +692,21 @@ function gTH(m,t,ma){return((S.thTuan[m||S.month]||{})[t]||{})[ma]||{};}
 function gPL(m,ma){return((S.pipeline[m||S.month]||{})[ma])||{};}
 
 async function loadMonth(m){
+  // Guard: nếu đang có write operation, không ghi đè local state bằng Firebase
+  // Tránh race condition: save xong Firebase chưa propagate → loadMonth ghi đè data mới
   var r=await Promise.all([fbGet('khPhong/'+m),fbGet('khTuan/'+m),fbGet('thTuan/'+m),fbGet('pipeline/'+m)]);
   if(r[0])S.khPhong[m]=r[0];else if(!S.khPhong[m])S.khPhong[m]={};
   if(r[1])S.khTuan[m]=r[1]; else if(!S.khTuan[m])S.khTuan[m]={};
-  if(r[2])S.thTuan[m]=r[2]; else if(!S.thTuan[m])S.thTuan[m]={};
-  if(r[3])S.pipeline[m]=r[3]; else if(!S.pipeline[m])S.pipeline[m]={};
-  if(r[3])invalidateDeals(m);
+  if(!S.isSaving){
+    // An toàn: không có write nào đang chờ → cập nhật từ Firebase
+    if(r[2])S.thTuan[m]=r[2]; else if(!S.thTuan[m])S.thTuan[m]={};
+    if(r[3])S.pipeline[m]=r[3]; else if(!S.pipeline[m])S.pipeline[m]={};
+    if(r[3])invalidateDeals(m);
+  } else {
+    // Đang save: chỉ khởi tạo nếu chưa có, không ghi đè
+    if(!S.thTuan[m])S.thTuan[m]={};
+    if(!S.pipeline[m])S.pipeline[m]={};
+  }
   S.online=!!(r[0]||r[1]||r[2]||r[3]);
 }
 async function loadNVS(){
@@ -710,6 +740,8 @@ function nvScore(m,ma){
 // ── PIPELINE HELPERS ──
 function getDeals(m,ma){var pl=gPL(m,ma),deals=[];Object.keys(pl).forEach(function(id){deals.push(Object.assign({id:id},pl[id]));});return deals.sort(function(a,b){return(b.ts||0)-(a.ts||0);});}
 var _dealCache={};
+// S.isSaving — guard chống race condition loadMonth vs save operations
+// Set true trước fbSet, false sau khi local state đã sync
 function getAllDeals(m){if(_dealCache[m])return _dealCache[m];var all=[];NVS.forEach(function(nv){getDeals(m,nv.ma).forEach(function(d){all.push(Object.assign({ma:nv.ma,ten:nv.ten},d));});});_dealCache[m]=all;return all;}
 function invalidateDeals(m){delete _dealCache[m||S.month];}
 function plStCfg(key){return PL_STAGES.filter(function(s){return s.key===key;})[0]||PL_STAGES[0];}
@@ -980,16 +1012,6 @@ function rPlWidget(m){
     +(allDeals.length===0?'<div style="text-align:center;padding:12px 0;color:var(--dim);font-size:12px">Chưa có deals · <button onclick="setTab(\'pl\')" style="color:#4d9fff;background:none;border:none;font-weight:800;cursor:pointer;font-size:12px">Thêm ngay ›</button></div>':'')
     +'</div>';
 }
-function rBarChart(m){
-  var fnvs=filtNVs();
-  var rows=STARS.map(function(k){
-    var data=['T1','T2','T3','T4'].map(function(t){var th=fnvs.reduce(function(s,nv){return s+(gTH(m,t,nv.ma)[k.key]||0);},0),kh=fnvs.reduce(function(s,nv){return s+(gKT(m,t,nv.ma)[k.key]||0);},0);return{t:t,p:pct(th,kh),kh:kh};});
-    var mx=Math.max.apply(null,data.map(function(d){return d.p||0;}).concat([100]));
-    return'<div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="font-size:13px">'+k.icon+'</span><span style="font-size:11px;font-weight:800;color:#fff">'+k.label+'</span></div>'
-      +'<div style="display:flex;gap:5px;align-items:flex-end;height:64px">'+data.map(function(d){var h=d.p!==null?Math.max(6,d.p/mx*72):6,c=d.kh>0?pc(d.p):'var(--mute)';return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="font-size:8px;font-weight:800;color:'+c+'">'+(d.p!==null?Math.round(d.p)+'%':'')+'</div><div style="width:100%;height:'+h+'px;background:'+c+';border-radius:3px 3px 0 0;opacity:'+(d.kh>0?1:.2)+';transition:height .6s"></div><div style="font-size:8px;color:var(--dim);font-weight:700">'+d.t+'</div></div>';}).join('')+'</div></div>';
-  }).join('');
-  return'<div class="chart-wrap"><div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:11px">📊 Tiến độ theo tuần</div>'+rows+'</div>';
-}
 function rDonut(m){
   var fnvs=filtNVs(),tuans=scopeTuans();
   var contribs=fnvs.map(function(nv){var th=tuans.reduce(function(s,t){var dk=S.donutKPI||'huy_dong';return s+(gTH(m,t,nv.ma)[dk]||0);},0);return{nv:nv,th:th};}).filter(function(x){return Math.abs(x.th)>0;}).sort(function(a,b){return Math.abs(b.th)-Math.abs(a.th);});
@@ -1136,9 +1158,11 @@ async function saveTH(){
   var btn=document.getElementById('sv-btn');if(btn){btn.textContent='⏳ Đang lưu...';btn.disabled=true;}
   var data={updatedAt:Date.now()};
   KPIS.forEach(function(k){var el=document.getElementById('fi_'+k.key);if(el&&el.value!=='')data[k.key]=parseFloat(el.value);});
+  S.isSaving=true;
   await fbSet('thTuan/'+S.month+'/'+S.selT+'/'+nv.ma,data);
   if(!S.thTuan[S.month])S.thTuan[S.month]={};if(!S.thTuan[S.month][S.selT])S.thTuan[S.month][S.selT]={};
   S.thTuan[S.month][S.selT][nv.ma]=data;
+  S.isSaving=false;
   if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}showToast('✅ Đã lưu TH '+CUR_T,'ok',2000);if(navigator.vibrate)navigator.vibrate(30);
   setTimeout(function(){S.selNV=null;render();},1300);
 }
@@ -1413,10 +1437,12 @@ async function saveDeal(){
   var dealId=S.plEditId||genDealId();
   var deal={sp:sp,kh:kh,sdt:sdt,gt:gt,gd:gd,han:han,note:note,tuan:tuan,ts:Date.now()};
   if(sp==='du_no')deal.diachi=diachi;
+  S.isSaving=true;
   await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
   if(!S.pipeline[S.month])S.pipeline[S.month]={};if(!S.pipeline[S.month][ma])S.pipeline[S.month][ma]={};
   S.pipeline[S.month][ma][dealId]=deal;
   invalidateDeals(S.month);
+  S.isSaving=false;
   if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}
   if(gd==='hoan_tat'){
     setTimeout(function(){
@@ -1433,9 +1459,11 @@ async function advDeal(ma,dealId,newStage){
   var pl=S.pipeline[S.month]&&S.pipeline[S.month][ma]?S.pipeline[S.month][ma]:{};
   var deal=pl[dealId];if(!deal)return;
   deal.gd=newStage;deal.ts=Date.now();
+  S.isSaving=true;
   await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
   S.pipeline[S.month][ma][dealId]=deal;
   invalidateDeals(S.month);
+  S.isSaving=false;
   if(newStage==='hoan_tat'){
     cfmShow('Deal hoàn tất! 🎉','Cập nhật TH tuần ngay?','✅','Cập nhật ngay','Để sau')
       .then(function(ok){if(ok){S.tab='nhap';S.selNV=ma;}render();});
@@ -1448,9 +1476,11 @@ async function delDeal(ma,dealId){
   cfmShow('Xóa deal này?','Thao tác không thể hoàn tác.','🗑️','Xóa','Hủy')
     .then(async function(ok){
       if(!ok)return;
+      S.isSaving=true;
       await fbDel('pipeline/'+S.month+'/'+ma+'/'+dealId);
       if(S.pipeline[S.month]&&S.pipeline[S.month][ma])delete S.pipeline[S.month][ma][dealId];
       invalidateDeals(S.month);
+      S.isSaving=false;
       closePlForm();
     });
 }
@@ -2964,6 +2994,212 @@ function closePWABanner(){
     else if(dx>0&&idx>0)goTab(tabs_order[idx-1]); // swipe phải → tab trước
   },{passive:true});
 })();
+
+// ══════════════════════════════════════════════════════════════
+// NAMESPACE ASSIGNMENTS — Phase 2
+// Gán tất cả functions vào KPIApp.* namespace
+// Functions gốc vẫn tồn tại trên global scope để tương thích
+// onclick handlers và window.* bridges không thay đổi
+// ══════════════════════════════════════════════════════════════
+
+// ── KPIApp.Firebase ──
+KPIApp.Firebase.get = fbGet;
+KPIApp.Firebase.set = fbSet;
+KPIApp.Firebase.del = fbDel;
+
+// ── KPIApp.Config ──
+KPIApp.Config.initPhong   = initPhong;
+KPIApp.Config.selectPhong = selectPhong;
+// Read-only constants
+Object.defineProperty(KPIApp.Config, 'PHONG_LIST',   {get: function(){return PHONG_LIST;}});
+Object.defineProperty(KPIApp.Config, 'CUR_PHONG',    {get: function(){return CUR_PHONG;}});
+Object.defineProperty(KPIApp.Config, 'PIN',           {get: function(){return PIN;}});
+Object.defineProperty(KPIApp.Config, 'NOW',           {get: function(){return NOW;}});
+Object.defineProperty(KPIApp.Config, 'CUR_M',         {get: function(){return CUR_M;}});
+Object.defineProperty(KPIApp.Config, 'CUR_T',         {get: function(){return CUR_T;}});
+Object.defineProperty(KPIApp.Config, 'MONTHS',        {get: function(){return MONTHS;}});
+Object.defineProperty(KPIApp.Config, 'DEFAULT_NVS',   {get: function(){return DEFAULT_NVS;}});
+Object.defineProperty(KPIApp.Config, 'DEFAULT_KH',    {get: function(){return DEFAULT_KH;}});
+Object.defineProperty(KPIApp.Config, 'PL_STAGES',     {get: function(){return PL_STAGES;}});
+Object.defineProperty(KPIApp.Config, 'KPIS',          {get: function(){return KPIS;}});
+Object.defineProperty(KPIApp.Config, 'STARS',         {get: function(){return STARS;}});
+Object.defineProperty(KPIApp.Config, 'STAR_WEIGHTS',  {get: function(){return STAR_WEIGHTS;}});
+Object.defineProperty(KPIApp.Config, 'NVS',           {get: function(){return NVS;}});
+
+// ── KPIApp.State ──
+Object.defineProperty(KPIApp.State, 'S',              {get: function(){return S;}});
+Object.defineProperty(KPIApp.State, 'cache',          {get: function(){return _dealCache;}});
+KPIApp.State.gKP = gKP;
+KPIApp.State.gKT = gKT;
+KPIApp.State.gTH = gTH;
+KPIApp.State.gPL = gPL;
+
+// ── KPIApp.Data ──
+KPIApp.Data.loadMonth      = loadMonth;
+KPIApp.Data.loadNVS        = loadNVS;
+KPIApp.Data.loadKPIS       = loadKPIS;
+KPIApp.Data.saveKPIS       = saveKPIS;
+KPIApp.Data.getDeals       = getDeals;
+KPIApp.Data.getAllDeals     = getAllDeals;
+KPIApp.Data.invalidateDeals= invalidateDeals;
+KPIApp.Data.saveTH         = saveTH;
+KPIApp.Data.saveDeal       = saveDeal;
+KPIApp.Data.advDeal        = advDeal;
+KPIApp.Data.delDeal        = delDeal;
+KPIApp.Data.saveKhP        = saveKhP;
+KPIApp.Data.saveKhT        = saveKhT;
+KPIApp.Data.nvAdd          = nvAdd;
+KPIApp.Data.nvDel          = nvDel;
+KPIApp.Data.nvEdit         = nvEdit;
+KPIApp.Data.bkAdd          = bkAdd;
+KPIApp.Data.bkToggle       = bkToggle;
+KPIApp.Data.bkEdit         = bkEdit;
+KPIApp.Data.bkDel          = bkDel;
+KPIApp.Data.rebuildStars   = rebuildStars;
+
+// ── KPIApp.KPI ──
+KPIApp.KPI.scopeTuans   = scopeTuans;
+KPIApp.KPI.thForNV      = thForNV;
+KPIApp.KPI.khForNV      = khForNV;
+KPIApp.KPI.khPS         = khPS;
+KPIApp.KPI.filtNVs      = filtNVs;
+KPIApp.KPI.scoreTD      = scoreTD;
+KPIApp.KPI.scoreKPIFull = scoreKPIFull;
+KPIApp.KPI.nvScore      = nvScore;
+KPIApp.KPI.plForecast   = plForecast;
+KPIApp.KPI.plStCfg      = plStCfg;
+KPIApp.KPI.plTotalVal   = plTotalVal;
+
+// ── KPIApp.Utils ──
+KPIApp.Utils.esc         = esc;
+KPIApp.Utils.renderAiText= renderAiText;
+KPIApp.Utils.fmt         = fmt;
+KPIApp.Utils.pct         = pct;
+KPIApp.Utils.fmtDealGt   = fmtDealGt;
+KPIApp.Utils.fmtTs       = fmtTs;
+KPIApp.Utils.fmtM        = fmtM;
+KPIApp.Utils.genDealId   = genDealId;
+KPIApp.Utils.genMonths   = genMonths;
+KPIApp.Utils.genDays     = genDays;
+KPIApp.Utils.daysLeft    = daysLeft;
+KPIApp.Utils.pc          = pc;
+KPIApp.Utils.p2s         = p2s;
+KPIApp.Utils.stl         = stl;
+KPIApp.Utils.acC         = acC;
+KPIApp.Utils.av          = av;
+KPIApp.Utils.chip        = chip;
+KPIApp.Utils.bar         = bar;
+KPIApp.Utils.ring        = ring;
+KPIApp.Utils.showToast   = showToast;
+KPIApp.Utils.showEl      = showEl;
+KPIApp.Utils.hideEl      = hideEl;
+KPIApp.Utils.setText     = setText;
+KPIApp.Utils.setHTML     = setHTML;
+KPIApp.Utils.val         = val;
+
+// ── KPIApp.UI ──
+KPIApp.UI.rHdr          = rHdr;
+KPIApp.UI.rNav          = rNav;
+KPIApp.UI.rContent      = rContent;
+KPIApp.UI.rNVFilter     = rNVFilter;
+KPIApp.UI.rScopeBar     = rScopeBar;
+KPIApp.UI.buildDonutSel = buildDonutSel;
+KPIApp.UI.rNhapList     = rNhapList;
+KPIApp.UI.rNhapForm     = rNhapForm;
+KPIApp.UI.rPlList       = rPlList;
+KPIApp.UI.rPlDetail     = rPlDetail;
+KPIApp.UI.rPlPhong      = rPlPhong;
+KPIApp.UI.rPlForm       = rPlForm;
+KPIApp.UI.rPlWidget     = rPlWidget;
+KPIApp.UI.rDash         = rDash;
+KPIApp.UI.rDashDetail   = rDashDetail;
+KPIApp.UI.rBarChart     = rBarChart;
+KPIApp.UI.rDonut        = rDonut;
+KPIApp.UI.rAlert        = rAlert;
+KPIApp.UI.rStar         = rStar;
+KPIApp.UI.rTimeline     = rTimeline;
+KPIApp.UI.rBokpi        = rBokpi;
+KPIApp.UI.bkRow         = bkRow;
+KPIApp.UI.rDsNV         = rDsNV;
+KPIApp.UI.rKhPhong      = rKhPhong;
+KPIApp.UI.rKhTuanList   = rKhTuanList;
+KPIApp.UI.rKhTuanForm   = rKhTuanForm;
+KPIApp.UI.rAI           = rAI;
+KPIApp.UI.buildAIContext= buildAIContext;
+
+// ── KPIApp.Report ──
+KPIApp.Report.buildPDFGuide      = buildPDFGuide;
+KPIApp.Report.openPDFWindow      = openPDFWindow;
+KPIApp.Report.buildReport        = buildReport;
+KPIApp.Report.printReport        = printReport;
+KPIApp.Report.printAllKPI        = printAllKPI;
+KPIApp.Report.printTimeline      = printTimeline;
+KPIApp.Report.buildZaloContent   = buildZaloContent;
+KPIApp.Report.buildZaloCanhan    = buildZaloCanhan;
+KPIApp.Report.openZaloShare      = openZaloShare;
+KPIApp.Report.closeZaloShare     = closeZaloShare;
+KPIApp.Report.copyZalo           = copyZalo;
+KPIApp.Report.setZaloMode        = setZaloMode;
+KPIApp.Report.setZaloCanhanScope = setZaloCanhanScope;
+KPIApp.Report.setZaloScope       = setZaloScope;
+
+// ── KPIApp.AI ──
+KPIApp.AI.callGemini   = callGemini;
+KPIApp.AI.aiAddMsg     = aiAddMsg;
+KPIApp.AI.aiShowTyping = aiShowTyping;
+KPIApp.AI.aiAsk        = aiAsk;
+KPIApp.AI.aiSend       = aiSend;
+
+// ── KPIApp.Auth ──
+KPIApp.Auth.openPin      = openPin;
+KPIApp.Auth.closePin     = closePin;
+KPIApp.Auth.rPinDots     = rPinDots;
+KPIApp.Auth.pinAdd       = pinAdd;
+KPIApp.Auth.pinDel       = pinDel;
+KPIApp.Auth.closePinModal= closePinModal;
+
+// ── KPIApp.Events ──
+KPIApp.Events.render         = render;
+KPIApp.Events.cfmShow        = cfmShow;
+KPIApp.Events.cfmResolve     = cfmResolve;
+KPIApp.Events.setTab         = setTab;
+KPIApp.Events.setKhTab       = setKhTab;
+KPIApp.Events.setMonth       = setMonth;
+KPIApp.Events.setT           = setT;
+KPIApp.Events.setTKh         = setTKh;
+KPIApp.Events.setScope       = setScope;
+KPIApp.Events.setScopeDay    = setScopeDay;
+KPIApp.Events.selNV          = selNV;
+KPIApp.Events.selNVKh        = selNVKh;
+KPIApp.Events.backNhap       = backNhap;
+KPIApp.Events.backKhT        = backKhT;
+KPIApp.Events.showDetail     = showDetail;
+KPIApp.Events.backDash       = backDash;
+KPIApp.Events.setPlTab       = setPlTab;
+KPIApp.Events.plSpChange     = plSpChange;
+KPIApp.Events.closePlForm    = closePlForm;
+KPIApp.Events.openNVPicker   = openNVPicker;
+KPIApp.Events.closeNVPicker  = closeNVPicker;
+KPIApp.Events.nvpSelectAll   = nvpSelectAll;
+KPIApp.Events.nvpClearAll    = nvpClearAll;
+KPIApp.Events.nvpToggle      = nvpToggle;
+KPIApp.Events.nvpSortScore   = nvpSortScore;
+KPIApp.Events.nvpConfirm     = nvpConfirm;
+KPIApp.Events.renderNVP      = renderNVP;
+KPIApp.Events.clearNVF       = clearNVF;
+KPIApp.Events.openExpModal   = openExpModal;
+KPIApp.Events.closeExpModal  = closeExpModal;
+KPIApp.Events.checkKhTuan    = checkKhTuan;
+KPIApp.Events.onFI           = onFI;
+KPIApp.Events.applyTheme     = applyTheme;
+KPIApp.Events.toggleTheme    = toggleTheme;
+KPIApp.Events.installPWA     = installPWA;
+KPIApp.Events.closePWABanner = closePWABanner;
+
+// ── Expose KPIApp globally (debug & future extensions) ──
+window.KPIApp = KPIApp;
+
+
 
 </script>
 <script type="module">

@@ -542,8 +542,16 @@ function selectPhong(id){
   init();
 }
 async function fbGet(p){try{var r=await fetch(DB+'/'+ROOT+'/'+p+'.json');if(!r.ok)return null;var d=await r.json();return d===null?null:d;}catch(e){console.warn('fbGet',e.message);return null;}}
-async function fbSet(p,d){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){console.warn('fbSet',e.message);}}
-async function fbDel(p){try{await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'DELETE'});}catch(e){console.warn('fbDel',e.message);}}
+async function fbSet(p,d){
+  var r=await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  if(!r.ok)throw new Error('fbSet HTTP '+r.status+' ('+p+')');
+  return r;
+}
+async function fbDel(p){
+  var r=await fetch(DB+'/'+ROOT+'/'+p+'.json',{method:'DELETE'});
+  if(!r.ok)throw new Error('fbDel HTTP '+r.status+' ('+p+')');
+  return r;
+}
 
 // ── PIN ──
 var PIN='1234',pinBuf='',pinAuth=false,pinCb=null;
@@ -1155,16 +1163,27 @@ function onFI(key,kv,col){
 }
 async function saveTH(){
   var nv=NVS.filter(function(n){return n.ma===S.selNV;})[0];if(!nv)return;
-  var btn=document.getElementById('sv-btn');if(btn){btn.textContent='⏳ Đang lưu...';btn.disabled=true;}
+  var btn=document.getElementById('sv-btn');
+  if(btn){btn.textContent='⏳ Đang lưu...';btn.disabled=true;}
   var data={updatedAt:Date.now()};
   KPIS.forEach(function(k){var el=document.getElementById('fi_'+k.key);if(el&&el.value!=='')data[k.key]=parseFloat(el.value);});
   S.isSaving=true;
-  await fbSet('thTuan/'+S.month+'/'+S.selT+'/'+nv.ma,data);
-  if(!S.thTuan[S.month])S.thTuan[S.month]={};if(!S.thTuan[S.month][S.selT])S.thTuan[S.month][S.selT]={};
-  S.thTuan[S.month][S.selT][nv.ma]=data;
-  S.isSaving=false;
-  if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}showToast('✅ Đã lưu TH '+CUR_T,'ok',2000);if(navigator.vibrate)navigator.vibrate(30);
-  setTimeout(function(){S.selNV=null;render();},1300);
+  try{
+    await fbSet('thTuan/'+S.month+'/'+S.selT+'/'+nv.ma,data);
+    if(!S.thTuan[S.month])S.thTuan[S.month]={};
+    if(!S.thTuan[S.month][S.selT])S.thTuan[S.month][S.selT]={};
+    S.thTuan[S.month][S.selT][nv.ma]=data;
+    if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}
+    showToast('✅ Đã lưu TH '+CUR_T,'ok',2000);
+    if(navigator.vibrate)navigator.vibrate(30);
+    setTimeout(function(){S.selNV=null;render();},1300);
+  }catch(e){
+    console.error('saveTH failed:',e.message);
+    if(btn){btn.textContent='❌ Lỗi lưu!';btn.disabled=false;btn.style.background='#ff4757';}
+    showToast('❌ Lưu thất bại — kiểm tra mạng và thử lại','err',4000);
+  }finally{
+    S.isSaving=false;
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1438,20 +1457,28 @@ async function saveDeal(){
   var deal={sp:sp,kh:kh,sdt:sdt,gt:gt,gd:gd,han:han,note:note,tuan:tuan,ts:Date.now()};
   if(sp==='du_no')deal.diachi=diachi;
   S.isSaving=true;
-  await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
-  if(!S.pipeline[S.month])S.pipeline[S.month]={};if(!S.pipeline[S.month][ma])S.pipeline[S.month][ma]={};
-  S.pipeline[S.month][ma][dealId]=deal;
-  invalidateDeals(S.month);
-  S.isSaving=false;
-  if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}
-  if(gd==='hoan_tat'){
-    setTimeout(function(){
-      closePlForm();
-      cfmShow('Deal hoàn tất! 🎉','Cập nhật TH tuần ngay?','✅','Cập nhật ngay','Để sau')
-        .then(function(ok){if(ok){S.tab='nhap';S.selNV=ma;render();}});
-    },800);
-  } else {
-    setTimeout(function(){closePlForm();},1200);
+  try{
+    await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
+    if(!S.pipeline[S.month])S.pipeline[S.month]={};
+    if(!S.pipeline[S.month][ma])S.pipeline[S.month][ma]={};
+    S.pipeline[S.month][ma][dealId]=deal;
+    invalidateDeals(S.month);
+    if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}
+    if(gd==='hoan_tat'){
+      setTimeout(function(){
+        closePlForm();
+        cfmShow('Deal hoàn tất! 🎉','Cập nhật TH tuần ngay?','✅','Cập nhật ngay','Để sau')
+          .then(function(ok){if(ok){S.tab='nhap';S.selNV=ma;render();}});
+      },800);
+    } else {
+      setTimeout(function(){closePlForm();},1200);
+    }
+  }catch(e){
+    console.error('saveDeal failed:',e.message);
+    if(btn){btn.textContent='❌ Lỗi lưu!';btn.disabled=false;btn.style.background='#ff4757';}
+    showToast('❌ Lưu deal thất bại — kiểm tra mạng và thử lại','err',4000);
+  }finally{
+    S.isSaving=false;
   }
 }
 
@@ -1460,16 +1487,22 @@ async function advDeal(ma,dealId,newStage){
   var deal=pl[dealId];if(!deal)return;
   deal.gd=newStage;deal.ts=Date.now();
   S.isSaving=true;
-  await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
-  S.pipeline[S.month][ma][dealId]=deal;
-  invalidateDeals(S.month);
-  S.isSaving=false;
-  if(newStage==='hoan_tat'){
-    cfmShow('Deal hoàn tất! 🎉','Cập nhật TH tuần ngay?','✅','Cập nhật ngay','Để sau')
-      .then(function(ok){if(ok){S.tab='nhap';S.selNV=ma;}render();});
-    return;
+  try{
+    await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
+    S.pipeline[S.month][ma][dealId]=deal;
+    invalidateDeals(S.month);
+    if(newStage==='hoan_tat'){
+      cfmShow('Deal hoàn tất! 🎉','Cập nhật TH tuần ngay?','✅','Cập nhật ngay','Để sau')
+        .then(function(ok){if(ok){S.tab='nhap';S.selNV=ma;}render();});
+      return;
+    }
+    render();
+  }catch(e){
+    console.error('advDeal failed:',e.message);
+    showToast('❌ Cập nhật deal thất bại — thử lại','err',4000);
+  }finally{
+    S.isSaving=false;
   }
-  render();
 }
 
 async function delDeal(ma,dealId){
@@ -1477,11 +1510,17 @@ async function delDeal(ma,dealId){
     .then(async function(ok){
       if(!ok)return;
       S.isSaving=true;
-      await fbDel('pipeline/'+S.month+'/'+ma+'/'+dealId);
-      if(S.pipeline[S.month]&&S.pipeline[S.month][ma])delete S.pipeline[S.month][ma][dealId];
-      invalidateDeals(S.month);
-      S.isSaving=false;
-      closePlForm();
+      try{
+        await fbDel('pipeline/'+S.month+'/'+ma+'/'+dealId);
+        if(S.pipeline[S.month]&&S.pipeline[S.month][ma])delete S.pipeline[S.month][ma][dealId];
+        invalidateDeals(S.month);
+        closePlForm();
+      }catch(e){
+        console.error('delDeal failed:',e.message);
+        showToast('❌ Xóa deal thất bại — thử lại','err',4000);
+      }finally{
+        S.isSaving=false;
+      }
     });
 }
 
@@ -2916,22 +2955,16 @@ window.kpiInit = async function(){
 // Firebase Auth gọi kpiInit() sau xác thực
 
 // ── PWA Service Worker ──
+// QUAN TRỌNG: Không tự reload khi có SW mới — tránh mất data đang nhập
+// SW chỉ làm nhiệm vụ cache offline, không can thiệp vào lifecycle app
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
     navigator.serviceWorker.register('./sw.js')
       .then(function(reg){
-        // Khi có SW mới → tự động reload để lấy code mới nhất
-        reg.addEventListener('updatefound', function(){
-          var newSW=reg.installing;
-          newSW.addEventListener('statechange', function(){
-            if(newSW.state==='installed'&&navigator.serviceWorker.controller){
-              // SW mới đã sẵn sàng - reload để áp dụng
-              window.location.reload();
-            }
-          });
-        });
-        // Chủ động check update mỗi lần mở app
-        reg.update();
+        // Không gọi reg.update() tự động — không tự check/apply SW mới
+        // Không lắng nghe updatefound — không reload khi có SW mới
+        // SW mới sẽ được apply tự nhiên khi user đóng tất cả tab và mở lại
+        console.log('SW registered:', reg.scope);
       })
       .catch(function(err){ console.log('SW fail', err); });
   });

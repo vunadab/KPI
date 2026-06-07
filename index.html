@@ -463,6 +463,19 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
 </div>
 <div id="app" style="display:none"></div>
 
+<!-- Confirm Modal — thay thế confirm() native, tránh lỗi Safari/iOS trong setTimeout -->
+<div id="cfm-modal" style="display:none;position:fixed;inset:0;background:#00000080;z-index:900;align-items:center;justify-content:center;padding:24px">
+  <div style="width:100%;max-width:320px;background:var(--bg1);border:1px solid var(--border2);border-radius:18px;padding:22px 20px;box-shadow:0 16px 48px #000a">
+    <div id="cfm-icon" style="font-size:28px;text-align:center;margin-bottom:10px">❓</div>
+    <div id="cfm-msg" style="font-size:14px;font-weight:800;color:var(--text);text-align:center;margin-bottom:6px"></div>
+    <div id="cfm-sub" style="font-size:11px;color:var(--dim);text-align:center;margin-bottom:18px"></div>
+    <div style="display:flex;gap:9px">
+      <button id="cfm-no" onclick="cfmResolve(false)" style="flex:1;padding:11px;border:1px solid var(--border2);background:var(--bg2);color:var(--dim);border-radius:10px;font-size:13px;font-weight:800;cursor:pointer">Không</button>
+      <button id="cfm-yes" onclick="cfmResolve(true)" style="flex:1;padding:11px;border:none;background:linear-gradient(135deg,#e8a020,#ffc84a);color:#030810;border-radius:10px;font-size:13px;font-weight:900;cursor:pointer">Có</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════
 // KPI BANKING NAB — Full App
@@ -663,6 +676,7 @@ async function loadMonth(m){
   if(r[1])S.khTuan[m]=r[1]; else if(!S.khTuan[m])S.khTuan[m]={};
   if(r[2])S.thTuan[m]=r[2]; else if(!S.thTuan[m])S.thTuan[m]={};
   if(r[3])S.pipeline[m]=r[3]; else if(!S.pipeline[m])S.pipeline[m]={};
+  if(r[3])invalidateDeals(m);
   S.online=!!(r[0]||r[1]||r[2]||r[3]);
 }
 async function loadNVS(){
@@ -687,13 +701,17 @@ function thForNV(m,ma){
   var rr={};KPIS.forEach(function(k){rr[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,ma)[k.key]||0);},0);});return rr;
 }
 function khForNV(m,ma){var rr={};KPIS.forEach(function(k){rr[k.key]=scopeTuans().reduce(function(s,t){return s+(gKT(m,t,ma)[k.key]||0);},0);});return rr;}
+// nvScore = Điểm Tổng quan: dùng cho Dashboard, PDF tổng quan, AI context, NV picker
+// Công thức: scoreKPIFull — SUM(%TẤT CẢ KPI × trọng số) ÷ KPIS.length
 function nvScore(m,ma){
   return scoreKPIFull(m,ma,scopeTuans());
 }
 
 // ── PIPELINE HELPERS ──
 function getDeals(m,ma){var pl=gPL(m,ma),deals=[];Object.keys(pl).forEach(function(id){deals.push(Object.assign({id:id},pl[id]));});return deals.sort(function(a,b){return(b.ts||0)-(a.ts||0);});}
-function getAllDeals(m){var all=[];NVS.forEach(function(nv){getDeals(m,nv.ma).forEach(function(d){all.push(Object.assign({ma:nv.ma,ten:nv.ten},d));});});return all;}
+var _dealCache={};
+function getAllDeals(m){if(_dealCache[m])return _dealCache[m];var all=[];NVS.forEach(function(nv){getDeals(m,nv.ma).forEach(function(d){all.push(Object.assign({ma:nv.ma,ten:nv.ten},d));});});_dealCache[m]=all;return all;}
+function invalidateDeals(m){delete _dealCache[m||S.month];}
 function plStCfg(key){return PL_STAGES.filter(function(s){return s.key===key;})[0]||PL_STAGES[0];}
 function plTotalVal(deals){return deals.reduce(function(s,d){return s+(d.gt||0);},0);}
 
@@ -1007,6 +1025,32 @@ function showToast(msg, type, ms){
   setTimeout(function(){t.classList.add('show');},10);
   setTimeout(function(){t.classList.remove('show');},ms||2000);
 }
+
+// cfmShow — thay confirm() native. Trả về Promise<boolean>
+// Dùng: cfmShow('Tiêu đề','Mô tả','⚠️','Có','Không').then(function(ok){if(ok){...}})
+var _cfmResolve=null;
+function cfmShow(msg,sub,icon,yes,no){
+  var el=document.getElementById('cfm-modal');
+  var msgEl=document.getElementById('cfm-msg');
+  var subEl=document.getElementById('cfm-sub');
+  var iconEl=document.getElementById('cfm-icon');
+  var yesEl=document.getElementById('cfm-yes');
+  var noEl=document.getElementById('cfm-no');
+  if(!el)return Promise.resolve(true); // fallback
+  if(msgEl)msgEl.textContent=msg||'';
+  if(subEl)subEl.textContent=sub||'';
+  if(iconEl)iconEl.textContent=icon||'❓';
+  if(yesEl)yesEl.textContent=yes||'Có';
+  if(noEl)noEl.textContent=no||'Không';
+  el.style.display='flex';
+  return new Promise(function(resolve){_cfmResolve=resolve;});
+}
+function cfmResolve(val){
+  var el=document.getElementById('cfm-modal');
+  if(el)el.style.display='none';
+  if(_cfmResolve){_cfmResolve(val);_cfmResolve=null;}
+}
+
 
 function buildDonutSel(){
   var sel=S.donutKPI||'huy_dong';
@@ -1326,7 +1370,7 @@ function rPlForm(){
     +'<select id="pl-sp" class="dsel" style="margin:0" onchange="plSpChange()"><option value="">-- Chọn sản phẩm --</option>'+kpOpts+'</select></div>'
 
     +'<div class="ff"><div class="fk" style="margin-bottom:6px;font-weight:700">Mã / Tên KH</div>'
-    +'<input type="text" id="pl-kh" value="'+(ed.kh||'')+'" placeholder="VD: KH001, Nguyễn Văn A..."></div>'
+    +'<input type="text" id="pl-kh" value="'+esc(ed.kh||'')+'" placeholder="VD: KH001, Nguyễn Văn A..."></div>'
 
     +'<div class="ff"><div class="fk" style="margin-bottom:6px;font-weight:700">Số điện thoại KH</div>'
     +'<input type="text" id="pl-sdt" value="'+(ed.sdt||'')+'" placeholder="0901234567"></div>'
@@ -1344,7 +1388,7 @@ function rPlForm(){
     +'<select id="pl-han" class="dsel" style="margin:0"><option value="">Không xác định</option>'+hanOpts+'</select></div>'
 
     +'<div class="ff"><div class="fk" style="margin-bottom:6px;font-weight:700">Ghi chú</div>'
-    +'<input type="text" id="pl-note" value="'+(ed.note||'')+'" placeholder="Ghi chú ngắn..."></div>'
+    +'<input type="text" id="pl-note" value="'+esc(ed.note||'')+'" placeholder="Ghi chú ngắn..."></div>'
 
     +'<button class="bsave" id="pl-sv-btn" onclick="saveDeal()">'+(isEdit?'💾 Lưu chỉnh sửa':'➕ Thêm deal')+'</button>'
     +(isEdit?'<button class="bdanger" onclick="delDeal(\''+ma+'\',\''+S.plEditId+'\')">🗑 Xóa deal này</button>':'')
@@ -1372,9 +1416,14 @@ async function saveDeal(){
   await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
   if(!S.pipeline[S.month])S.pipeline[S.month]={};if(!S.pipeline[S.month][ma])S.pipeline[S.month][ma]={};
   S.pipeline[S.month][ma][dealId]=deal;
+  invalidateDeals(S.month);
   if(btn){btn.textContent='✅ Đã lưu!';btn.classList.add('ok');}
   if(gd==='hoan_tat'){
-    setTimeout(function(){closePlForm();if(confirm('Deal hoàn tất! Cập nhật TH tuần ngay?')){S.tab='nhap';S.selNV=ma;render();}},800);
+    setTimeout(function(){
+      closePlForm();
+      cfmShow('Deal hoàn tất! 🎉','Cập nhật TH tuần ngay?','✅','Cập nhật ngay','Để sau')
+        .then(function(ok){if(ok){S.tab='nhap';S.selNV=ma;render();}});
+    },800);
   } else {
     setTimeout(function(){closePlForm();},1200);
   }
@@ -1386,15 +1435,24 @@ async function advDeal(ma,dealId,newStage){
   deal.gd=newStage;deal.ts=Date.now();
   await fbSet('pipeline/'+S.month+'/'+ma+'/'+dealId,deal);
   S.pipeline[S.month][ma][dealId]=deal;
-  if(newStage==='hoan_tat'&&confirm('Deal hoàn tất! Cập nhật TH tuần ngay?')){S.tab='nhap';S.selNV=ma;render();return;}
+  invalidateDeals(S.month);
+  if(newStage==='hoan_tat'){
+    cfmShow('Deal hoàn tất! 🎉','Cập nhật TH tuần ngay?','✅','Cập nhật ngay','Để sau')
+      .then(function(ok){if(ok){S.tab='nhap';S.selNV=ma;}render();});
+    return;
+  }
   render();
 }
 
 async function delDeal(ma,dealId){
-  if(!confirm('Xóa deal này?'))return;
-  await fbDel('pipeline/'+S.month+'/'+ma+'/'+dealId);
-  if(S.pipeline[S.month]&&S.pipeline[S.month][ma])delete S.pipeline[S.month][ma][dealId];
-  closePlForm();
+  cfmShow('Xóa deal này?','Thao tác không thể hoàn tác.','🗑️','Xóa','Hủy')
+    .then(async function(ok){
+      if(!ok)return;
+      await fbDel('pipeline/'+S.month+'/'+ma+'/'+dealId);
+      if(S.pipeline[S.month]&&S.pipeline[S.month][ma])delete S.pipeline[S.month][ma][dealId];
+      invalidateDeals(S.month);
+      closePlForm();
+    });
 }
 
 function closePlForm(){S.plFormNV=null;S.plEditId=null;render();}
@@ -1493,7 +1551,7 @@ function rDash(){
 function rDashDetail(){
   var nv=NVS.filter(function(n){return n.ma===S.detailNV;})[0];if(!nv)return'';
   var m=S.month,khS=khForNV(m,nv.ma),thS=thForNV(m,nv.ma);
-  // nvScore = (HD%×1.0 + DN%×1.5 + Thẻ%×0.8) / 3 — luôn chia 3
+  // Điểm Tổng quan: nvScore = scoreKPIFull (tất cả KPI ÷ KPIS.length)
   var score=nvScore(m,nv.ma);
   var rows=KPIS.map(function(k){var kh=khS[k.key]||0,th=thS[k.key]||0,p=kh>0?pct(th,kh):null;return'<div class="card" style="margin-bottom:8px;border-color:'+(kh>0?k.color+'30':'var(--border)')+'"><div style="display:flex;align-items:center;gap:9px;margin-bottom:'+(kh>0?'7px':'0')+'"><span style="font-size:19px">'+k.icon+'</span><div style="flex:1"><div style="font-weight:800;font-size:13px;color:'+(k.star?'#ffc84a':'#fff')+'">'+k.label+'</div><div style="font-size:10px;color:var(--dim)">KH: '+(kh?fmt(kh,k.unit):'Chưa giao')+'</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:900;color:'+(kh>0?k.color:'var(--dim)')+';font-family:\'Space Mono\',monospace">'+fmt(th,k.unit)+'</div><div style="font-size:11px;font-weight:800;color:'+pc(p)+'">'+p2s(p)+'</div></div></div>'+(kh>0?bar(th,kh,k.color,6):'')+'</div>';}).join('');
   var hist=['T1','T2','T3','T4'].map(function(t){var kh=gKT(m,t,nv.ma),th=gTH(m,t,nv.ma);if(!KPIS.some(function(k){return(kh[k.key]||0)>0;})&&!KPIS.some(function(k){return th[k.key]!=null;}))return'';var cells=STARS.map(function(k){var k2=kh[k.key]||0,t2=th[k.key]!=null?th[k.key]:null,p2=k2>0?pct(t2||0,k2):null;return'<div style="background:var(--bg2);border-radius:8px;padding:7px;text-align:center"><div style="font-size:11px">'+k.icon+'</div><div style="font-size:12px;font-weight:900;color:'+(k2>0?pc(p2):'var(--dim)')+';font-family:\'Space Mono\',monospace">'+(k2>0?fmt(t2||0,k.unit):'—')+'</div><div style="font-size:9px;color:var(--mute)">KH:'+fmt(k2,k.unit)+'</div>'+(k2>0&&p2!==null?'<div style="font-size:9px;font-weight:800;color:'+pc(p2)+'">'+Math.round(p2)+'%</div>':'')+'</div>';}).join('');return'<div style="background:var(--bg1);border-radius:12px;padding:11px;margin-bottom:7px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="tag tag-b">'+t+'</span>'+(th.updatedAt?'<span style="font-size:10px;color:var(--mute)">🕐 '+fmtTs(th.updatedAt)+'</span>':'')+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">'+cells+'</div></div>';}).join('');
@@ -1526,9 +1584,9 @@ function rAlert(){
     +(!total&&!chuaKh.length?'<div class="card card-green" style="text-align:center;padding:16px"><div style="font-size:26px;margin-bottom:5px">🎉</div><div style="font-weight:900;color:#00c48c">Không có cảnh báo!</div></div>':'')
     +(chuaNhap.length?block('🚨 '+chuaNhap.length+' NV có KH chưa nhập TH ('+CUR_T+')','#ff4757',chuaNhap):'')
     +(khongPS.length?block('⛔ '+khongPS.length+' NV không phát sinh ('+CUR_T+')','#ff4757',khongPS):'')
-    +(duoi50.length?'<div class="ac" style="border-left-color:#ff9f43"><div class="at" style="color:#ff9f43">⚠️ '+duoi50.length+' NV dưới 50% KPI trọng điểm</div>'+d50det+'</div>':'')
+    +(duoi50.length?'<div class="ac" style="border-left-color:#ff9f43"><div class="at" style="color:#ff9f43">⚠️ '+duoi50.length+' NV dưới 50% KPI trọng yếu</div>'+d50det+'</div>':'')
     +(chuaKh.length?block('📋 '+chuaKh.length+' NV chưa được giao KH ('+CUR_T+')','#e8a020',chuaKh):'')
-    +(plOver.length?'<div class="ac" style="border-left-color:#ff4757"><div class="at" style="color:#ff4757">⏰ '+plOver.length+' deal Pipeline quá hạn</div>'+plOver.map(function(d){var kpiC=KPIS.filter(function(k){return k.key===d.sp;})[0]||KPIS[0];return'<div class="ai"><span>'+kpiC.icon+'</span><div><span style="color:#fff">'+d.ten+'</span><div style="font-size:10px;color:var(--dim)">'+( d.kh||'Deal')+' · '+fmt(d.gt,kpiC.unit)+' · Quá '+Math.abs(daysLeft(d.han))+' ngày</div></div></div>';}).join('')+'</div>':'')
+    +(plOver.length?'<div class="ac" style="border-left-color:#ff4757"><div class="at" style="color:#ff4757">⏰ '+plOver.length+' deal Pipeline quá hạn</div>'+plOver.map(function(d){var kpiC=KPIS.filter(function(k){return k.key===d.sp;})[0]||KPIS[0];return'<div class="ai"><span>'+kpiC.icon+'</span><div><span style="color:#fff">'+esc(d.ten)+'</span><div style="font-size:10px;color:var(--dim)">'+esc(d.kh||'Deal')+' · '+fmt(d.gt,kpiC.unit)+' · Quá '+Math.abs(daysLeft(d.han))+' ngày</div></div></div>';}).join('')+'</div>':'')
 
     +(plEmpty.length?block('📋 '+plEmpty.length+' NV pipeline trống','#e8a020',plEmpty):'')
     // ── PACE ALERTS ──
@@ -1627,8 +1685,8 @@ function rBokpi(){
     +'<div style="font-size:11px;font-weight:800;color:var(--text);margin:12px 0 8px">📌 KPI Phụ ('+KPIS.filter(function(k){return!k.star;}).length+' chỉ tiêu)</div>'
     +crossRows
     +'<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;margin:12px 0">'
-    +'<div style="font-size:10px;font-weight:800;color:var(--gold);margin-bottom:4px">⚖️ Công thức Tuyên dương (3 KPI ⭐ ÷ 3)</div>'
-    +'<div style="font-size:10px;color:var(--dim);margin-bottom:8px">HD×1.0 + DN×1.5 + Thẻ×0.8 ÷ 3 — Giữ nguyên cho Chương trình thi đua</div>'
+    +'<div style="font-size:10px;font-weight:800;color:var(--gold);margin-bottom:4px">⚖️ Công thức Tuyên dương ('+STARS.length+' KPI trọng yếu ÷ '+STARS.length+')</div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-bottom:8px">'+STARS.map(function(k){return k.label+'×'+(STAR_WEIGHTS[k.key]||1.0);}).join(' + ')+' ÷ '+STARS.length+' — Giữ nguyên cho Chương trình thi đua</div>'
     +'<div style="font-size:10px;font-weight:800;color:#4d9fff;margin-bottom:4px">📊 Công thức Báo cáo tổng quan (tất cả '+KPIS.length+' KPI ÷ '+KPIS.length+')</div>'
     +'<div style="font-size:10px;color:var(--dim);font-family:monospace;word-break:break-all">('+allW+') ÷ '+KPIS.length+'</div>'
     +'<div style="font-size:10px;color:var(--dim);margin-top:5px">NV không có KH → KPI đó = 0, <b>vẫn chia '+KPIS.length+'</b> — đảm bảo công bằng</div>'
@@ -1721,12 +1779,15 @@ function bkEdit(key){
 function bkDel(key){
   var k=KPIS.find(function(x){return x.key===key;});
   if(!k)return;
-  if(!confirm('Xóa KPI "'+k.label+'" khỏi bộ chỉ tiêu?\nData TH đã nhập vẫn giữ trong Firebase.'))return;
-  KPIS.splice(KPIS.findIndex(function(x){return x.key===key;}),1);
-  delete STAR_WEIGHTS[key];
-  rebuildStars();
-  saveKPIS();
-  render();
+  cfmShow('Xóa KPI "'+k.label+'"?','Data TH đã nhập vẫn giữ trong Firebase.','⚠️','Xóa KPI','Hủy')
+    .then(function(ok){
+      if(!ok)return;
+      KPIS.splice(KPIS.findIndex(function(x){return x.key===key;}),1);
+      delete STAR_WEIGHTS[key];
+      rebuildStars();
+      saveKPIS();
+      render();
+    });
 }
 
 // ── PDF Guide helper — dùng chung cho printTimeline, printAllKPI, printReport ──
@@ -1781,7 +1842,7 @@ function rTimeline(){
       lastDate=ds;
     }
     html+='<div class="tl-card"><div class="tl-av" style="background:'+nvColor+'">'+nvName.charAt(0)+'</div>'
-      +'<div style="flex:1"><div class="tl-cname">'+(d.kh||'KH chưa điền')+'</div>'
+      +'<div style="flex:1"><div class="tl-cname">'+esc(d.kh||'KH chưa điền')+'</div>'
       +'<div class="tl-csub">'+nvName+' · '+spLabel+' · '+(gdL[d.gd]||d.gd)+(d.gt?' · <span style="color:var(--gold);font-weight:700">'+fmtDealGt(d)+'</span>':'')+'</div>'
       +(d.note?'<div style="font-size:10px;color:var(--dim)">'+esc(d.note||'')+'</div>':'')
       +'</div></div>';
@@ -1819,13 +1880,13 @@ function printTimeline(){
       var rowSt=rowBg?'background:'+rowBg+';':'';
       rows+='<tr style="'+rowSt+'">'
         +'<td style="font-weight:700">'+dObj.getDate()+'/'+(dObj.getMonth()+1)+'/'+dObj.getFullYear()+'</td>'
-        +'<td style="font-weight:700">'+(d.kh||'—')+'</td>'
+        +'<td style="font-weight:700">'+esc(d.kh||'—')+'</td>'
         +'<td>'+(d.sdt||'—')+'</td>'
         +'<td>'+spLabel+'</td>'
         +'<td>'+(gdL[d.gd]||d.gd)+'</td>'
         +'<td style="color:'+col+';font-weight:900;font-size:12px">'+(d.gd==='hoan_tat'?'✅ Hoàn tất':diff<0?'🔴 QUÁ HẠN '+Math.abs(diff)+' NGÀY':diff===0?'🟡 HÔM NAY':diff<=3?'🟠 Còn '+diff+'d':'🟢 Còn '+diff+'d')+'</td>'
         +'<td style="text-align:right">'+(d.gt?fmtDealGt(d):'—')+'</td>'
-        +'<td style="color:#666;font-size:10px">'+(d.note||'')+'</td>'
+        +'<td style="color:#666;font-size:10px">'+esc(d.note||'')+'</td>'
         +'</tr>';
     });
   });
@@ -1895,7 +1956,7 @@ function printAllKPI(){
     KPIS.forEach(function(k){
       th[k.key]=tuans.reduce(function(s,t){return s+(gTH(m,t,nv.ma)[k.key]||0);},0);
     });
-    // Điểm = nvScore() = scoreKPIFull — (HD×1.0+DN×1.5+Thẻ×0.8)/3, luôn chia STARS.length
+    // Điểm Tổng quan: nvScore = scoreKPIFull (tất cả KPI ÷ KPIS.length)
     var scRaw=nvScore(m,nv.ma);
     return{nv:nv,th:th,sc:scRaw!=null?Math.round(scRaw):0,hasScore:scRaw!=null};
   });
@@ -2080,8 +2141,8 @@ function rStar(){
   }).join('');
 
   var starHtml=starNV
-    ?'<div class="star-card"><div style="font-size:24px;margin-bottom:5px">🏆</div><div style="font-size:10px;color:#e8a020;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">'+fmtM(m)+' · '+t+' — XUẤT SẮC</div><div style="font-size:16px;font-weight:900;color:#ffc84a">'+starNV.nv.ten+'</div><div style="font-size:12px;color:var(--dim);margin-top:2px">TB 3 KPI: <b style="color:#ffc84a">'+p2s(starNV.avg)+'</b></div><div class="sk">'+starNV.scores.map(function(s){return'<div class="sk-i"><div style="font-size:14px">'+s.k.icon+'</div><div style="font-size:13px;font-weight:900;color:'+pc(s.p)+';font-family:\'Space Mono\',monospace">'+(s.kh>0?fmt(s.th||0,s.k.unit):'—')+'</div><div style="font-size:9px;color:var(--dim)">'+s.k.label+'</div><div style="font-size:10px;font-weight:800;color:'+pc(s.p)+'">'+p2s(s.p)+'</div></div>';}).join('')+'</div></div>'
-    :'<div class="card" style="text-align:center;padding:18px;margin-bottom:11px"><div style="font-size:26px;margin-bottom:5px">🏅</div><div style="font-weight:800;color:var(--dim)">Chưa có NV xuất sắc '+t+'</div><div style="font-size:12px;color:var(--mute);margin-top:3px">Yêu cầu: ≥70% TB 3 KPI trọng điểm</div></div>';
+    ?'<div class="star-card"><div style="font-size:24px;margin-bottom:5px">🏆</div><div style="font-size:10px;color:#e8a020;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">'+fmtM(m)+' · '+t+' — XUẤT SẮC</div><div style="font-size:16px;font-weight:900;color:#ffc84a">'+starNV.nv.ten+'</div><div style="font-size:12px;color:var(--dim);margin-top:2px">TB KPI trọng yếu: <b style="color:#ffc84a">'+p2s(starNV.avg)+'</b></div><div class="sk">'+starNV.scores.map(function(s){return'<div class="sk-i"><div style="font-size:14px">'+s.k.icon+'</div><div style="font-size:13px;font-weight:900;color:'+pc(s.p)+';font-family:\'Space Mono\',monospace">'+(s.kh>0?fmt(s.th||0,s.k.unit):'—')+'</div><div style="font-size:9px;color:var(--dim)">'+s.k.label+'</div><div style="font-size:10px;font-weight:800;color:'+pc(s.p)+'">'+p2s(s.p)+'</div></div>';}).join('')+'</div></div>'
+    :'<div class="card" style="text-align:center;padding:18px;margin-bottom:11px"><div style="font-size:26px;margin-bottom:5px">🏅</div><div style="font-weight:800;color:var(--dim)">Chưa có NV xuất sắc '+t+'</div><div style="font-size:12px;color:var(--mute);margin-top:3px">Yêu cầu: ≥70% TB KPI trọng yếu</div></div>';
 
   var top3Html=top3.length?'<div class="sec" style="margin-top:5px">🥇 Top 3 tuần '+t+'</div>'
     +top3.map(function(x,i){return'<div style="display:flex;align-items:center;gap:9px;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:7px;border:1px solid '+(i===0?'#e8a02028':'var(--border)')+'">'+'<div style="font-size:18px">'+['🥇','🥈','🥉'][i]+'</div>'+av(x.nv.ten,x.nv.ma,32)+'<div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">'+x.nv.ten+'</div></div><div style="font-size:16px;font-weight:900;color:'+pc(x.avg)+';font-family:\'Space Mono\',monospace">'+p2s(x.avg)+'</div></div>';}).join(''):'';
@@ -2149,10 +2210,13 @@ async function nvAdd(){
 function nvDel(i){
   var nv=NVS[i];
   if(!nv)return;
-  if(!confirm('Xóa '+nv.ten+' khỏi danh sách?\n\nDữ liệu KPI của NV này vẫn được giữ lại.'))return;
-  NVS.splice(i,1);
-  S.filterNVs=S.filterNVs.filter(function(ma){return ma!==nv.ma;});
-  fbSet('config/nvs',NVS).then(function(){render();});
+  cfmShow('Xóa '+nv.ten+'?','Dữ liệu KPI của NV này vẫn được giữ lại.','👤','Xóa NV','Hủy')
+    .then(function(ok){
+      if(!ok)return;
+      NVS.splice(i,1);
+      S.filterNVs=S.filterNVs.filter(function(ma){return ma!==nv.ma;});
+      fbSet('config/nvs',NVS).then(function(){render();});
+    });
 }
 function nvEdit(i){
   var nv=NVS[i];
@@ -2414,7 +2478,7 @@ function buildReport(m,scope){
   });
   var warnHtml2='';
   if(chuaNhap2.length)warnHtml2+='<div style="background:#fff0f1;border-left:4px solid #ff4757;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#c0392b;margin-bottom:3px">🚨 '+chuaNhap2.length+' NV chưa nhập TH</div><div style="font-size:11px;color:#666">'+chuaNhap2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
-  if(duoi50_2.length)warnHtml2+='<div style="background:#fff8e6;border-left:4px solid #ff9f43;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#d35400;margin-bottom:3px">⚠️ '+duoi50_2.length+' NV dưới 50% KPI trọng điểm</div><div style="font-size:11px;color:#666">'+duoi50_2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
+  if(duoi50_2.length)warnHtml2+='<div style="background:#fff8e6;border-left:4px solid #ff9f43;padding:8px 12px;border-radius:0 7px 7px 0;margin-bottom:7px"><div style="font-weight:800;color:#d35400;margin-bottom:3px">⚠️ '+duoi50_2.length+' NV dưới 50% KPI trọng yếu</div><div style="font-size:11px;color:#666">'+duoi50_2.map(function(nv){return nv.ten;}).join(' · ')+'</div></div>';
   if(!warnHtml2)warnHtml2='<div style="background:#e8f9f3;border-left:4px solid #00c48c;padding:8px 12px;border-radius:0 7px 7px 0"><div style="font-weight:800;color:#00a878">✅ Phòng đang kiểm soát tốt</div></div>';
 
   var allDeals=getAllDeals(m);
@@ -2427,7 +2491,7 @@ function buildReport(m,scope){
       +'<td style="padding:7px 9px;font-size:12px">'+kpiC.icon+' '+kpiC.label+'</td>'
       +'<td style="padding:7px 9px;text-align:center;font-size:12px">'+stC.icon+' '+stC.label+'</td>'
       +'<td style="padding:7px 9px;text-align:right;font-weight:800;font-family:monospace;color:#1a3a6e;font-size:12px">'+fmt(d.gt,kpiC.unit)+'</td>'
-      +'<td style="padding:7px 9px;font-size:11px;color:#555">'+(d.kh||'—')+'</td>'
+      +'<td style="padding:7px 9px;font-size:11px;color:#555">'+esc(d.kh||'—')+'</td>'
       +'<td style="padding:7px 9px;font-size:11px;color:#555">'+(d.sdt||'—')+'</td>'
       +(d.sp==='du_no'?'<td style="padding:7px 9px;font-size:11px;color:#555">'+(d.diachi||'—')+'</td>':'<td style="padding:7px 9px;font-size:11px;color:#aaa">—</td>')
       +'<td style="padding:7px 9px;font-size:11px;color:'+(dl!==null&&dl<0?'#ff4757':dl!==null&&dl<=3?'#ff9f43':'#555')+'">'+(d.han||'—')+'</td>'
@@ -2447,7 +2511,7 @@ function buildReport(m,scope){
     +'<div style="font-size:11px;color:#aaa;margin-top:1px">'+nvLabel+' · Xuất: '+dateStr+'</div>'
     +'<div style="margin-top:5px;display:inline-block;background:#fff8e6;border:1px solid #e8a020;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;color:#e8a020">🔒 NỘI BỘ</div></div></div>'
     +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">📈 I. TỔNG QUAN KPI — '+(isTuan?scope+' (so với KH tuần)':'Cả tháng (so với KH tháng)')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+kpiCards+'</div></div>'
-    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ 3 KPIs TRỌNG ĐIỂM ('+nvData.length+' NV)</div>'
+    +'<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:900;color:#1a3a6e;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #e8eef8">🏆 II. KẾT QUẢ KPI TRỌNG YẾU ('+nvData.length+' NV)</div>'
     +'<table><thead><tr><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;width:30px;text-align:center">#</th><th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:left">Họ và tên</th>'+thHead+'<th style="padding:7px 10px;color:#fff;font-size:10px;font-weight:800;text-align:center">Điểm TB</th></tr></thead><tbody>'+nvRows+'</tbody></table></div>'
     +'<div style="text-align:right"><div style="font-weight:800;color:#1a3a6e;font-size:11px">'+monthLabel+' · '+scopeLabel+'</div><div style="font-size:10px;color:#aaa;margin-top:1px">KPI Banking NAB System</div></div></div>'
     +'</div></body></html>';

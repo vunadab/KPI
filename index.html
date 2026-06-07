@@ -302,6 +302,100 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{background:var(--green);color:#020d0a}
 .toast.err{background:var(--red);color:#fff}
+/* ── GameFi ── */
+.gf-bar{margin:0 0 10px;background:linear-gradient(135deg,#0a1f3a,#061530);border:1px solid #f0b42930;border-radius:12px;padding:10px 13px;cursor:pointer;position:relative;overflow:hidden;}
+.gf-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#f0b42955,transparent);}
+.gf-bar-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.gf-bar-title{font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;}
+.gf-live{display:flex;align-items:center;gap:4px;font-size:9px;color:#00c48c;}
+.gf-dot{width:5px;height:5px;border-radius:50%;background:#00c48c;animation:gfpulse 1.5s infinite;}
+@keyframes gfpulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.gf-stats{display:grid;grid-template-columns:repeat(4,1fr);}
+.gf-stat{text-align:center;padding:0 4px;position:relative;}
+.gf-stat+.gf-stat::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:var(--border2);}
+.gf-stat-val{font-size:14px;font-weight:900;line-height:1.2;font-family:'Space Mono',monospace;}
+.gf-stat-lbl{font-size:8.5px;color:var(--dim);margin-top:2px;font-weight:600;}
+.gf-bar-bottom{margin-top:8px;padding-top:7px;border-top:1px solid var(--border);}
+.gf-fund-wrap{display:flex;align-items:center;gap:7px;}
+.gf-fund-label{font-size:8.5px;color:var(--dim);white-space:nowrap;}
+.gf-fund-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.gf-fund-fill{height:4px;border-radius:2px;background:linear-gradient(90deg,#00c48c,#f0b429);}
+.gf-fund-remain{font-size:8.5px;color:#00c48c;white-space:nowrap;font-weight:700;}
+.gf-sheet-overlay{position:fixed;inset:0;background:#00000080;z-index:300;display:flex;align-items:flex-end;}
+.gf-sheet{width:100%;background:var(--bg1);border-radius:20px 20px 0 0;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;}
+.gf-sheet-drag{width:32px;height:3px;background:var(--border2);border-radius:2px;margin:11px auto 13px;}
+.gf-sheet-head{padding:0 14px 11px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.gf-sheet-title{font-size:16px;font-weight:900;color:var(--gold);}
+.gf-stabs{display:flex;gap:3px;padding:0 12px 11px;overflow-x:auto;border-bottom:1px solid var(--border);flex-shrink:0;scrollbar-width:none;}
+.gf-stabs::-webkit-scrollbar{display:none;}
+.gf-stab{padding:6px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;border:1px solid var(--border2);background:transparent;color:var(--dim);flex-shrink:0;font-family:inherit;}
+.gf-stab.on{background:var(--gold);color:#040d1a;border-color:var(--gold);}
+.gf-content{flex:1;overflow-y:auto;}
+.gf-bxh-row{display:flex;align-items:center;gap:9px;padding:9px 13px;border-bottom:1px solid var(--border);}
+.gf-rank{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;}
+.gf-r1{background:linear-gradient(135deg,#f0b429,#ffd166);color:#040d1a;}
+.gf-r2{background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#040d1a;}
+.gf-r3{background:linear-gradient(135deg,#cd7f32,#e8a06b);color:#040d1a;}
+.gf-rN{background:var(--bg3);color:var(--dim);}
+.gf-xp-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--gold);}
+.gf-xpbar{height:3px;background:var(--bg3);border-radius:2px;width:48px;margin-top:3px;overflow:hidden;}
+.gf-xpbar-f{height:3px;border-radius:2px;background:linear-gradient(90deg,var(--gold),#ffd166);}
+.gf-war-arena{padding:13px;background:linear-gradient(180deg,var(--bg2),var(--bg1));border-bottom:1px solid var(--border);}
+.gf-war-teams{display:flex;align-items:stretch;gap:8px;}
+.gf-wteam{flex:1;background:var(--bg3);border-radius:10px;padding:11px;border:1px solid var(--border);}
+.gf-wteam-name{font-size:13px;font-weight:800;margin-top:4px;}
+.gf-wteam-xp{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;margin:4px 0;line-height:1;}
+.gf-vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:26px;flex-shrink:0;}
+.gf-vs-txt{font-size:13px;font-weight:900;color:var(--mute);}
+.gf-hp-section{margin-top:10px;}
+.gf-hp-labels{display:flex;justify-content:space-between;font-size:8.5px;margin-bottom:3px;}
+.gf-hp-track{height:9px;background:var(--bg0);border-radius:5px;overflow:hidden;display:flex;}
+.gf-hp-a,.gf-hp-b{height:9px;}
+.gf-kb-section{padding:8px 13px;border-bottom:1px solid var(--border);}
+.gf-kb-title{font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.gf-kb-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.gf-kb-track{flex:1;height:5px;background:var(--bg0);border-radius:3px;overflow:hidden;display:flex;}
+.gf-kb-a,.gf-kb-b{height:5px;}
+.gf-prize-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--border);}
+.gf-prize-ico{font-size:19px;width:26px;text-align:center;flex-shrink:0;}
+.gf-prize-amt{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#00c48c;}
+.gf-ticket-grid{padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px;}
+.gf-tck{width:50px;height:62px;border-radius:9px;border:1.5px solid #f0b42930;background:linear-gradient(135deg,#12200a,#0a1606);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.gf-tck.empty{opacity:.2;filter:grayscale(1);}
+.gf-tck-num{font-family:'Space Mono',monospace;font-size:8px;color:var(--gold);}
+.gf-tck-name{font-size:7px;color:var(--dim);text-align:center;padding:0 2px;line-height:1.2;}
+.gf-lucky-wrap{padding:16px 14px;text-align:center;}
+.gf-slot-machine{background:var(--bg2);border:1px solid #f0b42925;border-radius:13px;padding:14px;margin-bottom:14px;position:relative;}
+.gf-slot-machine::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#f0b429,transparent);border-radius:13px 13px 0 0;}
+.gf-slot-window{height:48px;overflow:hidden;position:relative;}
+.gf-slot-item{height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:var(--gold);}
+.gf-slot-ot,.gf-slot-ob{position:absolute;left:0;right:0;height:13px;z-index:2;}
+.gf-slot-ot{top:0;background:linear-gradient(to bottom,var(--bg2),transparent);}
+.gf-slot-ob{bottom:0;background:linear-gradient(to top,var(--bg2),transparent);}
+.gf-spin-btn{padding:12px 24px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#ffd166);color:#040d1a;font-weight:900;font-size:14px;border:none;cursor:pointer;font-family:inherit;width:100%;}
+.gf-spin-btn:disabled{opacity:.4;cursor:not-allowed;}
+.gf-winner-box{display:none;margin-top:12px;background:linear-gradient(135deg,#0d2a08,#061a05);border:1.5px solid #00c48c30;border-radius:12px;padding:14px;}
+.gf-winner-box.show{display:block;animation:gfpop .35s cubic-bezier(.34,1.56,.64,1);}
+@keyframes gfpop{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+.gf-hof-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--border);}
+.gf-admin-section{padding:12px 13px;border-bottom:1px solid var(--border);}
+.gf-admin-label{font-size:10px;font-weight:800;color:var(--dim);margin-bottom:7px;text-transform:uppercase;}
+.gf-inp{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit;outline:none;}
+.gf-inp:focus{border-color:var(--gold);}
+.gf-admin-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.gf-tog{width:38px;height:20px;background:var(--bg3);border-radius:10px;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s;border:none;}
+.gf-tog.on{background:#00c48c;}
+.gf-tog::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;}
+.gf-tog.on::after{left:21px;}
+.gf-save-btn{width:100%;padding:12px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#ffd166);color:#040d1a;font-weight:900;font-size:14px;border:none;cursor:pointer;font-family:inherit;margin-top:10px;}
+.gf-nv-pick{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--bg2);margin-bottom:5px;cursor:pointer;}
+.gf-nv-pick.sel{border-color:#1a6fff40;background:#1a6fff0a;}
+.gf-nv-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.gf-nv-pick.sel .gf-nv-chk{background:var(--blue);border-color:var(--blue);color:#fff;}
+.gf-xp-row{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid var(--border);}
+.gf-xp-slider{-webkit-appearance:none;flex:1;height:4px;border-radius:2px;background:var(--bg3);outline:none;}
+.gf-xp-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg1);}
+.gf-xp-pct{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--gold);width:34px;text-align:right;}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -462,6 +556,27 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
   <button onclick="closePWABanner()" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;flex-shrink:0;padding:4px">✕</button>
 </div>
 <div id="app" style="display:none"></div>
+
+<!-- GameFi Bottom Sheet -->
+<div id="gf-sheet" class="gf-sheet-overlay" style="display:none" onclick="if(event.target===this)gfCloseSheet()">
+  <div class="gf-sheet">
+    <div class="gf-sheet-drag"></div>
+    <div class="gf-sheet-head">
+      <div class="gf-sheet-title">&#9889; GameFi League</div>
+      <button onclick="gfCloseSheet()" style="background:var(--bg3);border:none;color:var(--dim);padding:5px 10px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px">&#10005; &#272;&#243;ng</button>
+    </div>
+    <div class="gf-stabs" id="gf-stabs">
+      <button class="gf-stab on" onclick="gfSetTab('bxh',this)">&#127949; BXH</button>
+      <button class="gf-stab" onclick="gfSetTab('war',this)">&#9876;&#65039; Team War</button>
+      <button class="gf-stab" onclick="gfSetTab('prize',this)">&#127873; Gi&#7843;i</button>
+      <button class="gf-stab" onclick="gfSetTab('ticket',this)">&#127915; V&#233;</button>
+      <button class="gf-stab" onclick="gfSetTab('lucky',this)">&#127922; Lucky</button>
+      <button class="gf-stab" onclick="gfSetTab('hof',this)">&#127963;&#65039; HoF</button>
+      <button class="gf-stab" onclick="gfSetTab('admin',this)">&#9881;&#65039; Admin</button>
+    </div>
+    <div class="gf-content" id="gf-content"></div>
+  </div>
+</div>
 
 <!-- Confirm Modal — thay thế confirm() native, tránh lỗi Safari/iOS trong setTimeout -->
 <div id="cfm-modal" style="display:none;position:fixed;inset:0;background:#00000080;z-index:900;align-items:center;justify-content:center;padding:24px">
@@ -708,6 +823,9 @@ var S={
   online:false,
   isSaving:false,  // true khi đang có write operation — block loadMonth ghi đè local state
   aiHistory:[],    // H-02: khai báo tường minh, giới hạn 20 entries trong aiAddMsg
+  gfTab:'bxh',     // sub-tab trong GameFi sheet: bxh|war|prize|ticket|lucky|hof|admin
+  gfConfig:null,   // load từ Firebase: {meta,prizes,teams,fund,tickets}
+  gfEditTeam:null, // teamId đang edit trong admin team builder
   khPhong:{}, khTuan:{}, thTuan:{}, pipeline:{},
 };
 
@@ -765,8 +883,203 @@ function nvScore(m,ma){
 // ── PIPELINE HELPERS ──
 function getDeals(m,ma){var pl=gPL(m,ma),deals=[];Object.keys(pl).forEach(function(id){deals.push(Object.assign({id:id},pl[id]));});return deals.sort(function(a,b){return(b.ts||0)-(a.ts||0);});}
 var _dealCache={};
-var _aiKey=null;           // Cache Gemini API key — chỉ đọc Firebase 1 lần, không đọc lại mỗi message
-var _kpiInitialized=false; // Guard: kpiInit chỉ chạy 1 lần dù onAuthStateChanged fire nhiều lần
+var _aiKey=null;
+var _kpiInitialized=false;
+var _intervalId=null;
+
+// ══════════════════════════════════════════════════════════════
+// GAMEFI ENGINE — Phase A (Tính XP, xếp hạng, dữ liệu)
+// Đọc thTuan + khTuan hiện có. KHÔNG ghi vào namespace kpi/
+// ══════════════════════════════════════════════════════════════
+
+// Default config — dùng khi Firebase chưa có data
+var GF_DEFAULT_WEIGHTS={du_no:40,huy_dong:20,bao_hiem:10,the_td:10,cif:8,tk_hkd:7,qr_code:5};
+var GF_DEFAULT_PRIZES=[
+  {id:'loan_champ',  name:'Loan Champion',  icon:'👑',type:'weekly', kpi_key:'du_no',    pct:25,tk_count:2,enabled:true,order:1},
+  {id:'deposit_star',name:'Deposit Star',   icon:'💰',type:'weekly', kpi_key:'huy_dong', pct:20,tk_count:1,enabled:true,order:2},
+  {id:'card_hunter', name:'Card Hunter',    icon:'💳',type:'weekly', kpi_key:'the_td',   pct:10,tk_count:1,enabled:true,order:3},
+  {id:'mvp',         name:'MVP Of The Month',icon:'🏆',type:'monthly',kpi_key:null,       pct:20,tk_count:3,enabled:true,order:4},
+  {id:'team_champ',  name:'Team Champion',  icon:'⚔️',type:'monthly',kpi_key:null,       pct:15,tk_count:1,enabled:true,order:5},
+  {id:'lucky_draw',  name:'Grand Lucky Draw',icon:'🎲',type:'lucky',  kpi_key:null,       pct:10,tk_count:0,enabled:true,order:6}
+];
+var GF_DEFAULT_TICKETS={total_month:20,rules:{
+  loan_champ:{count:2,enabled:true},
+  deposit_star:{count:1,enabled:true},
+  card_hunter:{count:1,enabled:true},
+  mvp:{count:3,enabled:true},
+  team_champ:{count:1,enabled:true}
+}};
+
+// ── Helpers ──
+function gfWeights(){
+  return(S.gfConfig&&S.gfConfig.meta&&S.gfConfig.meta.xp_weights)||GF_DEFAULT_WEIGHTS;
+}
+function gfPrizes(){
+  var p=(S.gfConfig&&S.gfConfig.prizes)||{};
+  var base=GF_DEFAULT_PRIZES.map(function(d){return Object.assign({},d,p[d.id]||{});});
+  // Thêm prize tùy chỉnh từ Firebase
+  Object.keys(p).forEach(function(id){
+    if(!base.some(function(b){return b.id===id;})){base.push(Object.assign({id:id},p[id]));}
+  });
+  return base.filter(function(pr){return pr.enabled!==false;}).sort(function(a,b){return(a.order||99)-(b.order||99);});
+}
+function gfTeams(){return(S.gfConfig&&S.gfConfig.teams)||{};}
+function gfFund(m){return((S.gfConfig&&S.gfConfig.fund)||{})[m]||{total:0,spent:0};}
+function gfTicketConfig(){return(S.gfConfig&&S.gfConfig.tickets)||GF_DEFAULT_TICKETS;}
+function gfTeamOf(ma){
+  var teams=gfTeams();
+  var found=null;
+  Object.keys(teams).forEach(function(tid){
+    var t=teams[tid];
+    if(t.members&&t.members.indexOf(ma)>=0)found=tid;
+  });
+  return found;
+}
+
+// ── XP Calculation ──
+// gfCalcXP: Tính XP cho 1 NV trong 1 tuần (t = T1|T2|T3|T4)
+// Không ảnh hưởng KPI hiện tại — chỉ đọc gTH + gKT
+function gfCalcXP(m,ma,t){
+  var weights=gfWeights();
+  var tuans=t?[t]:['T1','T2','T3','T4'];
+  var total=0;
+  var hasAny=false;
+  KPIS.forEach(function(k){
+    var w=weights[k.key];
+    if(!w||w<=0)return;
+    var th=tuans.reduce(function(s,tt){var v=gTH(m,tt,ma)[k.key];return s+(v!=null?v:0);},0);
+    var hasData=tuans.some(function(tt){return gTH(m,tt,ma)[k.key]!=null;});
+    if(!hasData)return;
+    hasAny=true;
+    var kh=tuans.reduce(function(s,tt){return s+(gKT(m,tt,ma)[k.key]||0);},0);
+    var p=kh>0?(th/kh*100):0;
+    total+=Math.min(p,200)*w; // cap 200% để tránh outlier
+  });
+  if(!hasAny)return null;
+  return Math.round(total); // max ~10000 khi đạt 100% mọi KPI
+}
+
+// gfCalcMonthXP: XP tháng = trung bình 4 tuần (chỉ tính tuần đã nhập)
+function gfCalcMonthXP(m,ma){
+  var tuans=['T1','T2','T3','T4'];
+  var vals=[];
+  tuans.forEach(function(t){
+    var v=gfCalcXP(m,ma,t);
+    if(v!==null)vals.push(v);
+  });
+  if(!vals.length)return null;
+  return Math.round(vals.reduce(function(s,v){return s+v;},0)/vals.length);
+}
+
+// gfCalcTeamXP: Trung bình XP các thành viên — công bằng mọi kích thước team
+function gfCalcTeamXP(m,teamId){
+  var teams=gfTeams();
+  var team=teams[teamId];
+  if(!team||!team.members||!team.members.length)return null;
+  var vals=team.members.map(function(ma){return gfCalcMonthXP(m,ma);}).filter(function(v){return v!==null;});
+  if(!vals.length)return null;
+  return Math.round(vals.reduce(function(s,v){return s+v;},0)/vals.length);
+}
+
+// gfRankNV: Trả về NVS sorted theo XP tháng giảm dần
+function gfRankNV(m){
+  return NVS.map(function(nv){
+    return{nv:nv,xp:gfCalcMonthXP(m,nv.ma),team:gfTeamOf(nv.ma)};
+  }).sort(function(a,b){
+    if(a.xp===null&&b.xp===null)return 0;
+    if(a.xp===null)return 1;
+    if(b.xp===null)return-1;
+    return b.xp-a.xp;
+  });
+}
+
+// gfWeeklyWinner: NV có TH tuyệt đối cao nhất cho 1 KPI trong 1 tuần
+function gfWeeklyWinner(m,t,kpiKey){
+  var best=null,bestVal=-1;
+  NVS.forEach(function(nv){
+    var v=gTH(m,t,nv.ma)[kpiKey];
+    if(v!=null&&v>bestVal){bestVal=v;best=nv;}
+  });
+  return best?{nv:best,value:bestVal}:null;
+}
+
+// gfGetMVP: MVP tháng = XP cao nhất + KPI tổng quan ≥ 90%
+function gfGetMVP(m){
+  var ranked=gfRankNV(m).filter(function(r){return r.xp!==null;});
+  if(!ranked.length)return null;
+  // Ưu tiên NV có KPI tổng quan ≥ 90
+  var eligible=ranked.filter(function(r){var sc=nvScore(m,r.nv.ma);return sc!==null&&sc>=90;});
+  return eligible.length?eligible[0]:ranked[0];
+}
+
+// ── Firebase GameFi ──
+// Dùng ROOT GameFi riêng, không liên quan ROOT KPI hiện tại
+function gfRoot(){
+  var r=typeof ROOT!=='undefined'?ROOT.replace(/\/[^/]*$/,''):'kpi';
+  return r+'/gamefi'; // vd: kpi/gamefi hoặc app_root/gamefi
+}
+
+async function gfLoadConfig(){
+  try{
+    var d=await fbGet(gfRoot()+'/config');
+    if(d)S.gfConfig=d;
+    else S.gfConfig={meta:{xp_weights:Object.assign({},GF_DEFAULT_WEIGHTS)},prizes:{},teams:{},fund:{},tickets:Object.assign({},GF_DEFAULT_TICKETS)};
+  }catch(e){
+    S.gfConfig={meta:{xp_weights:Object.assign({},GF_DEFAULT_WEIGHTS)},prizes:{},teams:{},fund:{},tickets:Object.assign({},GF_DEFAULT_TICKETS)};
+    console.warn('gfLoadConfig',e.message);
+  }
+}
+
+async function gfSaveConfig(type,data){
+  if(!S.gfConfig)S.gfConfig={};
+  S.gfConfig[type]=data;
+  try{
+    await fbSet(gfRoot()+'/config/'+type,data);
+    showToast('✅ Đã lưu cấu hình GameFi','ok',2000);
+  }catch(e){
+    showToast('❌ Lưu cấu hình thất bại — thử lại','err',3000);
+    throw e;
+  }
+}
+
+async function gfLoadData(m){
+  try{
+    var d=await fbGet(gfRoot()+'/data/'+m);
+    return d||{awards:{},tickets:{issued:{}},hof:null};
+  }catch(e){return{awards:{},tickets:{issued:{}},hof:null};}
+}
+
+async function gfSaveAward(m,weekOrMonth,prizeId,winnerMa,winnerVal){
+  try{
+    var prize=gfPrizes().filter(function(p){return p.id===prizeId;})[0];
+    if(!prize)return;
+    var data={ma:winnerMa,ten:(NVS.filter(function(n){return n.ma===winnerMa;})[0]||{}).ten||winnerMa,value:winnerVal,ts:Date.now()};
+    var path=gfRoot()+'/data/'+m+'/awards/'+weekOrMonth+'/'+prizeId;
+    await fbSet(path,data);
+    // Phát vé tự động
+    var tkCount=prize.tk_count||0;
+    for(var i=0;i<tkCount;i++){await gfIssueTicket(m,winnerMa,'award:'+prizeId+':'+weekOrMonth);}
+    showToast('✅ Đã ghi nhận '+prize.name+'!','ok',2500);
+  }catch(e){showToast('❌ Lưu giải thất bại','err',3000);}
+}
+
+async function gfIssueTicket(m,ma,reason){
+  try{
+    var cfg=gfTicketConfig();
+    var cur=await fbGet(gfRoot()+'/data/'+m+'/tickets/issued');
+    var count=cur?Object.keys(cur).length:0;
+    if(count>=cfg.total_month){showToast('⚠️ Đã đạt giới hạn vé tháng','err',2500);return;}
+    var id='tk_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,5);
+    await fbSet(gfRoot()+'/data/'+m+'/tickets/issued/'+id,{ma:ma,reason:reason,ts:Date.now()});
+  }catch(e){console.warn('gfIssueTicket',e.message);}
+}
+
+async function gfSaveHoF(m,data){
+  try{
+    await fbSet(gfRoot()+'/data/hof/'+m,data);
+  }catch(e){console.warn('gfSaveHoF',e.message);}
+}
+ // Guard: kpiInit chỉ chạy 1 lần dù onAuthStateChanged fire nhiều lần
 var _intervalId=null;      // Ref đến setInterval để có thể clearInterval khi cần
 // S.isSaving — guard chống race condition loadMonth vs save operations
 // Set true trước fbSet, false sau khi local state đã sync
@@ -1645,6 +1958,7 @@ function rDash(){
   return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div>'
     +'<div class="pad" style="padding-top:4px">'
     +rNVFilter()
+    +(S.gfConfig?rGFBar():'')
     +'<div class="sec">Tổng hợp · '+fmtM(m)+'</div>'
     +'<div class="kg">'+kCards+'</div>'
     +(S.scope==='thang'?rBarChart(m):'')
@@ -2255,7 +2569,10 @@ function rStar(){
     +top3.map(function(x,i){return'<div style="display:flex;align-items:center;gap:9px;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:7px;border:1px solid '+(i===0?'#e8a02028':'var(--border)')+'">'+'<div style="font-size:18px">'+['🥇','🥈','🥉'][i]+'</div>'+av(x.nv.ten,x.nv.ma,32)+'<div style="flex:1"><div style="font-weight:800;font-size:13px;color:#fff">'+x.nv.ten+'</div></div><div style="font-size:16px;font-weight:900;color:'+pc(x.avg)+';font-family:\'Space Mono\',monospace">'+p2s(x.avg)+'</div></div>';}).join(''):'';
 
   var starScopeLabel=isThang?'📅 Cả tháng':'📋 Tuần '+S.selT;
-  return'<div class="pad"><div class="sec">🌟 Tuyên dương · '+starScopeLabel+'</div>'
+  return'<div class="pad"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+    +'<div class="sec" style="margin:0">🌟 Tuyên dương · '+starScopeLabel+'</div>'
+    +(S.gfConfig?'<button onclick="gfOpenSheet()" style="font-size:11px;color:var(--gold);background:var(--gold)10;border:1px solid var(--gold)30;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer;font-family:inherit">⚡ GameFi</button>':'')
+    +'</div>'
     +'<div class="tt">'
     +(S.selT==='thang'?'<button class="tb on" onclick="setT(\'thang\')">📅 Tháng</button>':'<button class="tb" onclick="setT(\'thang\')">📅 Tháng</button>')
     +['T1','T2','T3','T4'].map(function(tt){return(S.selT===tt?'<button class="tb on" onclick="setT(\''+tt+'\')">' :'<button class="tb" onclick="setT(\''+tt+'\')">')+tt+'</button>';}).join('')
@@ -3017,7 +3334,10 @@ window.kpiInit = async function(){
     hideEl('loading');
     return;
   }
-  try{await loadKPIS();await loadNVS();await loadMonth(CUR_M);}catch(e){console.warn(e);}
+  try{await loadKPIS();await loadNVS();await loadMonth(CUR_M);await gfLoadConfig();}catch(e){console.warn(e);}
+  // Load GF data cho tháng hiện tại
+  S.gfData={};
+  gfLoadData(CUR_M).then(function(d){S.gfData[CUR_M]=d;}).catch(function(){});
   hideEl('loading');
   var appEl=document.getElementById('app');if(appEl)appEl.style.display='block';
   render();
@@ -3115,7 +3435,589 @@ function closePWABanner(){
 })();
 
 // ══════════════════════════════════════════════════════════════
-// NAMESPACE ASSIGNMENTS — Phase 2
+// GAMEFI UI — Phase C: Render functions
+// ══════════════════════════════════════════════════════════════
+
+function rGFBar(){
+  var m=S.month;
+  var fund=gfFund(m);
+  var total=fund.total||0;
+  var spent=fund.spent||0;
+  var remain=total-spent;
+  var remainPct=total>0?Math.round(remain/total*100):100;
+  // Team dẫn đầu
+  var teams=gfTeams();
+  var teamIds=Object.keys(teams);
+  var leadTeam=null,leadXP=-1;
+  teamIds.forEach(function(tid){var x=gfCalcTeamXP(m,tid);if(x!==null&&x>leadXP){leadXP=x;leadTeam=teams[tid];}});
+  var teamLabel=leadTeam?(leadTeam.icon||'⚡')+' '+((leadTeam.name||'').split(' ').slice(1).join(' ')||leadTeam.name||'—'):'—';
+  // MVP
+  var mvpData=gfGetMVP(m);
+  var mvpLabel=mvpData?mvpData.nv.ten.split(' ').pop():'—';
+
+  return'<div class="gf-bar" onclick="gfOpenSheet()">'
+    +'<div class="gf-bar-top">'
+    +'<div class="gf-bar-title">&#9889; GAMEFI LEAGUE &middot; '+fmtM(m)+'</div>'
+    +'<div class="gf-live"><div class="gf-dot"></div>LIVE</div>'
+    +'</div>'
+    +'<div class="gf-stats">'
+    +'<div class="gf-stat"><div class="gf-stat-val" style="color:var(--gold);font-size:12px;">'+fmt(total/1000000,'M')+'đ</div><div class="gf-stat-lbl">&#128176; T&#7893;ng qu&#7929;</div></div>'
+    +'<div class="gf-stat"><div class="gf-stat-val" style="color:var(--red);font-size:12px;">'+(spent>0?fmt(spent/1000000,'M')+'đ':'—')+'</div><div class="gf-stat-lbl">&#128228; &#272;&#227; chi</div></div>'
+    +'<div class="gf-stat"><div class="gf-stat-val" style="font-size:11px;color:var(--cyan);">'+teamLabel+'</div><div class="gf-stat-lbl">&#9876;&#65039; Team d&#7851;n</div></div>'
+    +'<div class="gf-stat"><div class="gf-stat-val" style="font-size:11px;color:var(--gold2);">'+esc(mvpLabel)+'</div><div class="gf-stat-lbl">&#11088; MVP</div></div>'
+    +'</div>'
+    +'<div class="gf-bar-bottom">'
+    +'<div class="gf-fund-wrap">'
+    +'<span class="gf-fund-label">C&ograve;n l&#7841;i</span>'
+    +'<div class="gf-fund-track"><div class="gf-fund-fill" style="width:'+remainPct+'%"></div></div>'
+    +'<span class="gf-fund-remain">'+(total>0?fmt(remain/1000000,'M')+'đ ('+remainPct+'%)':'Ch&#432;a thi&#7871;t l&#7853;p')+'</span>'
+    +'</div></div></div>';
+}
+
+// ── Sub-tab renders ──
+
+function rGFBXH(m){
+  var ranked=gfRankNV(m);
+  var maxXP=ranked.length&&ranked[0].xp?ranked[0].xp:1;
+  var rankClasses=['gf-r1','gf-r2','gf-r3'];
+  var html='<div style="padding:8px 13px;font-size:10px;color:var(--dim)">BXH C&aacute; nh&acirc;n &middot; '+fmtM(m)+' &middot; X&#7871;p theo XP</div>';
+  ranked.forEach(function(r,i){
+    if(r.xp===null)return;
+    var rc=i<3?rankClasses[i]:'gf-rN';
+    var col=acC(r.nv.ma);
+    var initials=(r.nv.ten||'?').split(' ').pop()[0]||'?';
+    var teamId=r.team;
+    var teamName=teamId&&gfTeams()[teamId]?(gfTeams()[teamId].icon||'')+(gfTeams()[teamId].name||''):'';
+    var pctBar=maxXP>0?Math.round(r.xp/maxXP*100):0;
+    html+='<div class="gf-bxh-row">'
+      +'<div class="gf-rank '+rc+'">'+(''+( i+1))+'</div>'
+      +'<div class="av" style="width:30px;height:30px;border-radius:8px;background:'+col+'18;color:'+col+';font-size:12px;font-weight:800;flex-shrink:0;display:flex;align-items:center;justify-content:center">'+esc(initials)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.nv.ten)+'</div>'
+      +(teamName?'<div style="font-size:9px;color:var(--dim)">'+esc(teamName)+'</div>':'')+'</div>'
+      +'<div style="text-align:right;flex-shrink:0">'
+      +'<div class="gf-xp-val">'+r.xp.toLocaleString()+'</div>'
+      +'<div class="gf-xpbar"><div class="gf-xpbar-f" style="width:'+pctBar+'%"></div></div>'
+      +'</div></div>';
+  });
+  if(!ranked.filter(function(r){return r.xp!==null;}).length){
+    html+='<div style="padding:20px;text-align:center;color:var(--dim);font-size:12px">Ch&#432;a c&#243; d&#7919; li&#7879;u XP &middot; NV c&#7847;n nh&#7853;p TH tr&#432;&#7899;c</div>';
+  }
+  return html;
+}
+
+function rGFTeamWar(m){
+  var teams=gfTeams();
+  var teamIds=Object.keys(teams);
+  if(teamIds.length<2){
+    return'<div style="padding:20px;text-align:center;color:var(--dim);font-size:12px">C&#7847;n &#237;t nh&#7845;t 2 team &middot; Thi&#7871;t l&#7853;p trong Admin</div>';
+  }
+  // Lấy 2 team đầu tiên để War
+  var t1=teams[teamIds[0]],t2=teams[teamIds[1]];
+  var xp1=gfCalcTeamXP(m,teamIds[0])||0;
+  var xp2=gfCalcTeamXP(m,teamIds[1])||0;
+  var total=xp1+xp2||1;
+  var pct1=Math.round(xp1/total*100);
+  var pct2=100-pct1;
+  var colors=['#1a6fff','#7c4dff','#00c48c','#ff9f43'];
+
+  var html='<div class="gf-war-arena">'
+    +'<div style="font-size:10px;font-weight:800;color:var(--dim);text-align:center;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">&#9876;&#65039; TEAM WAR &middot; '+fmtM(m)+'</div>'
+    +'<div class="gf-war-teams">'
+    // Team A
+    +'<div class="gf-wteam" style="border-color:'+colors[0]+'30">'
+    +'<div style="font-size:22px">'+(t1.icon||'🔥')+'</div>'
+    +'<div class="gf-wteam-name" style="color:'+colors[0]+'">'+esc(t1.name||teamIds[0])+'</div>'
+    +'<div class="gf-wteam-xp" style="color:var(--gold)">'+xp1.toLocaleString()+' <span style="font-size:9px;color:var(--dim)">XP TB</span></div>'
+    +'<div style="font-size:9px;color:var(--dim)">'+(t1.members?t1.members.length:0)+' th&agrave;nh vi&ecirc;n</div>'
+    +(xp1>=xp2?'<div style="font-size:9px;background:var(--gold)18;color:var(--gold);padding:2px 7px;border-radius:4px;margin-top:5px;font-weight:700;display:inline-block">&#127942; D&#7851;n &#273;&#7847;u</div>':'')
+    +'</div>'
+    // VS
+    +'<div class="gf-vs"><div class="gf-vs-txt">VS</div><div style="font-size:13px">&#9889;</div></div>'
+    // Team B
+    +'<div class="gf-wteam" style="border-color:'+colors[1]+'30">'
+    +'<div style="font-size:22px">'+(t2.icon||'⚡')+'</div>'
+    +'<div class="gf-wteam-name" style="color:'+colors[1]+'">'+esc(t2.name||teamIds[1])+'</div>'
+    +'<div class="gf-wteam-xp" style="color:var(--gold)">'+xp2.toLocaleString()+' <span style="font-size:9px;color:var(--dim)">XP TB</span></div>'
+    +'<div style="font-size:9px;color:var(--dim)">'+(t2.members?t2.members.length:0)+' th&agrave;nh vi&ecirc;n</div>'
+    +(xp2>xp1?'<div style="font-size:9px;background:var(--gold)18;color:var(--gold);padding:2px 7px;border-radius:4px;margin-top:5px;font-weight:700;display:inline-block">&#127942; D&#7851;n &#273;&#7847;u</div>':'')
+    +'</div></div>'
+    // HP bars tổng
+    +'<div class="gf-hp-section">'
+    +'<div class="gf-hp-labels">'
+    +'<span style="color:'+colors[0]+'">'+xp1.toLocaleString()+' XP</span>'
+    +'<span style="color:var(--dim);font-size:8.5px">TỔNG XP</span>'
+    +'<span style="color:'+colors[1]+'">'+xp2.toLocaleString()+' XP</span></div>'
+    +'<div class="gf-hp-track">'
+    +'<div class="gf-hp-a" style="width:'+pct1+'%;background:linear-gradient(90deg,'+colors[0]+','+colors[2]+')"></div>'
+    +'<div class="gf-hp-b" style="width:'+pct2+'%;background:linear-gradient(90deg,'+colors[1]+','+colors[3]+')"></div>'
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:8.5px;margin-top:3px">'
+    +'<span style="color:'+colors[0]+'">'+pct1+'%</span>'
+    +'<span style="color:var(--dim)">C&aacute;ch bi&#7879;t: '+(Math.abs(xp1-xp2)).toLocaleString()+' XP</span>'
+    +'<span style="color:'+colors[1]+'">'+pct2+'%</span></div></div></div>';
+
+  // KPI breakdown bars
+  html+='<div class="gf-kb-section"><div class="gf-kb-title">&#272;&#7889;i kh&aacute;ng t&#7915;ng KPI</div>';
+  KPIS.forEach(function(k){
+    var m1=t1.members||[],m2=t2.members||[];
+    var th1=m1.reduce(function(s,ma){return s+(thForNV(m,ma)[k.key]||0);},0);
+    var th2=m2.reduce(function(s,ma){return s+(thForNV(m,ma)[k.key]||0);},0);
+    var len1=m1.length||1,len2=m2.length||1;
+    var avg1=th1/len1,avg2=th2/len2;
+    var total2=avg1+avg2||1;
+    var p1=Math.round(avg1/total2*100),p2=100-p1;
+    html+='<div class="gf-kb-row">'
+      +'<span style="font-size:11px;width:16px;text-align:center">'+k.icon+'</span>'
+      +'<span style="font-size:9px;color:var(--dim);width:50px;flex-shrink:0">'+k.label+'</span>'
+      +'<div class="gf-kb-track">'
+      +'<div class="gf-kb-a" style="width:'+p1+'%;background:'+colors[0]+'"></div>'
+      +'<div class="gf-kb-b" style="width:'+p2+'%;background:'+colors[1]+'"></div>'
+      +'</div>'
+      +'<span style="font-size:9px;font-family:\'Space Mono\',monospace;width:58px;text-align:right;color:'+(p1>p2?colors[0]:colors[1])+'">'+p1+'%/'+p2+'%</span>'
+      +'</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function rGFPrizes(m){
+  var prizes=gfPrizes();
+  var fund=gfFund(m);
+  var total=fund.total||0;
+  var html='<div style="padding:8px 13px;font-size:10px;color:var(--dim)">Qu&#7929;: <strong style="color:var(--gold)">'+(total>0?fmt(total/1000000,'M')+'đ':'Ch&#432;a thi&#7871;t l&#7853;p')+'</strong> &middot; '+fmtM(m)+'</div>';
+
+  var weeklyPrizes=prizes.filter(function(p){return p.type==='weekly';});
+  var monthlyPrizes=prizes.filter(function(p){return p.type==='monthly';});
+  var luckyPrizes=prizes.filter(function(p){return p.type==='lucky';});
+
+  function prizeRow(p){
+    var amt=total>0?Math.round(total*p.pct/100):0;
+    return'<div class="gf-prize-row">'
+      +'<div class="gf-prize-ico">'+p.icon+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(p.name)+'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:1px">'+(p.kpi_key?(KPIS.find(function(k){return k.key===p.kpi_key;})||{label:p.kpi_key}).label+' t&#7889;t nh&#7845;t':'XP t&#7893;ng')+(p.tk_count?' &middot; '+p.tk_count+' v&#233;':'')+'</div></div>'
+      +'<div style="text-align:right">'
+      +'<div class="gf-prize-amt">'+(amt>0?fmt(amt/1000,'K')+'K':'—')+'</div>'
+      +'<div style="font-size:9px;color:var(--dim)">'+p.pct+'%</div>'
+      +'</div></div>';
+  }
+
+  if(weeklyPrizes.length){
+    html+='<div style="padding:5px 13px 2px;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase">GI&#7842;I TU&#7846;N</div>';
+    weeklyPrizes.forEach(function(p){html+=prizeRow(p);});
+  }
+  if(monthlyPrizes.length){
+    html+='<div style="padding:5px 13px 2px;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;margin-top:4px">GI&#7842;I TH&#193;NG</div>';
+    monthlyPrizes.forEach(function(p){html+=prizeRow(p);});
+  }
+  if(luckyPrizes.length){
+    html+='<div style="padding:5px 13px 2px;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;margin-top:4px">GI&#7842;I MAY M&#7854;N</div>';
+    luckyPrizes.forEach(function(p){html+=prizeRow(p);});
+  }
+  return html;
+}
+
+function rGFTickets(m){
+  var cfg=gfTicketConfig();
+  var total=cfg.total_month||20;
+  // Đọc từ S.gfData nếu có (load async riêng)
+  var issued=(S.gfData&&S.gfData[m]&&S.gfData[m].tickets&&S.gfData[m].tickets.issued)||{};
+  var issuedArr=Object.values(issued).sort(function(a,b){return(a.ts||0)-(b.ts||0);});
+  var count=issuedArr.length;
+
+  var html='<div style="padding:8px 13px;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:10px;color:var(--dim)">Golden Ticket &middot; '+fmtM(m)+'</div>'
+    +'<div style="font-size:10px"><span style="color:var(--gold);font-weight:800">'+count+'</span>'
+    +'<span style="color:var(--dim)"> / '+total+' &#273;&#227; ph&aacute;t</span></div></div>';
+
+  html+='<div class="gf-ticket-grid">';
+  for(var i=0;i<total;i++){
+    var num=String(i+1).padStart(3,'0');
+    if(i<issuedArr.length){
+      var tk=issuedArr[i];
+      var nv=NVS.find(function(n){return n.ma===tk.ma;})||{ten:tk.ma};
+      var lastName=(nv.ten||'?').split(' ').pop();
+      html+='<div class="gf-tck"><span style="font-size:16px">&#127915;</span><div class="gf-tck-num">#'+num+'</div><div class="gf-tck-name">'+esc(lastName)+'</div></div>';
+    } else {
+      html+='<div class="gf-tck empty"><span style="font-size:16px">&#127915;</span><div class="gf-tck-num">#'+num+'</div><div class="gf-tck-name">—</div></div>';
+    }
+  }
+  html+='</div><div style="padding:8px 13px;font-size:9px;color:var(--mute);text-align:center">V&#233; m&#7901; = ch&#432;a ph&aacute;t &middot; C&#7845;p t&#7921; &#273;&#7897;ng khi ghi nh&#7853;n gi&#7843;i</div>';
+  return html;
+}
+
+function rGFLucky(m){
+  var issued=(S.gfData&&S.gfData[m]&&S.gfData[m].tickets&&S.gfData[m].tickets.issued)||{};
+  var holders=Object.values(issued).map(function(tk){
+    var nv=NVS.find(function(n){return n.ma===tk.ma;})||{ten:tk.ma};
+    return nv.ten;
+  });
+  var uniqueHolders=holders.filter(function(v,i,a){return a.indexOf(v)===i;});
+
+  return'<div class="gf-lucky-wrap">'
+    +'<div style="font-size:15px;font-weight:900;color:var(--gold);margin-bottom:14px">&#127922; Grand Lucky Draw &middot; '+fmtM(m)+'</div>'
+    +'<div class="gf-slot-machine">'
+    +'<div style="font-size:9px;color:var(--dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em">Ng&#432;&#7901;i may m&#7855;n l&#224;...</div>'
+    +'<div class="gf-slot-window">'
+    +'<div class="gf-slot-ot"></div>'
+    +'<div id="gf-slot-display" class="gf-slot-item">'+(holders.length?'B&#7845;m QUAY &#8595;':'Ch&#432;a c&#243; v&#233;')+'</div>'
+    +'<div class="gf-slot-ob"></div></div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-top:5px">'+holders.length+' ng&#432;&#7901;i c&oacute; v&#233;</div></div>'
+    +'<button class="gf-spin-btn" id="gf-spin-btn" onclick="gfSpinLucky(\''+m+'\')"'+(holders.length?'':' disabled')+'>&#127922; QUAY LUCKY DRAW</button>'
+    +'<div class="gf-winner-box" id="gf-winner-box">'
+    +'<div style="font-size:28px;text-align:center;margin-bottom:8px">&#127881;</div>'
+    +'<div id="gf-winner-name" style="text-align:center;font-size:18px;font-weight:900;color:var(--gold)"></div>'
+    +'<div style="text-align:center;font-size:11px;color:var(--dim);margin-top:4px">Ng&#432;&#7901;i chi&#7871;n th&#7855;ng Grand Lucky Draw!</div>'
+    +'</div></div>';
+}
+
+function rGFHoF(){
+  var hof=(S.gfData&&S.gfData.hof)||{};
+  var months=Object.keys(hof).sort().reverse().slice(0,12);
+  if(!months.length){
+    return'<div style="padding:20px;text-align:center;color:var(--dim);font-size:12px">Ch&#432;a c&#243; d&#7919; li&#7879;u Hall of Fame</div>';
+  }
+  var html='<div style="padding:8px 13px;font-size:10px;color:var(--dim)">Hall of Fame &middot; L&#7883;ch s&#7917; vinh danh</div>';
+  months.forEach(function(m){
+    var d=hof[m];
+    if(d.mvp_name){
+      html+='<div class="gf-hof-row"><div style="font-size:9px;color:var(--dim);width:38px;font-family:\'Space Mono\',monospace">'+fmtM(m)+'</div>'
+        +'<div style="font-size:16px">&#127942;</div>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:700">'+esc(d.mvp_name)+'</div>'
+        +'<div style="font-size:9px;color:var(--gold)">MVP Of The Month</div></div></div>';
+    }
+    if(d.team_name){
+      html+='<div class="gf-hof-row"><div style="font-size:9px;color:var(--dim);width:38px;font-family:\'Space Mono\',monospace">'+fmtM(m)+'</div>'
+        +'<div style="font-size:16px">&#9876;&#65039;</div>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:700">'+esc(d.team_name)+'</div>'
+        +'<div style="font-size:9px;color:var(--gold)">Team Champion</div></div></div>';
+    }
+    if(d.lucky_winner){
+      html+='<div class="gf-hof-row"><div style="font-size:9px;color:var(--dim);width:38px;font-family:\'Space Mono\',monospace">'+fmtM(m)+'</div>'
+        +'<div style="font-size:16px">&#127922;</div>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:700">'+esc(d.lucky_winner)+'</div>'
+        +'<div style="font-size:9px;color:var(--gold)">Grand Lucky Draw</div></div></div>';
+    }
+  });
+  return html;
+}
+
+function rGFAdmin(){
+  var fund=gfFund(S.month);
+  var prizes=gfPrizes();
+  var teams=gfTeams();
+  var weights=gfWeights();
+  var teamIds=Object.keys(teams);
+
+  // Validate total prize pct
+  var totalPct=prizes.reduce(function(s,p){return s+p.pct;},0);
+
+  var html='<div style="padding:8px 13px;background:#ff475710;border-bottom:1px solid #ff475720;font-size:10px;color:var(--red);font-weight:700">&#128274; Ch&#7881; Tr&#432;&#7903;ng ph&ograve;ng &middot; Y&ecirc;u c&#7847;u PIN</div>'
+
+    // Fund
+    +'<div class="gf-admin-section">'
+    +'<div class="gf-admin-label">&#128176; Qu&#7929; th&#432;&#7903;ng th&aacute;ng '+fmtM(S.month)+' (VN&#272;)</div>'
+    +'<input class="gf-inp" type="number" id="gf-fund-inp" value="'+(fund.total||0)+'" placeholder="VD: 3000000" min="0">'
+    +'<button onclick="gfSaveFund()" style="margin-top:7px;width:100%;padding:9px;border-radius:9px;background:var(--gold);color:#040d1a;font-weight:800;font-size:13px;border:none;cursor:pointer;font-family:inherit">&#128176; L&#432;u qu&#7929;</button>'
+    +'</div>'
+
+    // XP Weights
+    +'<div class="gf-admin-section">'
+    +'<div class="gf-admin-label">&#9878;&#65039; Tr&#7885;ng s&#7889; XP (t&#7893;ng = 100%)</div>';
+
+  var kpiOrder=['du_no','huy_dong','bao_hiem','the_td','cif','tk_hkd','qr_code'];
+  var weightTotal=0;
+  kpiOrder.forEach(function(key,idx){
+    var kpi=KPIS.find(function(k){return k.key===key;})||{key:key,label:key,icon:'📊'};
+    var w=weights[key]||0;
+    weightTotal+=w;
+    html+='<div class="gf-xp-row">'
+      +'<span style="font-size:13px;width:18px;text-align:center">'+kpi.icon+'</span>'
+      +'<span style="font-size:11px;flex:1">'+kpi.label+'</span>'
+      +'<input class="gf-xp-slider" type="range" min="0" max="70" value="'+w+'" oninput="gfUpdateXPSlider(this,'+idx+')" data-key="'+key+'" id="gf-xps-'+idx+'">'
+      +'<div class="gf-xp-pct" id="gf-xpp-'+idx+'">'+w+'%</div>'
+      +'</div>';
+  });
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px">'
+    +'<span style="font-size:10px;color:var(--dim)">T&#7893;ng tr&#7885;ng s&#7889;</span>'
+    +'<span id="gf-xp-total" style="font-family:\'Space Mono\',monospace;font-size:13px;font-weight:700;color:'+(weightTotal===100?'#00c48c':'#ff4757')+'">'+(weightTotal===100?'= 100% ✅':'= '+weightTotal+'% ❌')+'</span></div>'
+    +'<button onclick="gfSaveWeights()" id="gf-xp-save" style="width:100%;padding:9px;border-radius:9px;background:'+(weightTotal===100?'var(--gold)':'var(--mute)')+';color:#040d1a;font-weight:800;font-size:13px;border:none;cursor:pointer;font-family:inherit;'+(weightTotal!==100?'opacity:.4;cursor:not-allowed':'')+'">&#128190; L&#432;u tr&#7885;ng s&#7889; XP</button>'
+    +'</div>'
+
+    // Teams
+    +'<div class="gf-admin-section">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+    +'<div class="gf-admin-label" style="margin:0">&#128101; Qu&#7843;n l&yacute; Team</div>'
+    +'<button onclick="gfStartNewTeam()" style="font-size:11px;color:var(--blue);background:none;border:1px solid var(--blue)30;border-radius:7px;padding:4px 10px;cursor:pointer;font-family:inherit;font-weight:700">+ Th&ecirc;m team</button>'
+    +'</div>';
+
+  if(teamIds.length){
+    teamIds.forEach(function(tid){
+      var t=teams[tid];
+      html+='<div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:9px 11px;margin-bottom:7px">'
+        +'<span style="font-size:18px">'+(t.icon||'⚡')+'</span>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:700">'+esc(t.name||tid)+'</div>'
+        +'<div style="font-size:10px;color:var(--dim)">'+(t.members?t.members.length:0)+' th&agrave;nh vi&ecirc;n</div></div>'
+        +'<button onclick="gfEditTeam(\''+tid+'\')" style="font-size:11px;color:var(--blue);background:var(--blue)10;border:1px solid var(--blue)25;border-radius:7px;padding:4px 9px;cursor:pointer;font-family:inherit;font-weight:700">S&#7917;a</button>'
+        +'</div>';
+    });
+  } else {
+    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:10px">Ch&#432;a c&oacute; team &middot; B&#7845;m "+ Th&ecirc;m team" &#273;&#7875; t&#7841;o</div>';
+  }
+  html+='</div>';
+
+  // Team builder nếu đang edit
+  if(S.gfEditTeam!==null){
+    html+=rGFTeamBuilder(S.gfEditTeam);
+  }
+
+  return html;
+}
+
+function rGFTeamBuilder(teamId){
+  var teams=gfTeams();
+  var team=teamId&&teams[teamId]?teams[teamId]:{name:'',icon:'⚡',members:[]};
+  var isNew=!teamId||!teams[teamId];
+  var selectedMembers=team.members||[];
+
+  var html='<div class="gf-admin-section" style="border:1px solid var(--gold)25;border-radius:11px;margin:10px 13px;padding:13px">'
+    +'<div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:10px">'+(isNew?'&#10133; T&#7841;o Team m&#7899;i':'&#9998; Ch&#7881;nh s&#7917;a: '+esc(team.name||teamId))+'</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:10px">'
+    +'<div onclick="gfPickIcon()" style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex-shrink:0" id="gf-team-icon">'+(team.icon||'⚡')+'</div>'
+    +'<input class="gf-inp" id="gf-team-name" type="text" value="'+esc(team.name||'')+'" placeholder="T&ecirc;n team... (VD: Loan Hunters)">'
+    +'</div>'
+    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin-bottom:7px;text-transform:uppercase">Ch&#7885;n th&agrave;nh vi&ecirc;n ('+(selectedMembers.length)+' &#273;ang ch&#7885;n)</div>'
+    +'<div style="max-height:220px;overflow-y:auto">';
+
+  NVS.forEach(function(nv){
+    var isSel=selectedMembers.indexOf(nv.ma)>=0;
+    var col=acC(nv.ma);
+    var xp=gfCalcMonthXP(S.month,nv.ma);
+    html+='<div class="gf-nv-pick'+(isSel?' sel':'')+'" onclick="gfToggleTeamMember(\''+nv.ma+'\',this)">'
+      +'<div class="gf-nv-chk">'+(isSel?'&#10003;':'')+'</div>'
+      +'<div style="width:26px;height:26px;border-radius:7px;background:'+col+'18;color:'+col+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">'+esc((nv.ten||'?').split(' ').pop()[0])+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(nv.ten)+'</div></div>'
+      +(xp!==null?'<div style="font-size:10px;color:var(--gold);font-family:\'Space Mono\',monospace">'+xp.toLocaleString()+' XP</div>':'')
+      +'</div>';
+  });
+
+  html+='</div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px">'
+    +(teamId&&teams[teamId]?'<button onclick="gfDeleteTeam(\''+teamId+'\')" style="flex:0;padding:10px 14px;border-radius:9px;background:#ff475710;border:1px solid #ff475730;color:var(--red);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap">&#128465; X&oacute;a</button>':'')
+    +'<button onclick="gfCancelTeamEdit()" style="flex:1;padding:10px;border-radius:9px;background:var(--bg3);border:1px solid var(--border2);color:var(--dim);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">H&#7911;y</button>'
+    +'<button onclick="gfSaveTeam(\''+teamId+'\')" style="flex:2;padding:10px;border-radius:9px;background:var(--gold);color:#040d1a;font-weight:800;font-size:13px;border:none;cursor:pointer;font-family:inherit">&#128190; L&#432;u Team</button>'
+    +'</div></div>';
+
+  return html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// GAMEFI EVENTS — Phase D
+// ══════════════════════════════════════════════════════════════
+
+// GF sheet state
+var _gfSpinning=false;
+var _gfTeamIconEmojis=['🔥','⚡','🏆','🦁','🐯','🦊','🦅','💎','🌟','🚀','⚔️','🛡️','🎯','🏹','💪'];
+var _gfIconIdx=0;
+var _gfPendingMembers=[];
+
+function gfOpenSheet(){
+  var el=document.getElementById('gf-sheet');
+  if(el){el.style.display='flex';document.body.style.overflow='hidden';}
+  gfSetTabById(S.gfTab||'bxh');
+}
+function gfCloseSheet(){
+  var el=document.getElementById('gf-sheet');
+  if(el){el.style.display='none';document.body.style.overflow='';}
+}
+
+function gfSetTab(id,btn){
+  document.querySelectorAll('.gf-stab').forEach(function(t){t.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  S.gfTab=id;
+  var content=document.getElementById('gf-content');
+  if(!content)return;
+  var m=S.month;
+  if(id==='bxh')content.innerHTML=rGFBXH(m);
+  else if(id==='war')content.innerHTML=rGFTeamWar(m);
+  else if(id==='prize')content.innerHTML=rGFPrizes(m);
+  else if(id==='ticket')content.innerHTML=rGFTickets(m);
+  else if(id==='lucky')content.innerHTML=rGFLucky(m);
+  else if(id==='hof')content.innerHTML=rGFHoF();
+  else if(id==='admin'){
+    if(!pinAuth){openPin(function(){S.gfTab='admin';var content2=document.getElementById('gf-content');if(content2)content2.innerHTML=rGFAdmin();});return;}
+    content.innerHTML=rGFAdmin();
+  }
+}
+
+function gfSetTabById(id){
+  var tabs=document.querySelectorAll('.gf-stab');
+  tabs.forEach(function(t,i){
+    var ids=['bxh','war','prize','ticket','lucky','hof','admin'];
+    if(ids[i]===id){t.classList.add('on');}else{t.classList.remove('on');}
+  });
+  var content=document.getElementById('gf-content');
+  var m=S.month;
+  if(!content)return;
+  if(id==='bxh')content.innerHTML=rGFBXH(m);
+  else if(id==='war')content.innerHTML=rGFTeamWar(m);
+  else if(id==='prize')content.innerHTML=rGFPrizes(m);
+  else if(id==='ticket')content.innerHTML=rGFTickets(m);
+  else if(id==='lucky')content.innerHTML=rGFLucky(m);
+  else if(id==='hof')content.innerHTML=rGFHoF();
+  else if(id==='admin')content.innerHTML=rGFAdmin();
+}
+
+function gfUpdateXPSlider(slider,idx){
+  var el=document.getElementById('gf-xpp-'+idx);
+  if(el)el.textContent=slider.value+'%';
+  var sliders=document.querySelectorAll('.gf-xp-slider');
+  var total=0;
+  sliders.forEach(function(s){total+=parseInt(s.value)||0;});
+  var totalEl=document.getElementById('gf-xp-total');
+  var saveBtn=document.getElementById('gf-xp-save');
+  if(totalEl){totalEl.textContent=(total===100?'= 100% ✅':'= '+total+'% ❌');totalEl.style.color=total===100?'#00c48c':'#ff4757';}
+  if(saveBtn){saveBtn.style.opacity=total===100?'1':'.4';saveBtn.style.cursor=total===100?'pointer':'not-allowed';}
+}
+
+function gfSaveFund(){
+  var inp=document.getElementById('gf-fund-inp');
+  if(!inp)return;
+  var val=parseFloat(inp.value)||0;
+  var fund=(S.gfConfig&&S.gfConfig.fund)||{};
+  fund[S.month]={total:val,spent:fund[S.month]?fund[S.month].spent||0:0,note:fmtM(S.month)};
+  gfSaveConfig('fund',fund).then(function(){render();}).catch(function(){});
+}
+
+function gfSaveWeights(){
+  var sliders=document.querySelectorAll('.gf-xp-slider');
+  var total=0;
+  var weights={};
+  sliders.forEach(function(s){
+    var key=s.getAttribute('data-key');
+    var v=parseInt(s.value)||0;
+    if(key){weights[key]=v;total+=v;}
+  });
+  if(total!==100){showToast('❌ Tổng trọng số phải = 100%','err',3000);return;}
+  var meta=(S.gfConfig&&S.gfConfig.meta)||{};
+  meta.xp_weights=weights;
+  gfSaveConfig('meta',meta).catch(function(){});
+}
+
+function gfToggleTeamMember(ma,el){
+  if(!el)return;
+  var isSel=el.classList.contains('sel');
+  el.classList.toggle('sel');
+  var chk=el.querySelector('.gf-nv-chk');
+  if(chk)chk.innerHTML=isSel?'':'&#10003;';
+  if(isSel){_gfPendingMembers=_gfPendingMembers.filter(function(m){return m!==ma;});}
+  else{if(_gfPendingMembers.indexOf(ma)<0)_gfPendingMembers.push(ma);}
+  // Update count label
+  var lbl=document.querySelector('#gf-content .gf-admin-section[style*="gold"] div[style*="uppercase"]');
+  if(lbl)lbl.textContent='Chọn thành viên ('+_gfPendingMembers.length+' đang chọn)';
+}
+
+function gfStartNewTeam(){
+  S.gfEditTeam='__new__';
+  _gfPendingMembers=[];
+  var content=document.getElementById('gf-content');
+  if(content)content.innerHTML=rGFAdmin();
+}
+
+function gfEditTeam(teamId){
+  S.gfEditTeam=teamId;
+  var team=(gfTeams()[teamId])||{members:[]};
+  _gfPendingMembers=(team.members||[]).slice();
+  var content=document.getElementById('gf-content');
+  if(content)content.innerHTML=rGFAdmin();
+}
+
+function gfCancelTeamEdit(){
+  S.gfEditTeam=null;
+  _gfPendingMembers=[];
+  var content=document.getElementById('gf-content');
+  if(content)content.innerHTML=rGFAdmin();
+}
+
+function gfPickIcon(){
+  _gfIconIdx=(_gfIconIdx+1)%_gfTeamIconEmojis.length;
+  var el=document.getElementById('gf-team-icon');
+  if(el)el.textContent=_gfTeamIconEmojis[_gfIconIdx];
+}
+
+async function gfSaveTeam(teamId){
+  var nameInp=document.getElementById('gf-team-name');
+  var iconEl=document.getElementById('gf-team-icon');
+  var name=(nameInp?nameInp.value.trim():'');
+  var icon=(iconEl?iconEl.textContent.trim():'⚡');
+  if(!name){showToast('❌ Vui lòng nhập tên team','err',2500);return;}
+  var teams=Object.assign({},gfTeams());
+  var isNew=teamId==='__new__'||!teamId;
+  var newId=isNew?('team_'+Date.now().toString(36)):teamId;
+  teams[newId]={name:name,icon:icon,members:_gfPendingMembers.slice()};
+  try{
+    await gfSaveConfig('teams',teams);
+    S.gfEditTeam=null;_gfPendingMembers=[];
+    var content=document.getElementById('gf-content');
+    if(content)content.innerHTML=rGFAdmin();
+    render(); // refresh GF bar
+  }catch(e){}
+}
+
+async function gfDeleteTeam(teamId){
+  cfmShow('Xóa team này?','Thao tác không thể hoàn tác.','🗑️','Xóa','Hủy').then(async function(ok){
+    if(!ok)return;
+    var teams=Object.assign({},gfTeams());
+    delete teams[teamId];
+    try{
+      await gfSaveConfig('teams',teams);
+      S.gfEditTeam=null;_gfPendingMembers=[];
+      var content=document.getElementById('gf-content');
+      if(content)content.innerHTML=rGFAdmin();
+      render();
+    }catch(e){}
+  });
+}
+
+function gfSpinLucky(m){
+  if(_gfSpinning)return;
+  var issued=(S.gfData&&S.gfData[m]&&S.gfData[m].tickets&&S.gfData[m].tickets.issued)||{};
+  var holders=Object.values(issued).map(function(tk){
+    var nv=NVS.find(function(n){return n.ma===tk.ma;})||{ten:tk.ma};
+    return{ma:tk.ma,ten:nv.ten};
+  });
+  if(!holders.length){showToast('Chưa có vé để quay','err',2000);return;}
+  _gfSpinning=true;
+  var display=document.getElementById('gf-slot-display');
+  var btn=document.getElementById('gf-spin-btn');
+  var wbox=document.getElementById('gf-winner-box');
+  var wname=document.getElementById('gf-winner-name');
+  if(btn)btn.disabled=true;
+  if(wbox){wbox.classList.remove('show');wbox.style.display='none';}
+
+  var fast=setInterval(function(){
+    if(display)display.textContent=holders[Math.floor(Math.random()*holders.length)].ten;
+  },70);
+  setTimeout(function(){
+    clearInterval(fast);
+    var slow=setInterval(function(){
+      if(display)display.textContent=holders[Math.floor(Math.random()*holders.length)].ten;
+    },180);
+    setTimeout(function(){
+      clearInterval(slow);
+      var winner=holders[Math.floor(Math.random()*holders.length)];
+      if(display)display.textContent=winner.ten;
+      if(wname)wname.textContent=winner.ten;
+      if(wbox){wbox.style.display='block';setTimeout(function(){wbox.classList.add('show');},10);}
+      if(btn){btn.textContent='✅ Đã quay xong';}
+      _gfSpinning=false;
+      // Lưu kết quả
+      gfSaveAward(m,'lucky','lucky_draw',winner.ma,0).catch(function(){});
+    },900);
+  },2000);
+}
+
+
 // Gán tất cả functions vào KPIApp.* namespace
 // Functions gốc vẫn tồn tại trên global scope để tương thích
 // onclick handlers và window.* bridges không thay đổi
@@ -3315,7 +4217,20 @@ KPIApp.Events.toggleTheme    = toggleTheme;
 KPIApp.Events.installPWA     = installPWA;
 KPIApp.Events.closePWABanner = closePWABanner;
 
-// ── Expose KPIApp globally (debug & future extensions) ──
+// ── KPIApp.GameFi ──
+KPIApp.GameFi = {};
+KPIApp.GameFi.calcXP      = gfCalcXP;
+KPIApp.GameFi.calcMonthXP = gfCalcMonthXP;
+KPIApp.GameFi.calcTeamXP  = gfCalcTeamXP;
+KPIApp.GameFi.rankNV      = gfRankNV;
+KPIApp.GameFi.getMVP      = gfGetMVP;
+KPIApp.GameFi.loadConfig  = gfLoadConfig;
+KPIApp.GameFi.saveConfig  = gfSaveConfig;
+KPIApp.GameFi.openSheet   = gfOpenSheet;
+KPIApp.GameFi.closeSheet  = gfCloseSheet;
+KPIApp.GameFi.spinLucky   = gfSpinLucky;
+
+// ── Expose KPIApp globally ──
 window.KPIApp = KPIApp;
 
 

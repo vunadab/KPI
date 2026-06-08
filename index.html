@@ -393,9 +393,14 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
 .gf-nv-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
 .gf-nv-pick.sel .gf-nv-chk{background:var(--blue);border-color:var(--blue);color:#fff;}
 .gf-xp-row{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid var(--border);}
-.gf-xp-slider{-webkit-appearance:none;flex:1;height:4px;border-radius:2px;background:var(--bg3);outline:none;}
-.gf-xp-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg1);}
-.gf-xp-pct{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--gold);width:34px;text-align:right;}
+.gf-xp-num{width:64px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:8px;padding:8px 6px;color:var(--text);font-size:14px;font-weight:700;font-family:'Space Mono',monospace;outline:none;text-align:center;}
+.gf-xp-num:focus{border-color:var(--gold);}
+.gf-spend-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;margin-bottom:6px;}
+.gf-spend-del{background:none;border:none;color:var(--mute);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:5px;}
+.gf-spend-del:hover{background:var(--red)15;color:var(--red);}
+.gf-prize-sel{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--bg2);margin-bottom:5px;cursor:pointer;transition:all .15s;}
+.gf-prize-sel.sel{border-color:var(--gold)40;background:var(--gold)08;}
+.gf-prize-sel.sel .gf-nv-chk{background:var(--gold);border-color:var(--gold);color:#030b17;}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -566,8 +571,8 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
       <button onclick="gfCloseSheet()" style="background:var(--bg3);border:none;color:var(--dim);padding:5px 10px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px">&#10005; &#272;&#243;ng</button>
     </div>
     <div class="gf-stabs" id="gf-stabs">
-      <button class="gf-stab on" onclick="gfSetTab('bxh',this)">&#127949; BXH</button>
-      <button class="gf-stab" onclick="gfSetTab('war',this)">&#9876;&#65039; Team War</button>
+      <button class="gf-stab on" onclick="gfSetTab('war',this)">&#9876;&#65039; Team War</button>
+      <button class="gf-stab" onclick="gfSetTab('bxh',this)">&#127949; BXH</button>
       <button class="gf-stab" onclick="gfSetTab('prize',this)">&#127873; Gi&#7843;i</button>
       <button class="gf-stab" onclick="gfSetTab('ticket',this)">&#127915; V&#233;</button>
       <button class="gf-stab" onclick="gfSetTab('lucky',this)">&#127922; Lucky</button>
@@ -823,7 +828,7 @@ var S={
   online:false,
   isSaving:false,  // true khi đang có write operation — block loadMonth ghi đè local state
   aiHistory:[],    // H-02: khai báo tường minh, giới hạn 20 entries trong aiAddMsg
-  gfTab:'bxh',     // sub-tab trong GameFi sheet: bxh|war|prize|ticket|lucky|hof|admin
+  gfTab:'war',     // sub-tab trong GameFi sheet: war|bxh|prize|ticket|lucky|hof|admin
   gfConfig:null,   // load từ Firebase: {meta,prizes,teams,fund,tickets}
   gfEditTeam:null, // teamId đang edit trong admin team builder
   khPhong:{}, khTuan:{}, thTuan:{}, pipeline:{},
@@ -924,7 +929,12 @@ function gfPrizes(){
   return base.filter(function(pr){return pr.enabled!==false;}).sort(function(a,b){return(a.order||99)-(b.order||99);});
 }
 function gfTeams(){return(S.gfConfig&&S.gfConfig.teams)||{};}
-function gfFund(m){return((S.gfConfig&&S.gfConfig.fund)||{})[m]||{total:0,spent:0};}
+function gfFund(m){
+  var f=((S.gfConfig&&S.gfConfig.fund)||{})[m]||{total:0};
+  var history=Array.isArray(f.spent_history)?f.spent_history:[];
+  var spent=history.reduce(function(s,item){return s+(item.amount||0);},0);
+  return{total:f.total||0,spent:spent,history:history,note:f.note||''};
+}
 function gfTicketConfig(){return(S.gfConfig&&S.gfConfig.tickets)||GF_DEFAULT_TICKETS;}
 function gfTeamOf(ma){
   var teams=gfTeams();
@@ -1324,6 +1334,22 @@ function fmtTs(ts){if(!ts)return'';var d=new Date(ts);return d.getDate()+'/'+(d.
 function genDealId(){return 'd'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function daysLeft(s){if(!s)return null;return Math.ceil((new Date(s).getTime()-Date.now())/86400000);}
 function fmtM(m){var p=m.split('-');return 'T'+(+p[1])+'/'+p[0];}
+// fmtVND: format tiền chuẩn ngân hàng VN
+// < 1tr  → 850.000đ | >= 1tr → 2,2 Tr.đ | 0/null → —
+function fmtVND(n){
+  if(!n||n<=0)return'—';
+  if(n>=1000000){
+    var tr=Math.round(n/100000)/10;
+    return tr.toLocaleString('vi-VN')+' Tr.đ';
+  }
+  if(n>=1000){return Math.round(n/1000)+'K';}
+  return n.toLocaleString('vi-VN')+'đ';
+}
+// fmtVNDFull: số đầy đủ dùng trong tooltip/detail
+function fmtVNDFull(n){
+  if(!n||n<=0)return'0đ';
+  return n.toLocaleString('vi-VN')+'đ';
+}
 function filtNVs(){return S.filterNVs.length>0?NVS.filter(function(nv){return S.filterNVs.indexOf(nv.ma)>=0;}):NVS;}
 function khPS(m){
   if(S.scope==='thang'||S.scope==='ngay'||S.scope==='custom')return gKP(m);
@@ -3450,28 +3476,50 @@ function rGFBar(){
   var teamIds=Object.keys(teams);
   var leadTeam=null,leadXP=-1;
   teamIds.forEach(function(tid){var x=gfCalcTeamXP(m,tid);if(x!==null&&x>leadXP){leadXP=x;leadTeam=teams[tid];}});
-  var teamLabel=leadTeam?(leadTeam.icon||'⚡')+' '+((leadTeam.name||'').split(' ').slice(1).join(' ')||leadTeam.name||'—'):'—';
+  var teamLabel=leadTeam?(leadTeam.icon||'⚡')+' '+((leadTeam.name||'').split(' ').slice(-1)[0]||leadTeam.name||'—'):'—';
   // MVP
   var mvpData=gfGetMVP(m);
   var mvpLabel=mvpData?mvpData.nv.ten.split(' ').pop():'—';
 
   return'<div class="gf-bar" onclick="gfOpenSheet()">'
-    +'<div class="gf-bar-top">'
-    +'<div class="gf-bar-title">&#9889; GAMEFI LEAGUE &middot; '+fmtM(m)+'</div>'
-    +'<div class="gf-live"><div class="gf-dot"></div>LIVE</div>'
+    +'<div class="gfbar-header" style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px 6px;border-bottom:1px solid #f0b42915;">'
+    +'<div style="font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;">&#9889; GAMEFI LEAGUE &middot; '+fmtM(m)+'</div>'
+    +'<div style="display:flex;align-items:center;gap:4px;font-size:9px;color:#00c48c;font-weight:700;"><div class="gf-dot"></div>LIVE</div>'
     +'</div>'
-    +'<div class="gf-stats">'
-    +'<div class="gf-stat"><div class="gf-stat-val" style="color:var(--gold);font-size:12px;">'+fmt(total/1000000,'M')+'đ</div><div class="gf-stat-lbl">&#128176; T&#7893;ng qu&#7929;</div></div>'
-    +'<div class="gf-stat"><div class="gf-stat-val" style="color:var(--red);font-size:12px;">'+(spent>0?fmt(spent/1000000,'M')+'đ':'—')+'</div><div class="gf-stat-lbl">&#128228; &#272;&#227; chi</div></div>'
-    +'<div class="gf-stat"><div class="gf-stat-val" style="font-size:11px;color:var(--cyan);">'+teamLabel+'</div><div class="gf-stat-lbl">&#9876;&#65039; Team d&#7851;n</div></div>'
-    +'<div class="gf-stat"><div class="gf-stat-val" style="font-size:11px;color:var(--gold2);">'+esc(mvpLabel)+'</div><div class="gf-stat-lbl">&#11088; MVP</div></div>'
+    +'<div style="display:flex;align-items:center;padding:9px 12px;">'
+    // Cup icon
+    +'<div style="font-size:26px;filter:drop-shadow(0 2px 6px #f0b42950);flex-shrink:0;margin-right:10px;">&#127942;</div>'
+    // 4 stats
+    +'<div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);">'
+    // Tổng quỹ
+    +'<div style="text-align:center;padding:0 3px;position:relative;">'
+    +'<div style="font-size:13px;font-weight:900;color:var(--gold);font-family:\'Space Mono\',monospace;line-height:1.2;">'+fmtVND(total)+'</div>'
+    +'<div style="font-size:8px;color:var(--dim);margin-top:3px;font-weight:600;">&#128176; T&#7893;ng qu&#7929;</div>'
     +'</div>'
-    +'<div class="gf-bar-bottom">'
-    +'<div class="gf-fund-wrap">'
-    +'<span class="gf-fund-label">C&ograve;n l&#7841;i</span>'
-    +'<div class="gf-fund-track"><div class="gf-fund-fill" style="width:'+remainPct+'%"></div></div>'
-    +'<span class="gf-fund-remain">'+(total>0?fmt(remain/1000000,'M')+'đ ('+remainPct+'%)':'Ch&#432;a thi&#7871;t l&#7853;p')+'</span>'
-    +'</div></div></div>';
+    // Đã chi
+    +'<div style="text-align:center;padding:0 3px;position:relative;border-left:1px solid var(--border2);">'
+    +'<div style="font-size:13px;font-weight:900;color:var(--red);font-family:\'Space Mono\',monospace;line-height:1.2;">'+(spent>0?fmtVND(spent):'—')+'</div>'
+    +'<div style="font-size:8px;color:var(--dim);margin-top:3px;font-weight:600;">&#128228; &#272;&#227; chi</div>'
+    +'</div>'
+    // Team dẫn
+    +'<div style="text-align:center;padding:0 3px;position:relative;border-left:1px solid var(--border2);">'
+    +'<div style="font-size:11px;font-weight:900;color:var(--cyan);line-height:1.2;">'+esc(teamLabel)+'</div>'
+    +'<div style="font-size:8px;color:var(--dim);margin-top:3px;font-weight:600;">&#9876;&#65039; Team d&#7851;n</div>'
+    +'</div>'
+    // MVP — nổi bật riêng
+    +'<div style="text-align:center;padding:0 3px;position:relative;border-left:1px solid var(--border2);">'
+    +'<div style="font-size:8px;color:var(--gold);font-weight:800;margin-bottom:1px;">&#128081; MVP</div>'
+    +'<div style="font-size:13px;font-weight:900;color:var(--gold2);font-family:\'Space Mono\',monospace;line-height:1.1;">'+esc(mvpLabel)+'</div>'
+    +'<div style="font-size:8px;color:var(--gold);margin-top:2px;font-weight:600;">&#11088; Th&aacute;ng n&agrave;y</div>'
+    +'</div>'
+    +'</div></div>'
+    // Progress bar
+    +'<div style="padding:0 12px 9px;display:flex;align-items:center;gap:7px;">'
+    +'<span style="font-size:8.5px;color:var(--dim);white-space:nowrap;">C&ograve;n l&#7841;i</span>'
+    +'<div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;">'
+    +'<div style="height:5px;border-radius:3px;background:linear-gradient(90deg,#00c48c,#f0b429);width:'+remainPct+'%"></div></div>'
+    +'<span style="font-size:8.5px;color:#00c48c;font-weight:700;white-space:nowrap;">'+(total>0?fmtVND(remain)+' ('+remainPct+'%)':'Ch&#432;a thi&#7871;t l&#7853;p')+'</span>'
+    +'</div></div>';
 }
 
 // ── Sub-tab renders ──
@@ -3727,22 +3775,78 @@ function rGFAdmin(){
 
   var kpiOrder=['du_no','huy_dong','bao_hiem','the_td','cif','tk_hkd','qr_code'];
   var weightTotal=0;
-  kpiOrder.forEach(function(key,idx){
-    var kpi=KPIS.find(function(k){return k.key===key;})||{key:key,label:key,icon:'📊'};
+  kpiOrder.forEach(function(key){
     var w=weights[key]||0;
     weightTotal+=w;
+    var kpi=KPIS.find(function(k){return k.key===key;})||{key:key,label:key,icon:'📊'};
     html+='<div class="gf-xp-row">'
-      +'<span style="font-size:13px;width:18px;text-align:center">'+kpi.icon+'</span>'
-      +'<span style="font-size:11px;flex:1">'+kpi.label+'</span>'
-      +'<input class="gf-xp-slider" type="range" min="0" max="70" value="'+w+'" oninput="gfUpdateXPSlider(this,'+idx+')" data-key="'+key+'" id="gf-xps-'+idx+'">'
-      +'<div class="gf-xp-pct" id="gf-xpp-'+idx+'">'+w+'%</div>'
+      +'<span style="font-size:14px;width:20px;text-align:center">'+kpi.icon+'</span>'
+      +'<span style="font-size:12px;flex:1">'+kpi.label+'</span>'
+      +'<input class="gf-xp-num" type="number" min="0" max="100" value="'+w+'"'
+      +' data-key="'+key+'" oninput="gfUpdateXPNum(this)">'
+      +'<span style="font-size:11px;color:var(--dim);width:12px;">%</span>'
       +'</div>';
   });
-  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px">'
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0 4px">'
     +'<span style="font-size:10px;color:var(--dim)">T&#7893;ng tr&#7885;ng s&#7889;</span>'
     +'<span id="gf-xp-total" style="font-family:\'Space Mono\',monospace;font-size:13px;font-weight:700;color:'+(weightTotal===100?'#00c48c':'#ff4757')+'">'+(weightTotal===100?'= 100% ✅':'= '+weightTotal+'% ❌')+'</span></div>'
-    +'<button onclick="gfSaveWeights()" id="gf-xp-save" style="width:100%;padding:9px;border-radius:9px;background:'+(weightTotal===100?'var(--gold)':'var(--mute)')+';color:#040d1a;font-weight:800;font-size:13px;border:none;cursor:pointer;font-family:inherit;'+(weightTotal!==100?'opacity:.4;cursor:not-allowed':'')+'">&#128190; L&#432;u tr&#7885;ng s&#7889; XP</button>'
+    +'<button onclick="gfSaveWeights()" id="gf-xp-save" style="width:100%;padding:10px;border-radius:10px;background:'+(weightTotal===100?'linear-gradient(135deg,var(--gold),var(--gold2))':'var(--mute)')+';color:#040d1a;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:inherit;'+(weightTotal!==100?'opacity:.5;cursor:not-allowed':'')+'">&#128190; L&#432;u tr&#7885;ng s&#7889; XP</button>'
     +'</div>'
+
+    // ── Chi thưởng ──
+    +'<div class="gf-admin-section">'
+    +'<div class="gf-admin-label">&#128228; Ghi nh&#7853;n chi th&#432;&#7903;ng</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-bottom:9px;line-height:1.6;">'
+    +'Sau khi trao th&#432;&#7903;ng, ghi v&agrave;o &#273;&acirc;y &#273;&#7875; tr&#7915; qu&#7929;.<br>'
+    +'H&#7879; th&#7889;ng t&#7921; t&#237;nh <strong style="color:var(--text)">&#272;&#227; chi</strong> v&agrave; <strong style="color:var(--text)">C&ograve;n l&#7841;i</strong>.</div>';
+
+  // Prize dropdown — tick chọn từ danh sách prize đã config
+  var enabledPrizes=prizes.filter(function(p){return p.enabled!==false;});
+  html+='<div style="font-size:10px;font-weight:800;color:var(--dim);margin-bottom:7px;text-transform:uppercase;">&#127873; Ch&#7885;n gi&#7843;i th&#432;&#7903;ng</div>';
+  if(enabledPrizes.length){
+    enabledPrizes.forEach(function(p){
+      var typeLabel=p.type==='weekly'?'Tu&#7847;n':p.type==='monthly'?'Th&aacute;ng':'Lucky';
+      html+='<div class="gf-prize-sel" id="gfps_'+p.id+'" onclick="gfToggleSpendPrize(\''+p.id+'\',\''+esc(p.name)+'\',this)">'
+        +'<div class="gf-nv-chk" id="gfpc_'+p.id+'"></div>'
+        +'<span style="font-size:17px;">'+p.icon+'</span>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:12px;font-weight:700;">'+esc(p.name)+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);">'+typeLabel+(fund.total>0?' &middot; '+fmtVND(Math.round(fund.total*p.pct/100)):'')+'</div>'
+        +'</div></div>';
+    });
+  } else {
+    html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:10px;">Ch&#432;a c&#243; gi&#7843;i &middot; Thi&#7871;t l&#7853;p trong tab C&#7845;u h&igrave;nh gi&#7843;i</div>';
+  }
+  html+='<div id="gf-spend-name-row" style="display:none;margin-top:8px;">'
+    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin-bottom:5px;text-transform:uppercase;">T&ecirc;n ng&#432;&#7901;i nh&#7853;n</div>'
+    +'<input class="gf-inp" id="gf-spend-recipient" type="text" placeholder="T&ecirc;n NV nh&#7853;n gi&#7843;i...">'
+    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin:7px 0 5px;text-transform:uppercase;">S&#7889; ti&#7873;n (VN&#272;)</div>'
+    +'<input class="gf-inp" id="gf-spend-amt" type="number" placeholder="VD: 550000" min="0" style="font-family:\'Space Mono\',monospace;">'
+    +'<button onclick="gfSaveSpend()" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;background:linear-gradient(135deg,#ff4757,#ff6b7a);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:inherit;">&#128228; Ghi nh&#7853;n chi th&#432;&#7903;ng</button>'
+    +'</div>';
+
+  // Lịch sử chi
+  var spendHistory=fund.history||[];
+  if(spendHistory.length){
+    html+='<div style="margin-top:12px;">'
+      +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin-bottom:7px;text-transform:uppercase;">L&#7883;ch s&#7917; chi &middot; '+fmtM(S.month)+'</div>';
+    spendHistory.forEach(function(item,idx){
+      html+='<div class="gf-spend-item">'
+        +'<span style="font-size:16px;">'+(item.icon||'💸')+'</span>'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(item.prize_name||'—')+'</div>'
+        +'<div style="font-size:9px;color:var(--dim);">'+esc(item.recipient||'')+(item.ts?' &middot; '+fmtTs(item.ts):'')+'</div>'
+        +'</div>'
+        +'<div style="font-size:13px;font-weight:800;color:var(--red);font-family:\'Space Mono\',monospace;">'+fmtVNDFull(item.amount)+'</div>'
+        +'<button class="gf-spend-del" onclick="gfDelSpend('+idx+')" title="X&#243;a">&#10005;</button>'
+        +'</div>';
+    });
+    html+='<div style="display:flex;justify-content:space-between;padding:8px 0 2px;border-top:1px solid var(--border2);margin-top:4px;">'
+      +'<span style="font-size:11px;color:var(--dim);">T&#7893;ng &#273;&#227; chi</span>'
+      +'<span style="font-size:13px;font-weight:800;color:var(--red);font-family:\'Space Mono\',monospace;">'+fmtVNDFull(fund.spent)+'</span>'
+      +'</div></div>';
+  }
+  html+='</div>';
 
     // Teams
     +'<div class="gf-admin-section">'
@@ -3853,7 +3957,7 @@ function gfSetTab(id,btn){
 function gfSetTabById(id){
   var tabs=document.querySelectorAll('.gf-stab');
   tabs.forEach(function(t,i){
-    var ids=['bxh','war','prize','ticket','lucky','hof','admin'];
+    var ids=['war','bxh','prize','ticket','lucky','hof','admin'];
     if(ids[i]===id){t.classList.add('on');}else{t.classList.remove('on');}
   });
   var content=document.getElementById('gf-content');
@@ -3868,16 +3972,92 @@ function gfSetTabById(id){
   else if(id==='admin')content.innerHTML=rGFAdmin();
 }
 
-function gfUpdateXPSlider(slider,idx){
-  var el=document.getElementById('gf-xpp-'+idx);
-  if(el)el.textContent=slider.value+'%';
-  var sliders=document.querySelectorAll('.gf-xp-slider');
+// gfUpdateXPNum: input số thay slider
+function gfUpdateXPNum(input){
+  var inputs=document.querySelectorAll('.gf-xp-num');
   var total=0;
-  sliders.forEach(function(s){total+=parseInt(s.value)||0;});
-  var totalEl=document.getElementById('gf-xp-total');
-  var saveBtn=document.getElementById('gf-xp-save');
-  if(totalEl){totalEl.textContent=(total===100?'= 100% ✅':'= '+total+'% ❌');totalEl.style.color=total===100?'#00c48c':'#ff4757';}
-  if(saveBtn){saveBtn.style.opacity=total===100?'1':'.4';saveBtn.style.cursor=total===100?'pointer':'not-allowed';}
+  inputs.forEach(function(inp){total+=parseInt(inp.value)||0;});
+  var el=document.getElementById('gf-xp-total');
+  var btn=document.getElementById('gf-xp-save');
+  if(el){
+    el.textContent=(total===100?'= 100% ✅':'= '+total+'% ❌');
+    el.style.color=total===100?'#00c48c':'#ff4757';
+  }
+  if(btn){
+    btn.style.opacity=total===100?'1':'.5';
+    btn.style.cursor=total===100?'pointer':'not-allowed';
+    btn.style.background=total===100?'linear-gradient(135deg,var(--gold),var(--gold2))':'var(--mute)';
+  }
+}
+
+// Spend prize selection state
+var _gfSelectedPrize=null;
+
+function gfToggleSpendPrize(prizeId,prizeName,el){
+  // Deselect all
+  document.querySelectorAll('.gf-prize-sel').forEach(function(e){e.classList.remove('sel');});
+  document.querySelectorAll('[id^="gfpc_"]').forEach(function(e){e.innerHTML='';});
+  var nameRow=document.getElementById('gf-spend-name-row');
+  if(_gfSelectedPrize===prizeId){
+    _gfSelectedPrize=null;
+    if(nameRow)nameRow.style.display='none';
+    return;
+  }
+  _gfSelectedPrize=prizeId;
+  el.classList.add('sel');
+  var chk=document.getElementById('gfpc_'+prizeId);
+  if(chk)chk.innerHTML='&#10003;';
+  if(nameRow)nameRow.style.display='block';
+}
+
+async function gfSaveSpend(){
+  if(!_gfSelectedPrize){showToast('&#9888;&#65039; Vui lòng chọn giải thưởng','err',2500);return;}
+  var recipientEl=document.getElementById('gf-spend-recipient');
+  var amtEl=document.getElementById('gf-spend-amt');
+  var recipient=(recipientEl?recipientEl.value.trim():'');
+  var amount=parseFloat(amtEl?amtEl.value:0)||0;
+  if(!recipient){showToast('❌ Nhập tên người nhận giải','err',2500);return;}
+  if(amount<=0){showToast('❌ Nhập số tiền chi thưởng','err',2500);return;}
+  var prize=gfPrizes().find(function(p){return p.id===_gfSelectedPrize;});
+  var fund=(S.gfConfig&&S.gfConfig.fund)||{};
+  var mFund=fund[S.month]||{total:0};
+  var history=Array.isArray(mFund.spent_history)?mFund.spent_history.slice():[];
+  history.push({
+    prize_id:_gfSelectedPrize,
+    prize_name:prize?prize.name:_gfSelectedPrize,
+    icon:prize?prize.icon:'💸',
+    recipient:recipient,
+    amount:amount,
+    ts:Date.now()
+  });
+  mFund.spent_history=history;
+  fund[S.month]=mFund;
+  try{
+    await gfSaveConfig('fund',fund);
+    _gfSelectedPrize=null;
+    var content=document.getElementById('gf-content');
+    if(content)content.innerHTML=rGFAdmin();
+    render();
+  }catch(e){}
+}
+
+async function gfDelSpend(idx){
+  cfmShow('Xóa mục chi thưởng này?','Thao tác không thể hoàn tác.','🗑️','Xóa','Hủy')
+    .then(async function(ok){
+      if(!ok)return;
+      var fund=(S.gfConfig&&S.gfConfig.fund)||{};
+      var mFund=fund[S.month]||{};
+      var history=Array.isArray(mFund.spent_history)?mFund.spent_history.slice():[];
+      history.splice(idx,1);
+      mFund.spent_history=history;
+      fund[S.month]=mFund;
+      try{
+        await gfSaveConfig('fund',fund);
+        var content=document.getElementById('gf-content');
+        if(content)content.innerHTML=rGFAdmin();
+        render();
+      }catch(e){}
+    });
 }
 
 function gfSaveFund(){
@@ -3885,17 +4065,18 @@ function gfSaveFund(){
   if(!inp)return;
   var val=parseFloat(inp.value)||0;
   var fund=(S.gfConfig&&S.gfConfig.fund)||{};
-  fund[S.month]={total:val,spent:fund[S.month]?fund[S.month].spent||0:0,note:fmtM(S.month)};
+  var existing=fund[S.month]||{};
+  fund[S.month]={total:val,spent_history:existing.spent_history||[],note:fmtM(S.month)};
   gfSaveConfig('fund',fund).then(function(){render();}).catch(function(){});
 }
 
 function gfSaveWeights(){
-  var sliders=document.querySelectorAll('.gf-xp-slider');
+  var inputs=document.querySelectorAll('.gf-xp-num');
   var total=0;
   var weights={};
-  sliders.forEach(function(s){
-    var key=s.getAttribute('data-key');
-    var v=parseInt(s.value)||0;
+  inputs.forEach(function(inp){
+    var key=inp.getAttribute('data-key');
+    var v=parseInt(inp.value)||0;
     if(key){weights[key]=v;total+=v;}
   });
   if(total!==100){showToast('❌ Tổng trọng số phải = 100%','err',3000);return;}
@@ -4226,9 +4407,12 @@ KPIApp.GameFi.rankNV      = gfRankNV;
 KPIApp.GameFi.getMVP      = gfGetMVP;
 KPIApp.GameFi.loadConfig  = gfLoadConfig;
 KPIApp.GameFi.saveConfig  = gfSaveConfig;
-KPIApp.GameFi.openSheet   = gfOpenSheet;
-KPIApp.GameFi.closeSheet  = gfCloseSheet;
-KPIApp.GameFi.spinLucky   = gfSpinLucky;
+KPIApp.GameFi.saveSpend    = gfSaveSpend;
+KPIApp.GameFi.delSpend     = gfDelSpend;
+KPIApp.GameFi.fmtVND       = fmtVND;
+KPIApp.GameFi.openSheet    = gfOpenSheet;
+KPIApp.GameFi.closeSheet   = gfCloseSheet;
+KPIApp.GameFi.spinLucky    = gfSpinLucky;
 
 // ── Expose KPIApp globally ──
 window.KPIApp = KPIApp;

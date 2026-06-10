@@ -3824,24 +3824,18 @@ function rGFAdmin(){
   if(enabledPrizes.length){
     enabledPrizes.forEach(function(p){
       var typeLabel=p.type==='weekly'?'Tu&#7847;n':p.type==='monthly'?'Th&aacute;ng':'Lucky';
-      html+='<div class="gf-prize-sel" id="gfps_'+p.id+'" onclick="gfToggleSpendPrize(\''+p.id+'\',\''+esc(p.name)+'\',this)">'
-        +'<div class="gf-nv-chk" id="gfpc_'+p.id+'"></div>'
-        +'<span style="font-size:17px;">'+p.icon+'</span>'
-        +'<div style="flex:1">'
-        +'<div style="font-size:12px;font-weight:700;">'+esc(p.name)+'</div>'
-        +'<div style="font-size:9px;color:var(--dim);">'+typeLabel+(fund.total>0?' &middot; '+fmtVND(Math.round(fund.total*p.pct/100)):'')+'</div>'
-        +'</div></div>';
+      var isSel=(_gfSelectedPrize===p.id);
+      html+='<div class="gf-prize-sel'+(isSel?' sel':'')+'" id="gfps_'+p.id+'" onclick="gfToggleSpendPrize(\''+p.id+'\',\''+esc(p.name)+'\',this)">'        +'<div class="gf-nv-chk" id="gfpc_'+p.id+'">'+(isSel?'&#10003;':'')+'</div>'        +'<span style="font-size:17px;">'+p.icon+'</span>'        +'<div style="flex:1">'        +'<div style="font-size:12px;font-weight:700;">'+esc(p.name)+'</div>'        +'<div style="font-size:9px;color:var(--dim);">'+typeLabel+(fund.total>0?' &middot; '+fmtVND(Math.round(fund.total*p.pct/100)):'')+'</div>'        +'</div></div>';
     });
   } else {
     html+='<div style="font-size:11px;color:var(--dim);text-align:center;padding:10px;">Ch&#432;a c&#243; gi&#7843;i &middot; Thi&#7871;t l&#7853;p trong tab C&#7845;u h&igrave;nh gi&#7843;i</div>';
   }
-  html+='<div id="gf-spend-name-row" style="display:none;margin-top:8px;">'
-    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin-bottom:5px;text-transform:uppercase;">T&ecirc;n ng&#432;&#7901;i nh&#7853;n</div>'
-    +'<input class="gf-inp" id="gf-spend-recipient" type="text" placeholder="T&ecirc;n NV nh&#7853;n gi&#7843;i...">'
-    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin:7px 0 5px;text-transform:uppercase;">S&#7889; ti&#7873;n (VN&#272;)</div>'
-    +'<input class="gf-inp" id="gf-spend-amt" type="number" placeholder="VD: 550000" min="0" style="font-family:\'Space Mono\',monospace;">'
-    +'<button onclick="gfSaveSpend()" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;background:linear-gradient(135deg,#ff4757,#ff6b7a);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:inherit;">&#128228; Ghi nh&#7853;n chi th&#432;&#7903;ng</button>'
-    +'</div>';
+  // Form nhập chi thưởng — hiện ngay nếu đã chọn giải (kể cả sau re-render)
+  var nameRowVis=_gfSelectedPrize?'block':'none';
+  html+='<div id="gf-spend-name-row" style="display:'+nameRowVis+';margin-top:8px;">'    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin-bottom:5px;text-transform:uppercase;">T&ecirc;n ng&#432;&#7901;i nh&#7853;n</div>'    +'<input class="gf-inp" id="gf-spend-recipient" type="text" placeholder="T&ecirc;n NV nh&#7853;n gi&#7843;i...">'    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin:7px 0 5px;text-transform:uppercase;">S&#7889; ti&#7873;n (VN&#272;)</div>'    +'<input class="gf-inp" id="gf-spend-amt" type="number" placeholder="VD: 550000" min="0" style="font-family:\'Space Mono\',monospace;">'    +'<button onclick="gfSaveSpend()" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;background:linear-gradient(135deg,#ff4757,#ff6b7a);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:inherit;">&#128228; Ghi nh&#7853;n chi th&#432;&#7903;ng</button>'    +'</div>';
+
+  // ── Thưởng nóng (không cần tick giải) ──
+  html+='<div style="margin-top:14px;border-top:1px dashed var(--border2);padding-top:12px;">'    +'<div style="font-size:10px;font-weight:800;color:var(--dim);margin-bottom:7px;text-transform:uppercase;">&#128293; Th&#432;&#7903;ng n&oacute;ng (kh&#244;ng c&#7847;n ch&#7885;n gi&#7843;i)</div>'    +'<div style="font-size:10px;color:var(--dim);margin-bottom:8px;line-height:1.5;">Th&#432;&#7903;ng xu&#7845;t s&#7855;c &#273;&#7897;t xu&#7845;t, khen ng&#7907;i ri&ecirc;ng. Kh&#244;ng tr&#7915; v&agrave;o c&#417; c&#7845;u gi&#7843;i.</div>'    +'<input class="gf-inp" id="gf-hot-recipient" type="text" placeholder="T&ecirc;n NV nh&#7853;n th&#432;&#7903;ng n&oacute;ng..." style="margin-bottom:7px;">'    +'<input class="gf-inp" id="gf-hot-note" type="text" placeholder="L&yacute; do / danh hi&#7879;u..." style="margin-bottom:7px;">'    +'<input class="gf-inp" id="gf-hot-amt" type="number" placeholder="S&#7889; ti&#7873;n (VN&#272;)" min="0" style="font-family:\'Space Mono\',monospace;margin-bottom:7px;">'    +'<button onclick="gfSaveHotReward()" style="width:100%;padding:11px;border-radius:10px;background:linear-gradient(135deg,#ff6348,#ff9f43);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:inherit;">&#128293; Ghi nh&#7853;n th&#432;&#7903;ng n&oacute;ng</button>'    +'</div>';
 
   // Lịch sử chi
   var spendHistory=fund.history||[];
@@ -4011,7 +4005,8 @@ function gfUpdateXPNum(input){
 }
 
 // ── Prize Editor Handlers ──
-var _gfPrizeDraft=null; // bản nháp đang edit
+var _gfPrizeDraft=null;     // bản nháp đang edit
+var _gfSelectedPrize=null;  // prize đang được tick chọn trong chi thưởng
 
 function gfGetPrizeDraft(){
   if(!_gfPrizeDraft){
@@ -4133,11 +4128,43 @@ async function gfSaveSpend(){
   fund[S.month]=mFund;
   try{
     await gfSaveConfig('fund',fund);
+    showToast('✅ Đã ghi nhận chi thưởng!','ok',2500);
     _gfSelectedPrize=null;
     var content=document.getElementById('gf-content');
     if(content)content.innerHTML=rGFAdmin();
     render();
-  }catch(e){}
+  }catch(e){showToast('❌ Lỗi lưu Firebase: '+e.message,'err',4000);}
+}
+
+async function gfSaveHotReward(){
+  var recipientEl=document.getElementById('gf-hot-recipient');
+  var noteEl=document.getElementById('gf-hot-note');
+  var amtEl=document.getElementById('gf-hot-amt');
+  var recipient=(recipientEl?recipientEl.value.trim():'');
+  var note=(noteEl?noteEl.value.trim():'');
+  var amount=parseFloat(amtEl?amtEl.value:0)||0;
+  if(!recipient){showToast('❌ Nhập tên người nhận thưởng nóng','err',2500);return;}
+  if(amount<=0){showToast('❌ Nhập số tiền thưởng nóng','err',2500);return;}
+  var fund=(S.gfConfig&&S.gfConfig.fund)||{};
+  var mFund=fund[S.month]||{total:0};
+  var history=Array.isArray(mFund.spent_history)?mFund.spent_history.slice():[];
+  history.push({
+    prize_id:'hot_reward',
+    prize_name:'🔥 Thưởng nóng'+(note?' — '+note:''),
+    icon:'🔥',
+    recipient:recipient,
+    amount:amount,
+    ts:Date.now()
+  });
+  mFund.spent_history=history;
+  fund[S.month]=mFund;
+  try{
+    await gfSaveConfig('fund',fund);
+    showToast('✅ Đã ghi nhận thưởng nóng cho '+recipient+'!','ok',2500);
+    var content=document.getElementById('gf-content');
+    if(content)content.innerHTML=rGFAdmin();
+    render();
+  }catch(e){showToast('❌ Lỗi lưu Firebase: '+e.message,'err',4000);}
 }
 
 async function gfDelSpend(idx){
@@ -4527,8 +4554,9 @@ KPIApp.GameFi.calcTeamXP  = gfCalcTeamXP;
 KPIApp.GameFi.rankNV      = gfRankNV;
 KPIApp.GameFi.getMVP      = gfGetMVP;
 KPIApp.GameFi.loadConfig  = gfLoadConfig;
-KPIApp.GameFi.saveConfig  = gfSaveConfig;
-KPIApp.GameFi.saveSpend    = gfSaveSpend;
+KPIApp.GameFi.saveConfig    = gfSaveConfig;
+KPIApp.GameFi.saveSpend      = gfSaveSpend;
+KPIApp.GameFi.saveHotReward  = gfSaveHotReward;
 KPIApp.GameFi.delSpend     = gfDelSpend;
 KPIApp.GameFi.fmtVND       = fmtVND;
 KPIApp.GameFi.openSheet    = gfOpenSheet;

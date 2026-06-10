@@ -321,8 +321,8 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
 .gf-fund-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
 .gf-fund-fill{height:4px;border-radius:2px;background:linear-gradient(90deg,#00c48c,#f0b429);}
 .gf-fund-remain{font-size:8.5px;color:#00c48c;white-space:nowrap;font-weight:700;}
-.gf-sheet-overlay{position:fixed;inset:0;background:#00000080;z-index:300;display:flex;align-items:flex-end;}
-.gf-sheet{width:100%;background:var(--bg1);border-radius:20px 20px 0 0;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;}
+.gf-sheet-overlay{position:fixed;inset:0;background:#00000090;z-index:300;display:flex;align-items:flex-start;padding-top:56px;}
+.gf-sheet{width:100%;background:var(--bg1);border-radius:0 0 20px 20px;max-height:calc(100vh - 120px);overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border2);border-top:none;}
 .gf-sheet-drag{width:32px;height:3px;background:var(--border2);border-radius:2px;margin:11px auto 13px;}
 .gf-sheet-head{padding:0 14px 11px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .gf-sheet-title{font-size:16px;font-weight:900;color:var(--gold);}
@@ -565,8 +565,7 @@ body.light-mode .ai-bbl.usr{background:linear-gradient(135deg,var(--blue),#1a52e
 <!-- GameFi Bottom Sheet -->
 <div id="gf-sheet" class="gf-sheet-overlay" style="display:none" onclick="if(event.target===this)gfCloseSheet()">
   <div class="gf-sheet">
-    <div class="gf-sheet-drag"></div>
-    <div class="gf-sheet-head">
+    <div class="gf-sheet-head" style="padding-top:12px;">
       <div class="gf-sheet-title">&#9889; GameFi League</div>
       <button onclick="gfCloseSheet()" style="background:var(--bg3);border:none;color:var(--dim);padding:5px 10px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px">&#10005; &#272;&#243;ng</button>
     </div>
@@ -3632,38 +3631,57 @@ function rGFPrizes(m){
   var prizes=gfPrizes();
   var fund=gfFund(m);
   var total=fund.total||0;
-  var html='<div style="padding:8px 13px;font-size:10px;color:var(--dim)">Qu&#7929;: <strong style="color:var(--gold)">'+(total>0?fmt(total/1000000,'M')+'đ':'Ch&#432;a thi&#7871;t l&#7853;p')+'</strong> &middot; '+fmtM(m)+'</div>';
+  var totalPrize=prizes.reduce(function(s,p){return s+(p.amount||Math.round(total*(p.pct||0)/100));},0);
+  var over=total>0&&totalPrize>total;
 
-  var weeklyPrizes=prizes.filter(function(p){return p.type==='weekly';});
-  var monthlyPrizes=prizes.filter(function(p){return p.type==='monthly';});
-  var luckyPrizes=prizes.filter(function(p){return p.type==='lucky';});
+  var html='<div style="padding:9px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">'
+    +'<div style="font-size:10px;color:var(--dim)">Qu&#7929;: <strong style="color:var(--gold)">'+(total>0?fmtVND(total):'Ch&#432;a thi&#7871;t l&#7853;p')+'</strong> &middot; '+fmtM(m)+'</div>'
+    +'<button onclick="gfAddPrize()" style="font-size:11px;color:var(--blue);background:var(--blue)10;border:1px solid var(--blue)25;border-radius:7px;padding:4px 10px;cursor:pointer;font-family:inherit;font-weight:700">+ Th&ecirc;m gi&#7843;i</button>'
+    +'</div>';
 
-  function prizeRow(p){
-    var amt=total>0?Math.round(total*p.pct/100):0;
-    return'<div class="gf-prize-row">'
-      +'<div class="gf-prize-ico">'+p.icon+'</div>'
-      +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(p.name)+'</div>'
-      +'<div style="font-size:9px;color:var(--dim);margin-top:1px">'+(p.kpi_key?(KPIS.find(function(k){return k.key===p.kpi_key;})||{label:p.kpi_key}).label+' t&#7889;t nh&#7845;t':'XP t&#7893;ng')+(p.tk_count?' &middot; '+p.tk_count+' v&#233;':'')+'</div></div>'
-      +'<div style="text-align:right">'
-      +'<div class="gf-prize-amt">'+(amt>0?fmt(amt/1000,'K')+'K':'—')+'</div>'
-      +'<div style="font-size:9px;color:var(--dim)">'+p.pct+'%</div>'
-      +'</div></div>';
+  if(over){
+    html+='<div style="padding:7px 13px;background:var(--red)10;border-bottom:1px solid var(--red)20;font-size:11px;color:var(--red);font-weight:700">'
+      +'&#9888;&#65039; T&#7893;ng gi&#7843;i '+fmtVND(totalPrize)+' v&#432;&#7907;t qu&#7929; '+fmtVND(total)+'</div>';
   }
 
-  if(weeklyPrizes.length){
-    html+='<div style="padding:5px 13px 2px;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase">GI&#7842;I TU&#7846;N</div>';
-    weeklyPrizes.forEach(function(p){html+=prizeRow(p);});
+  function prizeEditRow(p,idx){
+    var typeOpts=['weekly','monthly','lucky'].map(function(t){
+      var lb=t==='weekly'?'Tu&#7847;n':t==='monthly'?'Th&aacute;ng':'Lucky';
+      return'<option value="'+t+'"'+(p.type===t?' selected':'')+'>'+lb+'</option>';
+    }).join('');
+    var curAmt=p.amount!=null?p.amount:(total>0?Math.round(total*(p.pct||0)/100):0);
+    return'<div style="padding:10px 13px;border-bottom:1px solid var(--border);background:'+(idx%2===0?'transparent':'var(--bg2)10')+'">'
+      // Row 1: icon + tên + loại
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'
+      +'<input style="width:38px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:5px 4px;color:var(--text);font-size:16px;text-align:center;outline:none;" value="'+esc(p.icon||'🎁')+'" oninput="gfPrizeField('+idx+',\'icon\',this.value)">'
+      +'<input style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:7px 9px;color:var(--text);font-size:13px;font-weight:700;outline:none;font-family:inherit;" value="'+esc(p.name||'')+'" placeholder="T&ecirc;n gi&#7843;i..." oninput="gfPrizeField('+idx+',\'name\',this.value)">'
+      +'<select onchange="gfPrizeField('+idx+',\'type\',this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:7px 6px;color:var(--dim);font-size:11px;font-family:inherit;outline:none;">'+typeOpts+'</select>'
+      +'<button onclick="gfDelPrize('+idx+')" style="background:var(--red)10;border:1px solid var(--red)20;border-radius:7px;padding:5px 9px;color:var(--red);font-size:12px;cursor:pointer;font-family:inherit;">&#10005;</button>'
+      +'</div>'
+      // Row 2: Số tiền
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+      +'<span style="font-size:10px;color:var(--dim);width:50px;flex-shrink:0;">S&#7889; ti&#7873;n:</span>'
+      +'<input type="number" min="0" value="'+curAmt+'" oninput="gfPrizeField('+idx+',\'amount\',parseInt(this.value)||0)" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:7px 9px;color:var(--green);font-size:14px;font-weight:800;outline:none;font-family:\'Space Mono\',monospace;text-align:right;">'
+      +'<span style="font-size:10px;color:var(--dim);">VN&#272;</span>'
+      +(curAmt>0?'<span style="font-size:11px;color:var(--green);font-weight:700;white-space:nowrap;">= '+fmtVND(curAmt)+'</span>':'')
+      +'</div>'
+      +'</div>';
   }
-  if(monthlyPrizes.length){
-    html+='<div style="padding:5px 13px 2px;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;margin-top:4px">GI&#7842;I TH&#193;NG</div>';
-    monthlyPrizes.forEach(function(p){html+=prizeRow(p);});
-  }
-  if(luckyPrizes.length){
-    html+='<div style="padding:5px 13px 2px;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;margin-top:4px">GI&#7842;I MAY M&#7854;N</div>';
-    luckyPrizes.forEach(function(p){html+=prizeRow(p);});
-  }
+
+  prizes.forEach(function(p,i){html+=prizeEditRow(p,i);});
+
+  // Tổng footer
+  html+='<div style="padding:10px 13px;display:flex;justify-content:space-between;align-items:center;background:var(--bg3);">'
+    +'<span style="font-size:11px;color:var(--dim);">T&#7893;ng gi&#7843;i th&#432;&#7903;ng</span>'
+    +'<span style="font-size:14px;font-weight:800;font-family:\'Space Mono\',monospace;color:'+(over?'var(--red)':'var(--green)')+';">'+fmtVND(totalPrize)+(total>0?' / '+fmtVND(total):'')+(over?' &#9888;&#65039;':' ✅')+'</span>'
+    +'</div>'
+    +'<div style="padding:10px 13px;">'
+    +'<button id="gf-prize-save-btn" onclick="gfSavePrizes()" style="width:100%;padding:11px;border-radius:10px;background:'+(over?'var(--mute)':'linear-gradient(135deg,var(--gold),var(--gold2))')+';color:#040d1a;font-weight:900;font-size:13px;border:none;cursor:'+(over?'not-allowed':'pointer')+';font-family:inherit;transition:all .3s;'+(over?'opacity:.5;':'')+'">&#128190; L&#432;u c&#7845;u h&igrave;nh gi&#7843;i</button>'
+    +'</div>';
+
   return html;
 }
+
 
 function rGFTickets(m){
   var cfg=gfTicketConfig();
@@ -3766,7 +3784,7 @@ function rGFAdmin(){
     +'<div class="gf-admin-section">'
     +'<div class="gf-admin-label">&#128176; Qu&#7929; th&#432;&#7903;ng th&aacute;ng '+fmtM(S.month)+' (VN&#272;)</div>'
     +'<input class="gf-inp" type="number" id="gf-fund-inp" value="'+(fund.total||0)+'" placeholder="VD: 3000000" min="0">'
-    +'<button onclick="gfSaveFund()" style="margin-top:7px;width:100%;padding:9px;border-radius:9px;background:var(--gold);color:#040d1a;font-weight:800;font-size:13px;border:none;cursor:pointer;font-family:inherit">&#128176; L&#432;u qu&#7929;</button>'
+    +'<button id="gf-fund-btn" onclick="gfSaveFund()" style="margin-top:7px;width:100%;padding:10px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#040d1a;font-weight:900;font-size:13px;border:none;cursor:pointer;font-family:inherit;transition:all .3s">&#128176; L&#432;u qu&#7929;</button>'
     +'</div>'
 
     // XP Weights
@@ -3936,6 +3954,8 @@ function gfCloseSheet(){
 }
 
 function gfSetTab(id,btn){
+  // Reset prize draft khi rời tab prize mà chưa lưu
+  if(S.gfTab==='prize'&&id!=='prize'&&_gfPrizeDraft!==null){_gfPrizeDraft=null;}
   document.querySelectorAll('.gf-stab').forEach(function(t){t.classList.remove('on');});
   if(btn)btn.classList.add('on');
   S.gfTab=id;
@@ -3990,8 +4010,87 @@ function gfUpdateXPNum(input){
   }
 }
 
-// Spend prize selection state
-var _gfSelectedPrize=null;
+// ── Prize Editor Handlers ──
+var _gfPrizeDraft=null; // bản nháp đang edit
+
+function gfGetPrizeDraft(){
+  if(!_gfPrizeDraft){
+    _gfPrizeDraft=gfPrizes().map(function(p){return Object.assign({},p);});
+  }
+  return _gfPrizeDraft;
+}
+
+function gfPrizeField(idx,field,val){
+  var draft=gfGetPrizeDraft();
+  if(!draft[idx])return;
+  draft[idx][field]=val;
+  // Recalc total để cập nhật warning real-time
+  var fund=gfFund(S.month);
+  var total=fund.total||0;
+  var totalPrize=draft.reduce(function(s,p){return s+(p.amount||0);},0);
+  var over=total>0&&totalPrize>total;
+  var saveBtn=document.getElementById('gf-prize-save-btn');
+  if(saveBtn){
+    saveBtn.style.background=over?'var(--mute)':'linear-gradient(135deg,var(--gold),var(--gold2))';
+    saveBtn.style.opacity=over?'.5':'1';
+    saveBtn.style.cursor=over?'not-allowed':'pointer';
+  }
+}
+
+function gfAddPrize(){
+  var draft=gfGetPrizeDraft();
+  draft.push({
+    id:'prize_'+Date.now().toString(36),
+    name:'Giải mới',icon:'🎁',type:'weekly',
+    kpi_key:null,amount:0,tk_count:0,enabled:true,
+    order:draft.length+1
+  });
+  var content=document.getElementById('gf-content');
+  if(content)content.innerHTML=rGFPrizes(S.month);
+}
+
+function gfDelPrize(idx){
+  var draft=gfGetPrizeDraft();
+  cfmShow('Xóa giải này?','Thao tác không thể hoàn tác.','🗑️','Xóa','Hủy').then(function(ok){
+    if(!ok)return;
+    draft.splice(idx,1);
+    var content=document.getElementById('gf-content');
+    if(content)content.innerHTML=rGFPrizes(S.month);
+  });
+}
+
+async function gfSavePrizes(){
+  var draft=gfGetPrizeDraft();
+  var fund=gfFund(S.month);
+  var total=fund.total||0;
+  var totalPrize=draft.reduce(function(s,p){return s+(p.amount||0);},0);
+  if(total>0&&totalPrize>total){
+    showToast('❌ Tổng giải vượt quỹ — kiểm tra lại','err',3000);return;
+  }
+  var btn=document.getElementById('gf-prize-save-btn');
+  if(btn){btn.textContent='⏳ Đang lưu...';btn.disabled=true;}
+  // Convert draft về prizes object cho Firebase
+  var prizesObj={};
+  draft.forEach(function(p){
+    if(p.id)prizesObj[p.id]=Object.assign({},p);
+  });
+  try{
+    await gfSaveConfig('prizes',prizesObj);
+    _gfPrizeDraft=null; // reset draft
+    if(btn){btn.textContent='✅ Đã lưu!';btn.style.background='var(--green)';}
+    setTimeout(function(){
+      var content=document.getElementById('gf-content');
+      if(content)content.innerHTML=rGFPrizes(S.month);
+    },1500);
+    render();
+  }catch(e){
+    if(btn){btn.textContent='❌ Lỗi lưu';btn.disabled=false;}
+    setTimeout(function(){
+      if(btn){btn.textContent='💾 Lưu cấu hình giải';btn.style.background='';}
+    },2000);
+  }
+}
+
 
 function gfToggleSpendPrize(prizeId,prizeName,el){
   // Deselect all
@@ -4062,12 +4161,24 @@ async function gfDelSpend(idx){
 
 function gfSaveFund(){
   var inp=document.getElementById('gf-fund-inp');
+  var btn=document.getElementById('gf-fund-btn');
   if(!inp)return;
   var val=parseFloat(inp.value)||0;
+  if(val<=0){showToast('❌ Vui lòng nhập số tiền quỹ','err',2500);return;}
+  if(btn){btn.textContent='⏳ Đang lưu...';btn.disabled=true;}
   var fund=(S.gfConfig&&S.gfConfig.fund)||{};
   var existing=fund[S.month]||{};
   fund[S.month]={total:val,spent_history:existing.spent_history||[],note:fmtM(S.month)};
-  gfSaveConfig('fund',fund).then(function(){render();}).catch(function(){});
+  gfSaveConfig('fund',fund).then(function(){
+    if(btn){btn.textContent='✅ Đã lưu!';btn.style.background='var(--green)';}
+    setTimeout(function(){
+      if(btn){btn.textContent='💰 Lưu quỹ';btn.disabled=false;btn.style.background='';}
+    },2000);
+    render();
+  }).catch(function(){
+    if(btn){btn.textContent='❌ Lỗi lưu';btn.disabled=false;}
+    setTimeout(function(){if(btn)btn.textContent='💰 Lưu quỹ';},2000);
+  });
 }
 
 function gfSaveWeights(){
@@ -4080,9 +4191,19 @@ function gfSaveWeights(){
     if(key){weights[key]=v;total+=v;}
   });
   if(total!==100){showToast('❌ Tổng trọng số phải = 100%','err',3000);return;}
+  var btn=document.getElementById('gf-xp-save');
+  if(btn){btn.textContent='⏳ Đang lưu...';btn.disabled=true;}
   var meta=(S.gfConfig&&S.gfConfig.meta)||{};
   meta.xp_weights=weights;
-  gfSaveConfig('meta',meta).catch(function(){});
+  gfSaveConfig('meta',meta).then(function(){
+    if(btn){btn.textContent='✅ Đã lưu trọng số!';btn.style.background='var(--green)';}
+    setTimeout(function(){
+      if(btn){btn.textContent='💾 Lưu trọng số XP';btn.disabled=false;btn.style.background='';}
+    },2000);
+  }).catch(function(){
+    if(btn){btn.textContent='❌ Lỗi lưu';btn.disabled=false;}
+    setTimeout(function(){if(btn)btn.textContent='💾 Lưu trọng số XP';},2000);
+  });
 }
 
 function gfToggleTeamMember(ma,el){

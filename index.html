@@ -265,7 +265,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 .kc{background:var(--card);border-radius:16px;padding:13px;border:1px solid var(--border);position:relative;overflow:hidden}
 .kc-bg{position:absolute;bottom:-8px;right:-4px;font-size:42px;opacity:.05;line-height:1}
 .kc-lbl{font-size:10px;color:var(--dim);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.kc-val{font-size:18px;font-weight:900;line-height:1.1;font-family:"Space Mono",monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kc-val{font-size:16px;font-weight:900;line-height:1.1;font-family:"Space Mono",monospace;white-space:nowrap;overflow:hidden}
 .kc-kh{font-size:10px;color:var(--mute);margin-top:3px}
 
 /* ── CHART ── */
@@ -285,7 +285,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
   .pad{padding:18px 22px}
   .kg{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   .kc{padding:16px}
-  body .kc-val{font-size:22px}
+  body .kc-val{font-size:20px}
   body .kc-lbl{font-size:11px}
   body .kc-kh{font-size:10px}
   body .kc-bg{font-size:54px}
@@ -760,6 +760,7 @@ function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setHTML(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;}
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
 function fmt(v,u){if(v==null)return'—';var n=+v;return isNaN(n)?'—':n.toLocaleString('vi-VN')+(u?' '+u:'');}
+function fmtNum(v){if(v==null)return'—';var n=+v;return isNaN(n)?'—':n.toLocaleString('vi-VN');}
 function pct(th,kh){return(kh&&kh>0&&th!=null)?th/kh*100:null;}
 function fmtDealGt(d){
   if(!d.gt&&d.gt!==0)return '';
@@ -1656,9 +1657,11 @@ function rPlList(){
       +'</div>'
       +(totalV>0?'<div style="font-size:11px;font-weight:800;color:var(--blue2);font-family:\'Space Mono\',monospace">'+fmt(totalV,'tr đ')+'</div>':'')
       +'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">'
-      +'<button onclick="event.stopPropagation();S.plFormNV=\''+nv.ma+'\';S.plEditId=null;render()" class="gold-btn">+ Deal</button>'
-      +'<span style="color:var(--dim);font-size:14px">›</span></div></button>';
+      +'<button onclick="event.stopPropagation();S.plFormNV=\''+nv.ma+'\';S.plEditId=null;render()"'
+      +' style="flex-shrink:0;padding:6px 12px;border-radius:9px;border:1px solid var(--glow-gold);'
+      +'background:var(--tint-gold);color:var(--gold2);font-size:11px;font-weight:800;'
+      +'cursor:pointer;font-family:inherit">+ Deal</button>'
+      +'<span style="color:var(--dim);font-size:14px;margin-left:4px">›</span></button>';
   }).join('');
   return'<div class="pad"><div class="sec">📋 Pipeline · '+fmtM(m)+'</div>'+tabBar+nvRows+'</div>';
 }
@@ -2011,7 +2014,7 @@ function rDash(){
     return'<div class="kc" style="border-color:'+(kh>0?k.color+'28':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div>'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
       +'<div style="min-width:0;flex:1"><div class="kc-lbl">'+(k.star?'<span style="color:var(--gold);margin-right:2px">★</span>':'')+k.label+'</div>'
-      +'<div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div>'
+      +'<div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmtNum(th)+'<span style="font-size:11px;font-weight:700;opacity:.8;margin-left:3px">'+k.unit+'</span></div>'
       +'<div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div>'
       +'<div style="background:'+badgeBg+';color:'+badgeCol+';border-radius:9px;padding:5px 9px;font-size:13px;font-weight:800;border:1px solid '+badgeCol+'28;flex-shrink:0;align-self:flex-start">'+(kh>0?p2s(p):'—')+'</div>'
       +'</div>'

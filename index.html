@@ -1647,21 +1647,27 @@ function rPlList(){
     var done=deals.filter(function(d){return d.gd==='hoan_tat';}).length;
     var over=deals.filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;}).length;
     var totalV=plTotalVal(deals);
-    return'<button class="nvi'+(active>0?' hk':'')+'" onclick="S.plNV=\''+nv.ma+'\';render()">'
+    return'<div class="nvi'+(active>0?' hk':'')+'" style="cursor:default">'
+      +'<div style="display:flex;align-items:center;gap:10px;width:100%">'
       +av(nv.ten,nv.ma,40)
-      +'<div style="flex:1"><div class="nv-n">'+nv.ten+'</div>'
-      +'<div style="font-size:11px;color:var(--dim);margin-top:2px">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+      +'<button onclick="S.plNV=\''+nv.ma+'\';render()" style="background:none;border:none;padding:0;text-align:left;flex:1;min-width:0">'
+      +'<div class="nv-n" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div>'
+      +'</button>'
+      +'<button onclick="event.stopPropagation();S.plFormNV=\''+nv.ma+'\';S.plEditId=null;render()"'
+      +' style="flex-shrink:0;padding:5px 11px;border-radius:8px;'
+      +'border:1px solid var(--glow-gold);background:var(--tint-gold);'
+      +'color:var(--gold2);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">'
+      +'＋ Deal</button>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--dim);margin-top:3px">'
       +(active>0?'<span style="color:var(--gold2);font-weight:700">'+active+' đang xử lý</span>':'<span style="color:var(--mute)">Chưa có deal</span>')
       +(done>0?' · <span style="color:var(--green)">'+done+' ✅</span>':'')
       +(over>0?' · <span style="color:var(--red)">⚠️ '+over+' quá hạn</span>':'')
       +'</div>'
-      +(totalV>0?'<div style="font-size:11px;font-weight:800;color:var(--blue2);font-family:\'Space Mono\',monospace">'+fmt(totalV,'tr đ')+'</div>':'')
-      +'</div>'
-      +'<button onclick="event.stopPropagation();S.plFormNV=\''+nv.ma+'\';S.plEditId=null;render()"'
-      +' style="flex-shrink:0;padding:6px 12px;border-radius:9px;border:1px solid var(--glow-gold);'
-      +'background:var(--tint-gold);color:var(--gold2);font-size:11px;font-weight:800;'
-      +'cursor:pointer;font-family:inherit">+ Deal</button>'
-      +'<span style="color:var(--dim);font-size:14px;margin-left:4px">›</span></button>';
+      +(totalV>0?'<div style="font-size:11px;font-weight:800;color:var(--blue2);font-family:\'Space Mono\',monospace;margin-top:2px">'+fmt(totalV,'tr đ')+'</div>':'')
+      +'</div></div></div>';
   }).join('');
   return'<div class="pad"><div class="sec">📋 Pipeline · '+fmtM(m)+'</div>'+tabBar+nvRows+'</div>';
 }

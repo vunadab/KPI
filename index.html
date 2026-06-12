@@ -114,7 +114,10 @@
 [data-theme="light"] input::placeholder{color:var(--text-muted);}
 [data-theme="light"] select option{background:var(--bg-surface);color:var(--text-primary);}
 [data-theme="light"] .kc{box-shadow:0 2px 8px rgba(27,94,155,.08);}
+[data-theme="light"] .bw{background:#dde8f2;}
 [data-theme="light"] .chart-wrap{box-shadow:0 2px 8px rgba(27,94,155,.08);}
+[data-theme="light"] .ac{background:var(--bg-surface);}
+[data-theme="light"] .ai{border-top-color:rgba(14,52,90,.07);}
 [data-theme="light"] .ri:hover{border-color:var(--border-strong);transform:translateY(-1px);}
 [data-theme="light"] .ai-bbl.bot{background:var(--bg-surface-2);border-color:var(--border-default);color:var(--text-primary);}
 [data-theme="light"] .ai-bbl.usr{background:var(--gradient-blue);color:#fff;}
@@ -157,7 +160,7 @@ button,input,select{font-family:inherit}button{cursor:pointer}
 .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
 .nv-n{font-weight:800;font-size:13px;color:var(--text)}.nv-s{font-size:11px;color:var(--dim);margin-top:2px}
 .chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.chip{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:800;border:1px solid;white-space:nowrap}
-.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}.kc-bg{position:absolute;bottom:-8px;right:-4px;font-size:42px;opacity:.05;line-height:1}.kc-kh{font-size:9px;color:var(--mute);margin-top:2px}
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}.kc-bg{position:absolute;bottom:-8px;right:-4px;font-size:42px;opacity:.05;line-height:1}.kc-kh{font-size:10px;color:var(--mute);margin-top:3px}
 .bw{background:var(--bg-raised);border-radius:3px;overflow:hidden}.bf{border-radius:3px;transition:width .6s ease}
 .fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.fl{display:flex;align-items:center;gap:9px}.fn{font-weight:800;font-size:14px;color:var(--text-primary)}.fk{font-size:10px;color:var(--dim);margin-top:2px}
 input[type=number],input[type=text]{width:100%;background:var(--bg1);border:1px solid var(--border2);border-radius:9px;padding:11px 12px;color:var(--text-primary);font-size:15px;font-weight:700;outline:none;-webkit-appearance:none}
@@ -259,11 +262,11 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 
 /* ── KPI CARD (Desktop-ready) ── */
 .kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
-.kc{background:var(--card);border-radius:14px;padding:12px;border:1px solid var(--border);position:relative;overflow:hidden}
+.kc{background:var(--card);border-radius:16px;padding:13px;border:1px solid var(--border);position:relative;overflow:hidden}
 .kc-bg{position:absolute;bottom:-8px;right:-4px;font-size:42px;opacity:.05;line-height:1}
-.kc-lbl{font-size:10px;color:var(--dim);margin-bottom:3px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
-.kc-val{font-size:18px;font-weight:900;line-height:1.1;font-family:"Space Mono",monospace}
-.kc-kh{font-size:9px;color:var(--mute);margin-top:2px}
+.kc-lbl{font-size:10px;color:var(--dim);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.kc-val{font-size:18px;font-weight:900;line-height:1.1;font-family:"Space Mono",monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kc-kh{font-size:10px;color:var(--mute);margin-top:3px}
 
 /* ── CHART ── */
 .chart-wrap{background:var(--card);border-radius:14px;padding:13px;border:1px solid var(--border);margin-bottom:10px}
@@ -305,7 +308,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input:focu
 
 
 /* ── RANK ITEMS ── */
-.ri{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:7px;cursor:pointer;transition:border-color .15s,transform .15s;width:100%;text-align:left;}
+.ri{display:flex;align-items:center;gap:10px;padding:12px 13px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,transform .15s;width:100%;text-align:left;}
 .av{border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0;}
 
 
@@ -2003,15 +2006,18 @@ function rDash(){
   });
   var kCards=KPIS.map(function(k){
     var th=totalTH[k.key]||0,kh=kp[k.key]||0,p=pct(th,kh),gap=kh>0?Math.max(0,kh-th):null;
-    return'<div class="kc" style="border-color:'+(kh>0?k.color+'32':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">'
-      +'<div><div class="kc-lbl">'+k.label+'</div>'
+    var badgeCol=pc(p);
+    var badgeBg=p===null?'var(--card2)':p>=100?'rgba(0,196,140,.12)':p>=70?'rgba(232,160,32,.12)':p>=40?'rgba(255,159,67,.12)':'rgba(255,71,87,.12)';
+    return'<div class="kc" style="border-color:'+(kh>0?k.color+'28':'var(--border)')+'"><div class="kc-bg">'+k.icon+'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
+      +'<div style="min-width:0;flex:1"><div class="kc-lbl">'+(k.star?'<span style="color:var(--gold);margin-right:2px">★</span>':'')+k.label+'</div>'
       +'<div class="kc-val" style="color:'+(kh>0?k.color:'var(--dim)')+'">'+fmt(th,k.unit)+'</div>'
       +'<div class="kc-kh">KH: '+(kh>0?fmt(kh,k.unit):'—')+'</div></div>'
-      +'<div style="position:relative;width:42px;height:42px">'+ring(kh>0?(p||0):0)
-      +'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:800;color:'+pc(p)+';text-align:center">'+(kh>0?p2s(p):'—')+'</div></div></div>'
+      +'<div style="background:'+badgeBg+';color:'+badgeCol+';border-radius:9px;padding:5px 9px;font-size:13px;font-weight:800;border:1px solid '+badgeCol+'28;flex-shrink:0;align-self:flex-start">'+(kh>0?p2s(p):'—')+'</div>'
+      +'</div>'
       +(kh>0?bar(th,kh,k.color):'')
-      +(gap&&gap>0?'<div style="font-size:9px;font-weight:800;color:var(--red);margin-top:3px">▼ -'+fmt(gap,k.unit)+'</div>':'')
+      +(gap&&gap>0?'<div style="font-size:10px;font-weight:700;color:var(--red);margin-top:5px">▼ Còn thiếu '+fmt(gap,k.unit)+'</div>'
+        :(kh>0?'<div style="font-size:10px;font-weight:700;color:var(--green);margin-top:5px">✓ Đạt chỉ tiêu</div>':''))
       +'</div>';
   }).join('');
   var ranks=nvData.slice(0,12).map(function(nv,i){
@@ -2021,12 +2027,19 @@ function rDash(){
       var kh=nv.kh[k.key]||0,th=nv.th[k.key]||0,p=kh>0?pct(th,kh):null;
       return'<span style="font-size:10px;font-weight:700;color:'+pc(p)+';background:'+pc(p)+'12;border-radius:5px;padding:2px 6px;border:1px solid '+pc(p)+'30">'+k.icon+' '+(kh>0?Math.round(p||0)+'%':'—')+'</span>';
     }).join('');
-    return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')"><div style="width:24px;height:24px;border-radius:50%;background:'+rb+';color:'+rc+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>'
+    var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+    var rankEl=i<3?'<div style="width:26px;text-align:center;font-size:18px;flex-shrink:0">'+medals[i]+'</div>'
+      :'<div style="width:26px;height:26px;border-radius:8px;background:var(--card2);color:var(--mute);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">'+(i+1)+'</div>';
+    var scPct=hasKh?Math.min(100,Math.max(0,nv.score||0)):0;
+    return'<button class="ri" onclick="showDetail(\''+nv.ma+'\')">'+ rankEl
       +av(nv.ten,nv.ma,32)
       +'<div style="flex:1;overflow:hidden"><div style="font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nv.ten+'</div>'
       +'<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px">'+tags+'</div></div>'
-      +'<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-size:18px;font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div>'
-      +'<div style="font-size:10px;color:'+st.c+'">'+st.l+'</div></div></button>';
+      +'<div style="text-align:right;flex-shrink:0">'
+      +'<div style="font-size:18px;font-weight:900;color:'+pc(hasKh?nv.score:null)+';font-family:\'Space Mono\',monospace">'+(hasKh?p2s(nv.score):'—')+'</div>'
+      +'<div style="width:44px;height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden">'
+      +'<div style="width:'+scPct+'%;height:100%;background:'+pc(hasKh?nv.score:null)+';border-radius:2px"></div></div>'
+      +'<div style="font-size:10px;color:'+st.c+';margin-top:3px">'+st.l+'</div></div></button>';
   }).join('');
   return'<div style="padding:13px 15px 0">'+rScopeBar()+'</div>'
     +'<div class="pad" style="padding-top:4px">'
@@ -2071,7 +2084,10 @@ function rAlert(){
   var plOver=allDeals.filter(function(d){return d.gd!=='hoan_tat'&&d.han&&daysLeft(d.han)<0;});
   var plEmpty=NVS.filter(function(nv){return getDeals(m,nv.ma).filter(function(d){return d.gd!=='hoan_tat';}).length===0;});
 
-  function block(title,color,items,extra){return'<div class="ac" style="border-left-color:'+color+'"><div class="at" style="color:'+color+'">'+title+'</div>'+(items||[]).map(function(nv){return'<div class="ai">'+av(nv.ten,nv.ma,28)+'<span style="color:var(--text-primary)">'+nv.ten+'</span></div>';}).join('')+(extra||'')+'</div>';}
+  function block(title,color,items,extra){
+    var bgMap={'#ff4757':'rgba(255,71,87,.05)','#ff9f43':'rgba(255,159,67,.05)','#e8a020':'rgba(232,160,32,.05)','var(--red)':'rgba(255,71,87,.05)'};
+    var bgTint=bgMap[color]||'var(--card)';
+    return'<div class="ac" style="border-left-color:'+color+';background:'+bgTint+'"><div class="at" style="color:'+color+'">'+title+'</div>'+(items||[]).map(function(nv){return'<div class="ai">'+av(nv.ten,nv.ma,28)+'<span style="color:var(--text-primary)">'+nv.ten+'</span></div>';}).join('')+(extra||'')+'</div>';}
   var d50det=duoi50.map(function(nv){var iss=STARS.map(function(k){var kh=gKT(m,CUR_T,nv.ma)[k.key]||0,th=gTH(m,CUR_T,nv.ma)[k.key];if(!kh||th==null||th<=0)return'';var p=pct(th,kh);return p<50?chip(k.icon+' '+p2s(p),pc(p)):'';}).filter(Boolean).join(' ');return'<div class="ai">'+av(nv.ten,nv.ma,28)+'<div style="flex:1"><span style="color:var(--text-primary)">'+nv.ten+'</span><div class="chips" style="margin-top:2px">'+iss+'</div></div></div>';}).join('');
   var total=chuaNhap.length+khongPS.length+duoi50.length+plOver.length;
   return'<div class="pad"><div class="sec">🚨 Cảnh báo · '+CUR_T+' · '+fmtM(m)+'</div>'
